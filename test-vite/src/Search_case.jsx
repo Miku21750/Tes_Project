@@ -25,7 +25,88 @@ import {
   Plus,
 } from "lucide-react"
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+ 
+const assets = [
+  {
+    AssetID: 1,
+    SerialNumber: "SN123456",
+    ProductName: "Laptop X100",
+    ProductNumber: "PX100-2024",
+    ProductLine: "Laptops",
+    SiteAccountID: 101,
+  },
+  {
+    AssetID: 2,
+    SerialNumber: "SN654321",
+    ProductName: "Smartphone Z5",
+    ProductNumber: "SZ5-2024",
+    ProductLine: "Smartphones",
+    SiteAccountID: 102,
+  },
+  {
+    AssetID: 3,
+    SerialNumber: "SN789012",
+    ProductName: "Tablet A10",
+    ProductNumber: "TA10-2024",
+    ProductLine: "Tablets",
+    SiteAccountID: 103,
+  },
+  {
+    AssetID: 4,
+    SerialNumber: "SN345678",
+    ProductName: "Monitor UltraWide",
+    ProductNumber: "MUW-2024",
+    ProductLine: "Monitors",
+    SiteAccountID: 104,
+  },
+  {
+    AssetID: 5,
+    SerialNumber: "SN567890",
+    ProductName: "Gaming Mouse GX500",
+    ProductNumber: "GMGX500-2024",
+    ProductLine: "Accessories",
+    SiteAccountID: 105,
+  },
+  {
+    AssetID: 6,
+    SerialNumber: "SN908172",
+    ProductName: "Mechanical Keyboard MK700",
+    ProductNumber: "MKMK700-2024",
+    ProductLine: "Accessories",
+    SiteAccountID: 106,
+  },
+  {
+    AssetID: 7,
+    SerialNumber: "SN382910",
+    ProductName: "External Hard Drive 1TB",
+    ProductNumber: "EHD1TB-2024",
+    ProductLine: "Storage",
+    SiteAccountID: 107,
+  },
+];
+
 import {
   Tabs,
   TabsContent,
@@ -130,6 +211,48 @@ const Search_case = () => {
               <TabsTrigger value="ci">Costumer Information</TabsTrigger>
             </div>
             <Button><span><Plus></Plus></span>Create Case</Button>
+
+            {/* Modal/Dialog */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-black text-white" variant="outline">Show Dialog</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-gray-100 max-w-3xl w-full max-w-[90vw]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
+                    <Table>
+                      <TableCaption>A list of your assets.</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[150px]">Serial Number</TableHead>
+                          <TableHead>Product Name</TableHead>
+                          <TableHead>Product Number</TableHead>
+                          <TableHead>Product Line</TableHead>
+                          <TableHead className="text-right">Site Account ID</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {assets.map((asset) => (
+                          <TableRow key={asset.AssetID}>
+                            <TableCell className="font-medium">{asset.SerialNumber}</TableCell>
+                            <TableCell>{asset.ProductName}</TableCell>
+                            <TableCell>{asset.ProductNumber}</TableCell>
+                            <TableCell>{asset.ProductLine}</TableCell>
+                            <TableCell className="text-right">{asset.SiteAccountID}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
           </TabsList>
           <TabsContent value="search">
             <Card>
