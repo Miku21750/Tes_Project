@@ -1,4 +1,4 @@
-import React from 'react'
+import { React } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
 import { InfoSide } from './components/info-sidebar'
@@ -6,6 +6,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarTrigger,
 } from './components/ui/sidebar' 
 
 import { Button } from "@/components/ui/button"
@@ -314,6 +315,33 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
+// import {
+//   Sheet,
+//   SheetTrigger,
+//   SheetClose,
+//   SheetContent,
+//   SheetHeader,
+//   SheetFooter,
+//   SheetTitle,
+//   SheetDescription 
+// } from "@/components/ui/sheet"
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+
+import TabsDialog from "@/components/Tabs-dialog"
+import {DialogDemo} from "@/components/modals-dialog"
 const data = {
   navMain: [
     {
@@ -400,6 +428,15 @@ const data = {
   ],
 }
 const Search_case = () => {
+
+  // const [search, setSearch] = useState("");
+  
+  // // Filtered Data
+  // const filteredData = data.filter((item) =>
+  //   item.name.toLowerCase().includes(search.toLowerCase()) || 
+  //   item.email.toLowerCase().includes(search.toLowerCase())
+  // );
+
   return (
     
     <div className="flex flex-1  gap-4 p-4 pt-0">
@@ -411,138 +448,6 @@ const Search_case = () => {
               <TabsTrigger value="ci">Costumer Information</TabsTrigger>
             </div>
             <Button><span><Plus></Plus></span>Create Case</Button>
-
-            {/* Modal/Dialog Assets */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-black text-white" variant="outline">Assets</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-gray-100 max-w-3xl w-full max-w-[90vw]">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Asset List</AlertDialogTitle>
-                  <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
-                    <Table>
-                      <TableCaption>A list of your assets.</TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[150px]">Serial Number</TableHead>
-                          <TableHead>Product Name</TableHead>
-                          <TableHead>Product Number</TableHead>
-                          <TableHead>Product Line</TableHead>
-                          <TableHead className="text-right">Site Account ID</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {assets.map((asset) => (
-                          <TableRow key={asset.AssetID}>
-                            <TableCell className="font-medium">{asset.SerialNumber}</TableCell>
-                            <TableCell>{asset.ProductName}</TableCell>
-                            <TableCell>{asset.ProductNumber}</TableCell>
-                            <TableCell>{asset.ProductLine}</TableCell>
-                            <TableCell className="text-right">{asset.SiteAccountID}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction>Continue</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Modal/Dialog Contacts */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-black text-white" variant="outline">Contacts</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-white shadow-lg rounded-lg w-full max-w-[85vw] max-h-[80vh] overflow-auto">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-lg font-bold">Contact List</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <div className="overflow-x-auto">
-                      <Table className="min-w-full">
-                        <TableCaption>A list of your contacts.</TableCaption>
-                        <TableHeader className="bg-gray-200">
-                          <TableRow>
-                            <TableHead className="w-[180px]">Name</TableHead>
-                            <TableHead className="w-[200px]">Email</TableHead>
-                            <TableHead className="w-[150px]">Phone</TableHead>
-                            <TableHead className="w-[120px] text-right">City</TableHead>
-                            <TableHead className="w-[150px] text-right">Country</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {contacts.map((contact) => (
-                            <TableRow key={contact.ContactID} className="even:bg-gray-100 hover:bg-gray-200">
-                              <TableCell className="font-medium">{contact.Salutation} {contact.FirstName} {contact.LastName}</TableCell>
-                              <TableCell>{contact.Email}</TableCell>
-                              <TableCell>{contact.Phone || contact.Mobile}</TableCell>
-                              <TableCell className="text-right">{contact.City}</TableCell>
-                              <TableCell className="text-right">{contact.Country}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="bg-gray-100 px-4 py-2">
-                  <AlertDialogCancel className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Continue</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Modal/Dialog siteAccounts */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-black text-white" variant="outline">
-                  Site Accounts
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-gray-100 max-w-5xl w-full max-w-[90vw]">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Site Accounts List</AlertDialogTitle>
-                  <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
-                    <Table>
-                      <TableCaption>A list of registered site accounts.</TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[150px]">Company</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead>Address</TableHead>
-                          <TableHead className="text-right">Country</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {siteAccounts.map((account) => (
-                          <TableRow key={account.SiteAccountID}>
-                            <TableCell className="font-medium">{account.Company}</TableCell>
-                            <TableCell>{account.Email}</TableCell>
-                            <TableCell>{account.PrimaryPhone}</TableCell>
-                            <TableCell>
-                              {account.AddressLine1}
-                              {account.AddressLine2 ? `, ${account.AddressLine2}` : ""}, {account.City}
-                              {account.StateProvince ? `, ${account.StateProvince}` : ""}
-                              , {account.ZipPostalCode}
-                            </TableCell>
-                            <TableCell className="text-right">{account.Country}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Close</AlertDialogCancel>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
           </TabsList>
           <TabsContent value="search">
             <Card>
@@ -612,31 +517,14 @@ const Search_case = () => {
           </TabsContent>
           <TabsContent value="ci">
             <Card>
-              {/* <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Change your password here. After saving, you'll be logged out.
-                </CardDescription>
-              </CardHeader> */}
-              <CardContent className="space-y-2">
-                <div className="space-y-1">
-                  <Label htmlFor="current">Current password</Label>
-                  <Input id="current" type="password" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="new">New password</Label>
-                  <Input id="new" type="password" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button>Save password</Button>
-              </CardFooter>
+              <DialogDemo></DialogDemo>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
       <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
         <Sidebar side='right' className="relative" collapsible='icon'>
+          <SidebarTrigger />
           <SidebarContent>
             <InfoSide items={data.navMain} />
           </SidebarContent>

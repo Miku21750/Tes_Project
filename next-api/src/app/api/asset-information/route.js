@@ -11,13 +11,17 @@ export async function GET(request) {
     const productName = searchParams.get("ProductName")
 
     //prisma query filter
-    const filters = {};
-    if(serialNumber){
-        filters.SerialNumber = { contains: serialNumber }
-    }
-    if(productName){
-        filters.ProductName = { contains: productName }
-    }
+    
+    const filters = {
+        SerialNumber : serialNumber ? { contains: serialNumber } : undefined,
+        ProductName : productName ? { contains: productName } : undefined,
+    };
+    // if(serialNumber){
+    //     filters.SerialNumber = { contains: serialNumber }
+    // }
+    // if(productName){
+    //     filters.ProductName = { contains: productName }
+    // }
     //get all data
     const asset_information = await prisma.asset_information.findMany({
         where: Object.keys(filters).length > 0 ? filters : undefined,
