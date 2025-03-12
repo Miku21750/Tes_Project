@@ -107,6 +107,119 @@ const assets = [
   },
 ];
 
+const contacts = [
+  {
+    ContactID: 1,
+    SiteAccountID: 201,
+    Salutation: "Mr.",
+    FirstName: "John",
+    LastName: "Doe",
+    Email: "john.doe@example.com",
+    PreferredLanguage: "English",
+    Phone: "+1-123-456-7890",
+    Mobile: "+1-987-654-3210",
+    WorkPhone: "+1-555-123-4567",
+    WorkExtension: "101",
+    OtherPhone: null,
+    OtherExtension: null,
+    Fax: "+1-555-987-6543",
+    AddressLine1: "123 Main St",
+    AddressLine2: "Suite 400",
+    City: "New York",
+    StateProvince: "NY",
+    Country: "USA",
+    ZipPostalCode: "10001",
+  },
+  {
+    ContactID: 2,
+    SiteAccountID: 202,
+    Salutation: "Ms.",
+    FirstName: "Jane",
+    LastName: "Smith",
+    Email: "jane.smith@example.com",
+    PreferredLanguage: "French",
+    Phone: "+33-123-456-789",
+    Mobile: "+33-987-654-321",
+    WorkPhone: "+33-555-123-456",
+    WorkExtension: "102",
+    OtherPhone: null,
+    OtherExtension: null,
+    Fax: "+33-555-987-654",
+    AddressLine1: "456 Rue de Paris",
+    AddressLine2: null,
+    City: "Paris",
+    StateProvince: "Île-de-France",
+    Country: "France",
+    ZipPostalCode: "75001",
+  },
+  {
+    ContactID: 3,
+    SiteAccountID: 203,
+    Salutation: "Dr.",
+    FirstName: "Alice",
+    LastName: "Brown",
+    Email: "alice.brown@example.com",
+    PreferredLanguage: "Spanish",
+    Phone: "+34-123-456-789",
+    Mobile: "+34-987-654-321",
+    WorkPhone: "+34-555-123-456",
+    WorkExtension: "103",
+    OtherPhone: "+34-111-222-333",
+    OtherExtension: "104",
+    Fax: "+34-555-987-654",
+    AddressLine1: "789 Calle Mayor",
+    AddressLine2: "Piso 2",
+    City: "Madrid",
+    StateProvince: "Madrid",
+    Country: "Spain",
+    ZipPostalCode: "28001",
+  },
+  {
+    ContactID: 4,
+    SiteAccountID: 204,
+    Salutation: "Mr.",
+    FirstName: "Michael",
+    LastName: "Johnson",
+    Email: "michael.johnson@example.com",
+    PreferredLanguage: "German",
+    Phone: "+49-123-456-789",
+    Mobile: "+49-987-654-321",
+    WorkPhone: "+49-555-123-456",
+    WorkExtension: "105",
+    OtherPhone: null,
+    OtherExtension: null,
+    Fax: "+49-555-987-654",
+    AddressLine1: "101 Berliner Straße",
+    AddressLine2: "Apt 12",
+    City: "Berlin",
+    StateProvince: "Berlin",
+    Country: "Germany",
+    ZipPostalCode: "10115",
+  },
+  {
+    ContactID: 5,
+    SiteAccountID: 205,
+    Salutation: "Mrs.",
+    FirstName: "Emma",
+    LastName: "Williams",
+    Email: "emma.williams@example.com",
+    PreferredLanguage: "Japanese",
+    Phone: "+81-123-456-789",
+    Mobile: "+81-987-654-321",
+    WorkPhone: "+81-555-123-456",
+    WorkExtension: "106",
+    OtherPhone: "+81-111-222-333",
+    OtherExtension: "107",
+    Fax: "+81-555-987-654",
+    AddressLine1: "5-1-1 Ginza",
+    AddressLine2: "Chuo-ku",
+    City: "Tokyo",
+    StateProvince: "Tokyo",
+    Country: "Japan",
+    ZipPostalCode: "104-0061",
+  },
+];
+
 import {
   Tabs,
   TabsContent,
@@ -212,10 +325,10 @@ const Search_case = () => {
             </div>
             <Button><span><Plus></Plus></span>Create Case</Button>
 
-            {/* Modal/Dialog */}
+            {/* Modal/Dialog Assets */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button className="bg-black text-white" variant="outline">Show Dialog</Button>
+                <Button className="bg-black text-white" variant="outline">Assets</Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="bg-gray-100 max-w-3xl w-full max-w-[90vw]">
                 <AlertDialogHeader>
@@ -249,6 +362,49 @@ const Search_case = () => {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Modal/Dialog Contacts */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-black text-white" variant="outline">Contacts</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-white shadow-lg rounded-lg w-full max-w-[85vw] max-h-[80vh] overflow-auto">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-lg font-bold">Contact List</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <div className="overflow-x-auto">
+                      <Table className="min-w-full">
+                        <TableCaption>A list of your contacts.</TableCaption>
+                        <TableHeader className="bg-gray-200">
+                          <TableRow>
+                            <TableHead className="w-[180px]">Name</TableHead>
+                            <TableHead className="w-[200px]">Email</TableHead>
+                            <TableHead className="w-[150px]">Phone</TableHead>
+                            <TableHead className="w-[120px] text-right">City</TableHead>
+                            <TableHead className="w-[150px] text-right">Country</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {contacts.map((contact) => (
+                            <TableRow key={contact.ContactID} className="even:bg-gray-100 hover:bg-gray-200">
+                              <TableCell className="font-medium">{contact.Salutation} {contact.FirstName} {contact.LastName}</TableCell>
+                              <TableCell>{contact.Email}</TableCell>
+                              <TableCell>{contact.Phone || contact.Mobile}</TableCell>
+                              <TableCell className="text-right">{contact.City}</TableCell>
+                              <TableCell className="text-right">{contact.Country}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="bg-gray-100 px-4 py-2">
+                  <AlertDialogCancel className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cancel</AlertDialogCancel>
+                  <AlertDialogAction className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Continue</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
