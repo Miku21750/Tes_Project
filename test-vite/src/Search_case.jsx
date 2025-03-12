@@ -541,7 +541,7 @@ const Search_case = () => {
                   <AlertDialogCancel>Close</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
-            </AlertDialog>            
+            </AlertDialog>
 
           </TabsList>
           <TabsContent value="search">
