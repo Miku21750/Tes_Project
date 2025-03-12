@@ -131,14 +131,14 @@ server.get('/contact-information', (req, res) =>{
         }
     });
 });
-//search data asset_information
-server.get('/asset-account/search', (req, res)=>{
+//search data contact_information
+server.get('/contact-information/search', (req, res)=>{
     const param = req.query.q;
     if (!param) {
         return res.status(400).json({ error: "Search query is required" });
     }
 
-    const sql = `SELECT * FROM asset_information WHERE SerialNumber LIKE ?`;
+    const sql = `SELECT * FROM contact_information WHERE Email LIKE ? Phone LIKE ? Country LIKE ?`;
 
     const searchValue = `%${param}%` ;
 
