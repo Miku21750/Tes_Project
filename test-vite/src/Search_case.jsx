@@ -220,6 +220,93 @@ const contacts = [
   },
 ];
 
+const siteAccounts = [
+  {
+    SiteAccountID: 1,
+    Company: "Tech Solutions Inc.",
+    Email: "contact@techsolutions.com",
+    PrimaryPhone: "+1 555-1234",
+    AddressLine1: "123 Innovation Drive",
+    AddressLine2: "Suite 200",
+    City: "San Francisco",
+    StateProvince: "CA",
+    Country: "USA",
+    ZipPostalCode: "94107",
+  },
+  {
+    SiteAccountID: 2,
+    Company: "Global Logistics Ltd.",
+    Email: "info@globallogistics.com",
+    PrimaryPhone: "+44 20 7946 0123",
+    AddressLine1: "456 Supply Chain Ave",
+    AddressLine2: null,
+    City: "London",
+    StateProvince: null,
+    Country: "UK",
+    ZipPostalCode: "SW1A 1AA",
+  },
+  {
+    SiteAccountID: 3,
+    Company: "Green Energy Corp.",
+    Email: "support@greenenergy.com",
+    PrimaryPhone: "+33 1 23 45 67 89",
+    AddressLine1: "789 Renewable Street",
+    AddressLine2: "Building A",
+    City: "Paris",
+    StateProvince: null,
+    Country: "France",
+    ZipPostalCode: "75001",
+  },
+  {
+    SiteAccountID: 4,
+    Company: "Cyber Security Experts",
+    Email: "security@cyberexperts.com",
+    PrimaryPhone: "+49 30 9876 5432",
+    AddressLine1: "321 Firewall Blvd",
+    AddressLine2: "Floor 5",
+    City: "Berlin",
+    StateProvince: null,
+    Country: "Germany",
+    ZipPostalCode: "10115",
+  },
+  {
+    SiteAccountID: 5,
+    Company: "NextGen AI Solutions",
+    Email: "hello@nextgenai.com",
+    PrimaryPhone: "+81 3-1234-5678",
+    AddressLine1: "101 AI Plaza",
+    AddressLine2: "Room 303",
+    City: "Tokyo",
+    StateProvince: null,
+    Country: "Japan",
+    ZipPostalCode: "100-0001",
+  },
+  {
+    SiteAccountID: 6,
+    Company: "Cloud Storage Unlimited",
+    Email: "sales@cloudstorage.com",
+    PrimaryPhone: "+61 2 9876 5432",
+    AddressLine1: "222 Cloud Lane",
+    AddressLine2: null,
+    City: "Sydney",
+    StateProvince: "NSW",
+    Country: "Australia",
+    ZipPostalCode: "2000",
+  },
+  {
+    SiteAccountID: 7,
+    Company: "FinTech Innovators",
+    Email: "finance@fintech.com",
+    PrimaryPhone: "+1 212-555-6789",
+    AddressLine1: "876 Wall Street",
+    AddressLine2: "Suite 10",
+    City: "New York",
+    StateProvince: "NY",
+    Country: "USA",
+    ZipPostalCode: "10005",
+  },
+];
+
 import {
   Tabs,
   TabsContent,
@@ -332,7 +419,7 @@ const Search_case = () => {
               </AlertDialogTrigger>
               <AlertDialogContent className="bg-gray-100 max-w-3xl w-full max-w-[90vw]">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Asset List</AlertDialogTitle>
                   <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
                     <Table>
                       <TableCaption>A list of your assets.</TableCaption>
@@ -408,6 +495,53 @@ const Search_case = () => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+
+            {/* Modal/Dialog siteAccounts */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-black text-white" variant="outline">
+                  Site Accounts
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-gray-100 max-w-5xl w-full max-w-[90vw]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Site Accounts List</AlertDialogTitle>
+                  <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
+                    <Table>
+                      <TableCaption>A list of registered site accounts.</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[150px]">Company</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Address</TableHead>
+                          <TableHead className="text-right">Country</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {siteAccounts.map((account) => (
+                          <TableRow key={account.SiteAccountID}>
+                            <TableCell className="font-medium">{account.Company}</TableCell>
+                            <TableCell>{account.Email}</TableCell>
+                            <TableCell>{account.PrimaryPhone}</TableCell>
+                            <TableCell>
+                              {account.AddressLine1}
+                              {account.AddressLine2 ? `, ${account.AddressLine2}` : ""}, {account.City}
+                              {account.StateProvince ? `, ${account.StateProvince}` : ""}
+                              , {account.ZipPostalCode}
+                            </TableCell>
+                            <TableCell className="text-right">{account.Country}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Close</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>            
 
           </TabsList>
           <TabsContent value="search">
