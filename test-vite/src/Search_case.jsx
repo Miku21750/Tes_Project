@@ -62,7 +62,7 @@ import {
 import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
-import { BtnModal } from './components/sc-modal'
+import { BtnModal, BtnModalNewAsset } from './components/sc-modal'
 
 import {DialogCloseButton} from "@/components/assets-modal"
 
@@ -249,6 +249,7 @@ const Search_case = () => {
             <Button className="cursor-pointer"><span></span>Customer Complaint Legal</Button> */}
             {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
             <BtnModal></BtnModal>
+            <BtnModalNewAsset></BtnModalNewAsset>
           </TabsList>
 
           {/* search tab */}
