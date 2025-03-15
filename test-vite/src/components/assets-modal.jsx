@@ -62,9 +62,7 @@ export function DialogCloseButton({
       setIsModalAssetOpen(false);
     }
   };
-  console.log('selected asset')
-  console.log(selectedAsset)
-
+  
   //run hook useEffect
   useEffect(() => {
     //call method
@@ -78,19 +76,20 @@ export function DialogCloseButton({
     };
     fetchDataAssets();
   }, []);
-
+  
   //filter item
-
-  const filteredAssets = search !== "" ? assets.filter(
+  
+  const filteredAssets = search.SerialNumber ? assets.filter(
     (asset) =>
-      asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
-      asset.ProductName?.toLowerCase().includes(search.toLowerCase())
-  ): [];
+      asset.SerialNumber?.toLowerCase().includes(search?.SerialNumber?.toLowerCase()) ||
+    asset.ProductName?.toLowerCase().includes(search?.SerialNumber?.toLowerCase())
+  ) : [];
   const filteredSearchAssets = searchAsset !== "" ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(searchAsset.toLowerCase()) ||
     asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase())
-  ): [];
+  ) : [];
+ 
   
   return (
     <Dialog open={isModalAssetOpen} onOpenChange={setIsModalAssetOpen}>
@@ -215,7 +214,13 @@ export function DialogCloseButton({
   );
 }
 
-export function DialogCompanyBtn({ onSelectCompany }) {
+export function DialogCompanyBtn({ 
+    isModalCompanyOpen,
+    setIsModalCompanyOpen,
+    search,
+    setSearch,
+    onSelectCompany
+  }) {
   //set State Company
   const [siteAccounts, setSiteAccounts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -234,25 +239,75 @@ export function DialogCompanyBtn({ onSelectCompany }) {
       fetchDataSiteAccounts();
     }, [])
 
-    //filter based on search
-    const filteredSiteAccount = siteAccounts.filter((company) =>
+    useEffect(() => {
+      console.log("Updated search state:", search);
+    }, [search]); // Logs every time `search` changes
+    
+    //filter based on search in search_case
+    //TODO : WHY TF THE FILTEREDSITEACCOUNT GIVE ALL MF DATA, FUCK
+    const [filteredSiteAccount, setFilteredSiteAccount] = useState([]);
+    useEffect(() => {
+      if (search.Company?.trim()) {
+        setFilteredSiteAccount(
+          siteAccounts.filter((company) =>
+            company.Company?.toLowerCase().trim() === search.Company.toLowerCase().trim()
+          )
+        );
+      } else {
+        setFilteredSiteAccount([]); // Reset when search is empty
+      }
+    }, [search.Company, siteAccounts]);
+    useEffect(() => {
+      console.log("Updated search state:", search);
+      console.log("search.Company:", search.Company);
+    }, [search]); // Logs every time `search` changes
+
+    //filter based on search in modal
+    const filteredSiteAccountSearched = searchQuery !== "" ? siteAccounts.filter((company) =>
       company.Company?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ): [];
+
+    console.log(filteredSiteAccount)
+    
 
     //handle selection
     const handleSelectSiteAccount = (company) => {
       setSelectedSiteAccounts(company)
+      // onSelectCompany(company)
     }
 
     //handle confirm 
     const handleConfirmSelection = () => {
       if(selectedSiteAccounts){
         onSelectCompany(selectedSiteAccounts)
+        setIsModalCompanyOpen(false);
+        // Reset search AFTER selection is confirmed
+        setTimeout(() => {
+          setSearch({
+            Email: "",
+            SerialNumber: "",
+            Country: "",
+            Company: "",
+            ZipPostalCode: "",
+            City: "",
+            Phone: "",
+            AssetTag: "",
+            ContractID: "",
+            TransactionType: "",
+            TransactionID: "",
+            Opsi: "",
+            LicenseKey: "",
+            PIN: ""
+          });
+        }, 300);
         // console.log("Company Selected:", selectedSiteAccounts);
       }
     }
+    useEffect(() => {
+      console.log("Company Selected (Updated):", selectedSiteAccounts);
+    }, [selectedSiteAccounts]); // Runs when `selectedSiteAccounts` updates
   return (
-    <Dialog >
+    <Dialog open={isModalCompanyOpen} onOpenChange={setIsModalCompanyOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">Companny</Button>
       </DialogTrigger>
@@ -283,39 +338,77 @@ export function DialogCompanyBtn({ onSelectCompany }) {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {filteredSiteAccount.length > 0 ? (
-              filteredSiteAccount.map((company) => (
-                <TableRow
-                  key={company.SiteAccountID}
-                  onClick={() => handleSelectSiteAccount(company)}
-                  className={`cursor-pointer hover:bg-gray-200 ${
-                    selectedSiteAccounts?.SiteAccountID === company.SiteAccountID
-                      ? "bg-blue-300"
-                      : ""
-                  }`}
-                >
-                  <TableCell>{company.Company}</TableCell>
-                  <TableCell>{company.AddressLine1}</TableCell>
-                  <TableCell>{company.City}</TableCell>
-                  <TableCell>{company.StateProvince}</TableCell>
-                  <TableCell>{company.Country}</TableCell>
-                  <TableCell>{company.ZipPostalCode}</TableCell>
-                  <TableCell>{company.Source || "-"}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center">
-                  No Companies Found
-                </TableCell>
-              </TableRow>
-            )}
-            </TableBody>
+                {filteredSiteAccountSearched.length > 0 ? (
+                  filteredSiteAccountSearched.map((company) =>(
+                    <TableRow
+                      key={company.SiteAccountID}
+                      onClick={() => handleSelectSiteAccount(company)}
+                      className={`cursor-pointer hover:bg-gray-200 ${
+                        selectedSiteAccounts?.SiteAccountID === company.SiteAccountID
+                          ? "bg-blue-300"
+                          : ""
+                      }`}
+                    >
+                      <TableCell>{company.Company}</TableCell>
+                      <TableCell>{company.AddressLine1}</TableCell>
+                      <TableCell>{company.City}</TableCell>
+                      <TableCell>{company.StateProvince}</TableCell>
+                      <TableCell>{company.Country}</TableCell>
+                      <TableCell>{company.ZipPostalCode}</TableCell>
+                      <TableCell>{company.Source || "-"}</TableCell>
+                    </TableRow>
+                  ))
+                ) : filteredSiteAccount.length > 0 ? (
+                  filteredSiteAccount.map((company) => (
+                    <TableRow
+                      key={company.SiteAccountID}
+                      onClick={() => handleSelectSiteAccount(company)}
+                      className={`cursor-pointer hover:bg-gray-200 ${
+                        selectedSiteAccounts?.SiteAccountID === company.SiteAccountID
+                          ? "bg-blue-300"
+                          : ""
+                      }`}
+                    >
+                      <TableCell>{company.Company}</TableCell>
+                      <TableCell>{company.AddressLine1}</TableCell>
+                      <TableCell>{company.City}</TableCell>
+                      <TableCell>{company.StateProvince}</TableCell>
+                      <TableCell>{company.Country}</TableCell>
+                      <TableCell>{company.ZipPostalCode}</TableCell>
+                      <TableCell>{company.Source || "-"}</TableCell>
+                    </TableRow>
+                  ))
+                ) : siteAccounts.length > 0 ? (
+                  siteAccounts.map((company) => (
+                    <TableRow
+                      key={company.SiteAccountID}
+                      onClick={() => handleSelectSiteAccount(company)}
+                      className={`cursor-pointer hover:bg-gray-200 ${
+                        selectedSiteAccounts?.SiteAccountID === company.SiteAccountID
+                          ? "bg-blue-300"
+                          : ""
+                      }`}
+                    >
+                      <TableCell>{company.Company}</TableCell>
+                      <TableCell>{company.AddressLine1}</TableCell>
+                      <TableCell>{company.City}</TableCell>
+                      <TableCell>{company.StateProvince}</TableCell>
+                      <TableCell>{company.Country}</TableCell>
+                      <TableCell>{company.ZipPostalCode}</TableCell>
+                      <TableCell>{company.Source || "-"}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">
+                      No Companies Found
+                    </TableCell>
+                  </TableRow>
+                )}
+                </TableBody>
         </Table>
         <DialogFooter className="sm:justify-end">
-            <Button type="button" variant="secondary" onClick={handleConfirmSelection}>
-              Select
-            </Button>
+        <Button onClick={handleConfirmSelection}>Select</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
