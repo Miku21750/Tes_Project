@@ -32,6 +32,14 @@ import { ContactRound, User,Search, Laptop } from "lucide-react";
 
 
 export function TableCompany({ selectedAsset = [] }) {
+
+  //check if not have any input available
+  const ifEmptyQuerySearch = !selectedAsset || Object.keys(selectedAsset).length === 0;
+  if (ifEmptyQuerySearch) return (
+    <p>No Record Found</p>
+  );
+
+  
   console.log("Received asset in TableCompany:", selectedAsset);
   const companies = selectedAsset?.site_account ? [
     {

@@ -244,6 +244,14 @@ const Search_case = () => {
   };
   
 
+  //handler site accunt
+  const [selectedSiteAccounts, setSelectedSiteAccounts] = useState(null);
+
+  const handleSelectedSiteAccount = (company) => {
+    setSelectedSiteAccounts(company);
+    console.log("Company Selected:", selectedSiteAccounts);
+  };
+
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
       <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
@@ -334,6 +342,7 @@ const Search_case = () => {
                 setSearch={setSearch} 
                 onSelectAsset={handleSelectedAsset} 
               />
+              <DialogCompanyBtn onSelectCompany={handleSelectedSiteAccount}></DialogCompanyBtn>
           </TabsList>
           <div className='mb-5'>
             {/* TODO : Change this Variable Name */}
