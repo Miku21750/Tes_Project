@@ -32,67 +32,78 @@ import {
 //importing API
 import ApiCustomer from "@/api";
 
-export function DialogCloseButton({ isModalAssetOpen, setIsModalAssetOpen }) {
-  console.log(isModalAssetOpen);
+export function DialogCloseButton({
+  isModalAssetOpen,
+  setIsModalAssetOpen,
+  search,
+  setSearch,
+  onSelectAsset,
+}) {
+  // console.log(isModalAssetOpen);
 
-  //create search state
-    const [search, setSearch] = useState("");
+  // create search state
+  const [searchAsset, setSearchAsset] = useState("");
+  const [searchedAssets, setSearchedAssets] = useState([]);
+
   //creating Asset Data
   const [assets, setAssets] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [siteAccounts, setSiteAccounts] = useState([]);
 
-  //define method
-  const fetchDataAssets = async () => {
-    //fetch data from API with Axios
-    await ApiCustomer.get("/api/asset-information").then((response) => {
-      // console.log("Asset");
-      // console.log(response.data.data)
-      //assign response data to state "asset"
-      setAssets(response.data.data);
-    });
+  //set asset selected data
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const handleSelectAsset = (asset) => {
+    setSelectedAsset(asset);
+    onSelectAsset(asset); 
+    console.log("Selected asset in modal:", asset);
   };
 
-  const fetchDataContacts = async () => {
-    //fetch data from API with Axios
-    await ApiCustomer.get("/api/contact-information").then((response) => {
-      // console.log("Contact");
-      // console.log(response.data.data)
-      //assign response data to state "asset"
-      setContacts(response.data.data);
-    });
+  const handleConfirmSelection = () => {
+    if (selectedAsset) {
+      setIsModalAssetOpen(false);
+    }
   };
-
-  const fetchDataSiteAccounts = async () => {
-    //fetch data from API with Axios
-    await ApiCustomer.get("/api/site_account").then((response) => {
-      // console.log("Site Account");
-      // console.log(response.data.data)
-      //assign response data to state "asset"
-      setSiteAccounts(response.data.data);
-    });
-  };
+  console.log('selected asset')
+  console.log(selectedAsset)
 
   //run hook useEffect
   useEffect(() => {
     //call method
+    const fetchDataAssets = async () => {
+      try {
+        const response = await ApiCustomer.get("/api/asset-information");
+        setAssets(response.data.data);
+      } catch (error) {
+        console.error("Error fetching assets:", error);
+      }
+    };
     fetchDataAssets();
-    fetchDataContacts();
-    fetchDataSiteAccounts();
   }, []);
 
   //filter item
 
-  const filteredAssets = assets.filter(
+  const filteredAssets = search !== "" ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
       asset.ProductName?.toLowerCase().includes(search.toLowerCase())
-  );
-
+  ): [];
+  const filteredSearchAssets = searchAsset !== "" ? assets.filter(
+    (asset) =>
+      asset.SerialNumber?.toLowerCase().includes(searchAsset.toLowerCase()) ||
+    asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase())
+  ): [];
+  
   return (
     <Dialog open={isModalAssetOpen} onOpenChange={setIsModalAssetOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Assets</Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSearch("");
+          }}
+        >
+          Assets
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl gap-y-10 shadow-white">
         <DialogHeader>
@@ -101,7 +112,11 @@ export function DialogCloseButton({ isModalAssetOpen, setIsModalAssetOpen }) {
             <span className="flex items-center w-[20em]  gap-2 relative">
               Search Assets
               <Search className="absolute right-1" />
-              <Input className=" flex-1 ring-2 border-0 rounded-2xl pr-10" />
+              <Input
+                className=" flex-1 ring-2 border-0 rounded-2xl pr-10"
+                value={searchAsset}
+                onChange={(e) => setSearchAsset(e.target.value)}
+              />
             </span>
           </DialogDescription>
         </DialogHeader>
@@ -117,23 +132,51 @@ export function DialogCloseButton({ isModalAssetOpen, setIsModalAssetOpen }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAssets.length > 0 ? (
-              filteredAssets.map((asset, index) => (
-                <TableRow key={asset.AssetID}>
+            {filteredSearchAssets.length > 0 ? (
+              filteredSearchAssets.map((asset) => (
+                <TableRow 
+                  key={asset.AssetID}
+                  onClick={()=>handleSelectAsset(asset)}
+                  className={selectedAsset?.AssetID === asset.AssetID ? "bg-gray-200" : ""}
+                >
                   <TableCell className="font-medium whitespace-break-spaces">
+                    
                     {asset.ProductName}
                   </TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.ProductLine}</TableCell>
                   <TableCell className="text-right">
-                    {asset.SiteAccountID}
+                    {asset.site_account?.Company}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : filteredAssets.length > 0 ? (
+              filteredAssets.map((asset) => (
+                <TableRow 
+                  key={asset.AssetID}
+                  className="cursor-pointer hover:bg-gray-200"
+                  onClick={()=>handleSelectAsset(asset)}
+                >
+                  <TableCell className="font-medium whitespace-break-spaces">
+                    
+                    {asset.ProductName}
+                  </TableCell>
+                  <TableCell>{asset.SerialNumber}</TableCell>
+                  <TableCell>{asset.ProductNumber}</TableCell>
+                  <TableCell>{asset.ProductLine}</TableCell>
+                  <TableCell className="text-right">
+                    {asset.site_account?.Company}
                   </TableCell>
                 </TableRow>
               ))
             ) : assets.length > 0 ? (
-              assets.map((asset, index) => (
-                <TableRow key={asset.AssetID}>
+              assets.map((asset) => (
+                <TableRow 
+                  key={asset.AssetID}
+                  className="cursor-pointer hover:bg-gray-200"
+                  onClick={()=>handleSelectAsset(asset)}
+                >
                   <TableCell className="font-medium whitespace-break-spaces">
                     {asset.ProductName}
                   </TableCell>
@@ -141,13 +184,16 @@ export function DialogCloseButton({ isModalAssetOpen, setIsModalAssetOpen }) {
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.ProductLine}</TableCell>
                   <TableCell className="text-right">
-                    {asset.SiteAccountID}
+                    {asset.site_account?.Company}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell className="font-medium whitespace-break-spaces">
+                <TableCell
+                  colSpan={5}
+                  className="text-center font-medium whitespace-break-spaces"
+                >
                   Data Belum Tersedia
                 </TableCell>
               </TableRow>
@@ -155,7 +201,11 @@ export function DialogCloseButton({ isModalAssetOpen, setIsModalAssetOpen }) {
           </TableBody>
         </Table>
         <DialogFooter className="sm:justify-end">
-          <Button type="button" variant="secondary">
+          <Button 
+            type="button" 
+            variant="secondary"
+            onClick={handleConfirmSelection}
+          >
             Select
           </Button>
         </DialogFooter>

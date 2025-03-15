@@ -61,3 +61,20 @@ import {
       </Select>
     )
   }
+
+  export function SelectBar3() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[200px] border-b-black">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Depot Repair">Depot Repair</SelectItem>
+            <SelectItem value="Item2">Item 2</SelectItem>
+            <SelectItem value="Item3">Item 3</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }

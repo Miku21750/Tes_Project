@@ -15,7 +15,7 @@ import { Building2 } from 'lucide-react'
 import { Contact } from 'lucide-react'
 import { PcCase } from 'lucide-react'
 import { Boxes } from 'lucide-react'
-
+import { AppAccordion } from './app-accordion'
  
 export function SheetBar() {
   return (
@@ -27,12 +27,15 @@ export function SheetBar() {
         <SheetHeader>
           <SheetTitle className="flex justify-center text-2xl mt-5">INFORMATION</SheetTitle>
         </SheetHeader>
-        <div>
+        <div className=''>
+        <AppAccordion></AppAccordion>
+        </div>
+        {/* <div>
           <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Building2 className='size-10'></Building2></Button>
           <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Contact className='size-10'></Contact></Button>
           <Button variant="secondary" className="mt-10 p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Boxes className='size-10'></Boxes></Button>
           <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><PcCase className='size-10'></PcCase></Button>
-        </div>
+        </div> */}
         {/* <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">

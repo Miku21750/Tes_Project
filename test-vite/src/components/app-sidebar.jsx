@@ -21,6 +21,9 @@ import {
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
+import { NavRecent } from "@/components/nav-projects"
+import { NavPinned } from "@/components/nav-projects"
+import { NavMywork } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -61,25 +64,32 @@ const data = {
   navMain: [
     {
       title: "Service",
+      title: "Service",
       url: "#",
+      icon: ServerIcon,
       icon: ServerIcon,
       isActive: true,
       items: [
         {
           title: "Case",
           url: "/Case",
+          title: "Case",
+          url: "/Case",
         },
         {
+          title: "Work Order",
           title: "Work Order",
           url: "#",
         },
         {
+          title: "Material Order",
           title: "Material Order",
           url: "#",
         },
       ],
     },
     {
+      title: "Unnable",
       title: "Unnable",
       url: "#",
       icon: Bot,
@@ -151,21 +161,31 @@ const data = {
       url: "/",
       icon: Home,
     },
-    {
-      name: "Recent",
-      url: "#",
-      icon: PieChart,
-    },
+  ],
+
+  recent: [
     {
       name: "Pinned",
       url: "#",
-      icon: Pin,
-    },
+      icon: PieChart,
+    }
+  ],
+
+  mywork: [
     {
+      name: "My work",
       name: "My work",
       url: "/search_case",
       icon: Table,
-    },
+    }
+  ],
+
+  pinned: [
+    {
+      name: "Pinned",
+      url: "#",
+      icon: Pin
+    }
   ],
 }
 
@@ -179,6 +199,9 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavProjects projects={data.projects} />
+        <NavRecent recent={data.recent}/>
+        <NavPinned pinned={data.pinned}></NavPinned>
+        <NavMywork mywork={data.mywork}/>
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>

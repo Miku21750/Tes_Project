@@ -51,7 +51,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
- 
 
 import {
   Tabs,
@@ -59,6 +58,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+
+import { DialogCloseButton } from './components/assets-modal'
 import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
@@ -90,7 +91,7 @@ const Search_case = () => {
       setSearch(searchQuery);
       console.log("search" + search)
     // }
-    // console.log(search)
+    console.log(search)
   }
 
   //creating Asset Data
@@ -145,10 +146,10 @@ const Search_case = () => {
 
   //filter item
   
-  const filteredAssets = assets.filter((asset) =>
-    asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
-    asset.ProductName?.toLowerCase().includes(search.toLowerCase())
-  );
+  // const filteredAssets = assets.filter((asset) =>
+  //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
+  //   asset.ProductName?.toLowerCase().includes(search.toLowerCase())
+  // );
   // console.log("filtered Asset")
   // console.log(filteredAssets);
 
@@ -182,7 +183,7 @@ const Search_case = () => {
   //handler submit
   // console.log(formData)
   const handlerSiteAccountSubmit = async () => {
-    console.log(formDataSiteAccount)
+    // console.log(formDataSiteAccount)
     try {
       const response = await ApiCustomer.post("/api/site_account", formDataSiteAccount);
       console.log("Success:", response.data);
@@ -234,6 +235,14 @@ const Search_case = () => {
       alert("Failed to save contact information");
     }
   };
+
+  //handler table selected
+  const [selectedAsset, setSelectedAsset] = useState(null); // Store selected asset data
+
+  const handleSelectedAsset = (asset) => {
+    console.log("Asset received in parent:", asset);
+    setSelectedAsset(asset);
+  };
   
 
   return (
@@ -258,7 +267,7 @@ const Search_case = () => {
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5"> 
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" className="border-b-black p-1"  />
+                  <Input id="email" className="border-b-black p-1 "  />
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="serialnumber">Serial Number</Label>
@@ -322,14 +331,27 @@ const Search_case = () => {
           <TabsContent value="ci">
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
-              <DialogCloseButton isModalAssetOpen={isModalAssetOpen} setIsModalAssetOpen={setIsModalAssetOpen}></DialogCloseButton>
+              <DialogCloseButton 
+                isModalAssetOpen={isModalAssetOpen} 
+                setIsModalAssetOpen={setIsModalAssetOpen} 
+                search={search} 
+                setSearch={setSearch} 
+                onSelectAsset={handleSelectedAsset} 
+              />
           </TabsList>
+          <div className='mb-5'>
+            {/* TODO : Change this Variable Name */}
+            <TableCompany selectedAsset={selectedAsset} />
+            <TableContact selectedAsset={selectedAsset}></TableContact>
+            <TableAsset selectedAsset={selectedAsset}></TableAsset>
+          </div>
           </TabsContent>
-          
+
+         
           <TabsContent value="Account">
           <TabsList className="flex h-[3em] bg-white">
             <div className="w-2xs p-2 text-black">
-              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+              <TabsTrigger value="Account" className="cursor-pointer" >Account</TabsTrigger>
               <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
             </div>
           </TabsList>
@@ -340,6 +362,14 @@ const Search_case = () => {
                   Change your password here. After saving, you'll be logged out.
                 </CardDescription>
               </CardHeader> */}
+              <CardHeader>
+                <CardTitle className="flex justify-end">
+                  
+                </CardTitle>
+                <CardTitle >
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
               
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
@@ -354,9 +384,18 @@ const Search_case = () => {
                   <Label htmlFor="PrimaryPhone">Primary Phone</Label>
                   <Input id="PrimaryPhone" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.PrimaryPhone}/>
                 </div>
-                <div className="space-y-0.5">
+              </CardContent>
+
+              <CardHeader className="mt-4">
+                <CardTitle>
+                  Address
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-3">
+              <div className="space-y-0.5">
                   <Label htmlFor="AddressLine1">Addres Line 1</Label>
-                  <Input id="AddressLine1" type="email" className="border-b-black p-1"  onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine1}/>
+                  <Input id="AddressLine1" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine1} />
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="AddressLine2">Addres Line 2</Label>
@@ -371,8 +410,8 @@ const Search_case = () => {
                   <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.StateProvince}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Country">Country</Label>
-                  <Input id="Country" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Country}/>
+                  <Label htmlFor="current">Country</Label>
+                  <SelectBar></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
@@ -394,7 +433,12 @@ const Search_case = () => {
             </TabsList>
             <Card className="drop-shadow-md">
               <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="flex justify-end">
+                  Clear All
+                </CardTitle>  
+                <CardTitle>
+                  Basic Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5">
@@ -466,15 +510,17 @@ const Search_case = () => {
                   <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Country">Country</Label>
-                  <SelectBar id="Country" onChange={handlerInputContactChange} />
+                  <Label htmlFor="current">Country</Label>
+                  <SelectBar onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
                   <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end">
+
+              <CardFooter className="flex justify-end gap-4">
+              <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-20" onClick={handlerContactSubmit}>Save</Button>
                 <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handlerContactSubmit}>Verify & Save</Button>
               </CardFooter>
             </Card>
