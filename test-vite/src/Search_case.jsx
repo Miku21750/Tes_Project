@@ -308,11 +308,25 @@ const Search_case = () => {
   };
 
   //handler table selected
-  const [selectedAsset, setSelectedAsset] = useState(null); // Store selected asset data
+  const [selectedAsset, setSelectedAsset] = useState([]); // Store selected asset data
 
   const handleSelectedAsset = (asset) => {
-    setSelectedAsset(asset);
+    if (Array.isArray(asset)) {
+      setSelectedAsset(asset);
+      setSelectedSiteAccounts(asset[0]?.site_account || null); // ✅ Update affiliated company
+      setSelectedContact(asset[0]?.contact_information || null); // ✅ Update affiliated contact
+    } else if (asset) {
+      setSelectedAsset([asset]);
+      setSelectedSiteAccounts(asset.site_account || null);
+      setSelectedContact(asset.contact_information || null)
+    } else {
+      setSelectedAsset([]);
+      setSelectedSiteAccounts(null);
+      setSelectedContact(null);
+    }
   };
+  
+  
 
   useEffect(() => {
     console.log("Updated selectedAsset:", selectedAsset);
@@ -320,7 +334,7 @@ const Search_case = () => {
   
 
   //handler site accunt
-  const [selectedSiteAccounts, setSelectedSiteAccounts] = useState(null);
+  const [selectedSiteAccounts, setSelectedSiteAccounts] = useState([]);
   
   const handleSelectedSiteAccount = (company) => {
     setSelectedSiteAccounts(company);
@@ -329,7 +343,7 @@ const Search_case = () => {
   
 
   //todo : handler selected contact
-  const [selectedContact, setSelectedContact] = useState(null);
+  const [selectedContact, setSelectedContact] = useState([]);
 
 
   return (
@@ -573,7 +587,7 @@ const Search_case = () => {
                   <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="WorkExtension">EXTN</Label>
+                  <Label htmlFor="WorkExtension">Work EXTN</Label>
                   <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
@@ -581,7 +595,7 @@ const Search_case = () => {
                   <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="OtherExtension">EXTN</Label>
+                  <Label htmlFor="OtherExtension"> Other EXTN</Label>
                   <Input id="OtherExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
@@ -616,6 +630,7 @@ const Search_case = () => {
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
                   <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+
                 </div>
               </CardContent>
 
