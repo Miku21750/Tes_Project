@@ -350,19 +350,6 @@ const Search_case = () => {
   const [selectedContact, setSelectedContact] = useState([]);
 
 
-  //handler site accunt
-  const [selectedSiteAccounts, setSelectedSiteAccounts] = useState(null);
-  
-  const handleSelectedSiteAccount = (company) => {
-    setSelectedSiteAccounts(company);
-    console.log("Company Selected:", selectedSiteAccounts);
-  };
-  
-
-  //todo : handler selected contact
-  const [selectedContact, setSelectedContact] = useState(null);
-
-
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
       <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
