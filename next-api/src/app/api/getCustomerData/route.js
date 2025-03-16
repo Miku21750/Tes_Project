@@ -23,12 +23,6 @@ export async function GET(request) {
         Company : company ? { contains: company } : undefined,
     };
     //get all data
-    /**
-     * TODO
-     * INTINYA BISA, TAPI GABISA COMBINE (maybe)
-     * Solution :
-     * make an switch case where criteria is.
-     */
     const asset_information = await prisma.asset_information.findMany({
         where: Object.keys(filters).length > 0 ? filters : undefined,
         include:

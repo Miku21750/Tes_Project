@@ -10,6 +10,7 @@ export async function GET(request) {
     const first_name = searchParams.get("first_name")
     const last_name = searchParams.get("last_name")
     const email = searchParams.get("email")
+    const siteAccountID = searchParams.get("SiteAccountID")
 
     //prisma query filter
     const filters = {};
@@ -21,6 +22,9 @@ export async function GET(request) {
     }
     if(email){
         filters.Email = { contains: email }
+    }
+    if(siteAccountID){
+        filters.SiteAccountID = parseInt(siteAccountID, 10);
     }
     //get all data
     const contact_information = await prisma.contact_information.findMany({
@@ -93,8 +97,5 @@ export async function POST(request) {
             message: "Contact Information Created Successfully!",
             data: contact_information,
         },
-        { 
-            status: 201
-        }
     )
 }

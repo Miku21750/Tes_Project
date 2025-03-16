@@ -49,14 +49,16 @@ export function TableCompany({
   const [relatedData, setRelatedData] = useState({}); // Stores related contacts/assets
   /// Check if both `selectedAsset` and `selectedCompany` are empty
   const ifEmptyQuerySearch =
-    (!selectedAsset || Object.keys(selectedAsset).length === 0) &&
-    (!selectedCompany || Object.keys(selectedCompany).length === 0);
+  (!selectedAsset || selectedAsset.length === 0) &&
+  (!selectedCompany || Object.keys(selectedCompany).length === 0);
+
 
   if (ifEmptyQuerySearch) return <p>No Record Found</p>;
 
 
   // console.log("Received asset in TableCompany:", selectedAsset);
 
+  //refactor any Data to Arry for accepting table
   const companyData = selectedCompany || selectedAsset?.site_account || null;
 
   const companies = companyData ? [
@@ -68,9 +70,11 @@ export function TableCompany({
       text: `${companyData.AddressLine1} ${companyData.City} ${companyData.StateProvince} ${companyData.Country}-${companyData.ZipPostalCode} | Email: ${companyData.Email} | Phone : ${companyData.PrimaryPhone}`,
     },
   ] : null;
-  // console.log(companies);
-    const contacts = Array.isArray(selectedContact) 
-    ? selectedContact.map((contact) => ({
+    const contacts = selectedContact 
+    ? (Array.isArray(selectedContact) 
+        ? selectedContact 
+        : [selectedContact]) // ✅ Wrap object in an array if necessary
+    .map((contact) => ({
         ContactID: contact.ContactID,
         FirstName: contact.FirstName,
         LastName: contact.LastName,
@@ -81,20 +85,26 @@ export function TableCompany({
         hpID: "526291",
       }))
     : [];
-  console.log("Final contact in TableCompany:", contacts); // ✅ Debugging log
+
+
+  console.log("Final contact in TableCompany:", selectedContact); // ✅ Debugging log
   
 
   // const assets = Array.isArray(selectedAsset) ? selectedAsset : [];
-  const assets = Array.isArray(selectedAsset) && selectedAsset.length > 0 ? selectedAsset.map((asset) => ({
-    AssetID: asset.AssetID,
-    SerialNumber: asset.SerialNumber,
-    ProductName: asset.ProductName,
-    ProductNumber: asset.ProductNumber,
-    ProductLine: asset.ProductLine,
-    isparent: "-",
-    parentasset: "-",
-    source: "CRM",
-  })) : [];
+  const assets = Array.isArray(selectedAsset) && selectedAsset.length > 0 
+  ? selectedAsset.map((asset) => ({
+      AssetID: asset.AssetID,
+      SerialNumber: asset.SerialNumber,
+      ProductName: asset.ProductName,
+      ProductNumber: asset.ProductNumber,
+      ProductLine: asset.ProductLine,
+      isparent: "-",
+      parentasset: "-",
+      source: "CRM",
+    }))
+  : [];
+
+
 
   
   // const [se, setSelectedAsset] = useState([]);
@@ -138,14 +148,18 @@ export function TableCompany({
         console.error("Error fetching company affiliations:", err);
       }
     } else {
-      setSelectedAsset(null);
-      setSelectedContact(null);
+      setSelectedAsset([]);
+      setSelectedContact([]);
+
     }
   }
 
   
   
-  
+  console.log("selectedAsset:", selectedAsset);
+  console.log("selectedCompany:", selectedCompany);
+  console.log("selectedContact:", selectedContact);
+
   return (
     // Company
       <Card className="m-0 p-0 gap-0">
@@ -182,7 +196,12 @@ export function TableCompany({
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <BtnModalContact className=""></BtnModalContact>
+              <BtnModalContact 
+                className="" 
+                selectedCompany={selectedCompany} 
+                selectedContact={selectedContact}
+                setSelectedContact={setSelectedContact}
+              />
               </div>
           <Table> 
             <TableHeader className="bg-gray-400">
