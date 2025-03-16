@@ -63,10 +63,29 @@ const data = {
   ],
   navMain: [
     {
+      title: "Master",
+      url: "#",
+      icon: Bot,
+      isActive: true,
+      items: [
+        {
+          title: "Company",
+          url: "/master/Company_table",
+        },
+        {
+          title: "Assets",
+          url: "/master/Assets_table",
+        },
+        {
+          title: "Contact",
+          url: "/master/Contact_table",
+        },
+      ],
+    },
+    {
       title: "Service",
       url: "#",
       icon: ServerIcon,
-      isActive: true,
       items: [
         {
           title: "Case",
@@ -78,25 +97,6 @@ const data = {
         },
         {
           title: "Material Order",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Unnable",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
           url: "#",
         },
       ],
