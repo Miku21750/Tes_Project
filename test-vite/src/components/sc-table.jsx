@@ -175,12 +175,12 @@ export function TableCompany({
         </CardHeader>
         <CardContent className=" p-3">
         { companies !== null ? (
-          <div className="text-gray-500"key={companies[0].key}>
+          <div className="text-gray-500"key={selectedAsset?.SerialNumber}>
               <p>{companies[1].text}</p>
           </div>
           
         ) : (
-          <div className="text-gray-500">
+          <div className="text-gray-500"key={selectedAsset?.SerialNumber}>
               <p>No Company Available</p>
           </div>
         )}
