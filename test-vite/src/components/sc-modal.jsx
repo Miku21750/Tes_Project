@@ -34,6 +34,7 @@ import {
   SelectBar2,
  } from "@/components/sc-select";
 
+ import {AlertDialog, AlertDialogContent, AlertDialogTrigger} from "@/components/ui/alert-dialog"
 //import API
 import ApiCustomer from "@/api";
 import axios from "axios";
@@ -414,3 +415,97 @@ export function BtnModalAsset() {
     </Dialog>
   )
 }
+
+export const AssetAlertDialog = ({ assetId, onUpdate }) => {
+  const [asset, setAsset] = useState(null);
+  const [serialNumber, setSerialNumber] = useState("");
+  const [productName, setProductName] = useState("");
+  const [productNumber, setProductNumber] = useState("");
+  const [productLine, setProductLine] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchAsset = async () => {
+    if (!assetId) return; // Cegah fetch jika assetId tidak ada
+    try {
+      const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
+      const data = response.data.data;
+      setAsset(data);
+      setSerialNumber(data?.SerialNumber || "");
+      setProductName(data?.ProductName || "");
+      setProductNumber(data?.ProductNumber || "");
+      setProductLine(data?.ProductLine || "");
+      console.error("Error fetching asset information:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (assetId && isOpen) { 
+      fetchAsset();
+    }
+  }, [assetId, isOpen]);
+
+  // Reset state saat modal ditutup
+  useEffect(() => {
+    if (!isOpen) {
+      setSerialNumber("");
+      setProductName("");
+      setProductNumber("");
+      setProductLine("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!serialNumber || !productName) {
+      alert("Serial Number dan Product Name wajib diisi!");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
+        SerialNumber: serialNumber,
+        ProductName: productName,
+        ProductNumber: productNumber,
+        ProductLine: productLine,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating asset:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
+    try {
+      await ApiCustomer.delete(`/api/asset-information/${assetId}`);
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error deleting asset:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchAsset(); }}>Edit/Hapus</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Asset Information</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} placeholder="Serial Number" />
+          <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" />
+          <Input value={productNumber} onChange={(e) => setProductNumber(e.target.value)} placeholder="Product Number" />
+          <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} placeholder="Product Line" />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
