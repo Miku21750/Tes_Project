@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ApiCustomer from "@/api";
-import { Pencil, Trash } from "lucide-react";
-import { BtnModalAsset, AssetAlertDialog } from "@/components/sc-modal"
+import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
 
 export const Assets_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,14 +36,16 @@ export const Assets_table = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Asset Information Table</h2>
+      <div className="space-x-2">
       <BtnModalAsset />
-      <input
-        type="text"
-        placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+        <input
+          type="text"
+          placeholder="Search..."
+          className="mb-4 p-2 border rounded w-1/3"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
@@ -68,13 +69,9 @@ export const Assets_table = () => {
                 <td className="border p-2">{asset.ProductLine}</td>
                 <td className="border p-2">{asset.SiteAccountID}</td>
                 <td className="border p-2 flex justify-center space-x-2">
-                  <button className="text-blue-500 hover:text-blue-700">
-                    <Pencil size={18} />
-                  </button>
-                  <button className="text-red-500 hover:text-red-700">
-                    <Trash size={18} />
-                  </button>
-                  <AssetAlertDialog assetId={asset.AssetID} onUpdate={fetchAssets}/>
+                  <AssetEdit 
+                  assetId={asset.AssetID} onUpdate={fetchAssets}/>
+                  <AssetDelete assetId={asset.AssetID} />
                 </td>
               </tr>
             ))}

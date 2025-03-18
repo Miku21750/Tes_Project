@@ -102,7 +102,7 @@ export async function DELETE(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            message: "Data Asset Information Deleted",
+            message: "Data Asset Information deleted",
             data: deletedAsset
         }, { status: 200 });
 

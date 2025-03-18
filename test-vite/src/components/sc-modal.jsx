@@ -34,7 +34,7 @@ import {
   SelectBar2,
  } from "@/components/sc-select";
 
- import {AlertDialog, AlertDialogContent, AlertDialogTrigger} from "@/components/ui/alert-dialog"
+import { Pencil, Trash } from "lucide-react";
 //import API
 import ApiCustomer from "@/api";
 import axios from "axios";
@@ -416,7 +416,7 @@ export function BtnModalAsset() {
   )
 }
 
-export const AssetAlertDialog = ({ assetId, onUpdate }) => {
+export function AssetEdit ({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
   const [serialNumber, setSerialNumber] = useState("");
   const [productName, setProductName] = useState("");
@@ -434,6 +434,7 @@ export const AssetAlertDialog = ({ assetId, onUpdate }) => {
       setProductName(data?.ProductName || "");
       setProductNumber(data?.ProductNumber || "");
       setProductLine(data?.ProductLine || "");
+    } catch (error) {
       console.error("Error fetching asset information:", error);
     }
   };
@@ -474,21 +475,12 @@ export const AssetAlertDialog = ({ assetId, onUpdate }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
-    try {
-      await ApiCustomer.delete(`/api/asset-information/${assetId}`);
-      onUpdate();
-      setIsOpen(false);
-    } catch (error) {
-      console.error("Error deleting asset:", error);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchAsset(); }}>Edit/Hapus</Button>
+        <Button  variant="outline" onClick={() => { setIsOpen(true); fetchAsset(); }}>
+          <Pencil />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -502,10 +494,37 @@ export const AssetAlertDialog = ({ assetId, onUpdate }) => {
         </div>
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
 
+export function AssetDelete ({ assetId }) {
+  const handleDelete = async () => {
+    try {
+      await ApiCustomer.delete(`/api/asset-information/${assetId}`);
+    } catch (error) {
+      console.error("Error deleting asset:", error);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700">
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Asset Information</DialogTitle>
+        </DialogHeader>
+        <h1>Anda yakin ingin menghapus data ini?</h1>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
