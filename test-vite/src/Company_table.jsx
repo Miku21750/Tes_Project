@@ -58,7 +58,7 @@ export const Company_table = () => {
         <table className="min-w-full border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border p-2">Site Account ID</th>
+              <th className="border p-2">No</th>
               <th className="border p-2">Company</th>
               <th className="border p-2">Email</th>
               <th className="border p-2">Primary Phone</th>
@@ -69,9 +69,11 @@ export const Company_table = () => {
           </thead>
           <tbody>
             {companies.length > 0 ? (
-              companies.map((company) => (
+              companies.map((company, index) => (
                 <tr key={company.SiteAccountID} className="hover:bg-gray-100">
-                  <td className="border p-2 text-center">{company.SiteAccountID}</td>
+                  <td className="border p-2 text-center">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
                   <td className="border p-2">{company.Company}</td>
                   <td className="border p-2">{company.Email}</td>
                   <td className="border p-2">{company.PrimaryPhone}</td>

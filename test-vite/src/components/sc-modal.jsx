@@ -677,3 +677,156 @@ export function CompanyDelete ({ siteAccountId }) {
     </Dialog>
   );
 };
+
+export function ContactEdit({ contactID, onUpdate }) {
+  const [contact, setContact] = useState(null);
+  const [salutation, setSalutation] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState("");
+  const [phone, setPhone] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [workPhone, setWorkPhone] = useState("");
+  const [workExtension, setWorkExtension] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [stateProvince, setStateProvince] = useState("");
+  const [country, setCountry] = useState("");
+  const [zipPostalCode, setZipPostalCode] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchContact = async () => {
+    if (!contactID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/contact-information/${contactID}`);
+      const data = response.data.data;
+      setContact(data);
+      setSalutation(data?.Salutation || "");
+      setFirstName(data?.FirstName || "");
+      setLastName(data?.LastName || "");
+      setEmail(data?.Email || "");
+      setPreferredLanguage(data?.PreferredLanguage || "");
+      setPhone(data?.Phone || "");
+      setMobile(data?.Mobile || "");
+      setWorkPhone(data?.WorkPhone || "");
+      setWorkExtension(data?.WorkExtension || "");
+      setAddressLine1(data?.AddressLine1 || "");
+      setAddressLine2(data?.AddressLine2 || "");
+      setCity(data?.City || "");
+      setStateProvince(data?.StateProvince || "");
+      setCountry(data?.Country || "");
+      setZipPostalCode(data?.ZipPostalCode || "");
+    } catch (error) {
+      console.error("Error fetching contact information:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (contactID && isOpen) {
+      fetchContact();
+    }
+  }, [contactID, isOpen]);
+
+  const handleUpdate = async () => {
+    if (!firstName || !lastName || !email || !phone || !city || !country) {
+      alert("Fields marked with * are required!");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/contact-information/${contactID}`, {
+        Salutation: salutation,
+        FirstName: firstName,
+        LastName: lastName,
+        Email: email,
+        PreferredLanguage: preferredLanguage,
+        Phone: phone,
+        Mobile: mobile,
+        WorkPhone: workPhone,
+        WorkExtension: workExtension,
+        AddressLine1: addressLine1,
+        AddressLine2: addressLine2,
+        City: city,
+        StateProvince: stateProvince,
+        Country: country,
+        ZipPostalCode: zipPostalCode,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating contact:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchContact(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Contact Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the contact. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} placeholder="Salutation" />
+          <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name *" />
+          <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name *" />
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
+          <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} placeholder="Preferred Language" />
+          <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone *" />
+          <Input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Mobile" />
+          <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} placeholder="Work Phone" />
+          <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} placeholder="Work Extension" />
+          <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1" />
+          <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
+          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />
+          <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} placeholder="State/Province" />
+          <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country *" />
+          <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} placeholder="Zip/Postal Code *" />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ContactDelete ({ contactID }) {
+  const handleDelete = async () => {
+    try {
+      await ApiCustomer.delete(`/api/contact-information/${contactID}`);
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700">
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Asset</DialogTitle>
+          <DialogDescription>
+            Delete asset confirm. 
+          </DialogDescription>
+        </DialogHeader>
+        <h1>Anda yakin ingin menghapus data ini?</h1>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
