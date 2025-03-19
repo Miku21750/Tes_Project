@@ -456,8 +456,8 @@ export function AssetEdit ({ assetId, onUpdate }) {
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!serialNumber || !productName) {
-      alert("Serial Number dan Product Name wajib diisi!");
+    if (!serialNumber || !productName || !productNumber) {
+      alert("Serial Number, Product Name dan Product Number wajib diisi!");
       return;
     }
 
@@ -485,11 +485,14 @@ export function AssetEdit ({ assetId, onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Asset Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the asset. Fields marked with * are required.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} placeholder="Serial Number" />
-          <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" />
-          <Input value={productNumber} onChange={(e) => setProductNumber(e.target.value)} placeholder="Product Number" />
+          <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} placeholder="Serial Number*" />
+          <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name*" />
+          <Input value={productNumber} onChange={(e) => setProductNumber(e.target.value)} placeholder="Product Number*" />
           <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} placeholder="Product Line" />
         </div>
         <DialogFooter>
@@ -518,7 +521,153 @@ export function AssetDelete ({ assetId }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Asset Information</DialogTitle>
+          <DialogTitle>Delete Asset</DialogTitle>
+          <DialogDescription>
+            Delete asset confirm. 
+          </DialogDescription>
+        </DialogHeader>
+        <h1>Anda yakin ingin menghapus data ini?</h1>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function CompanyEdit({ siteAccountId, onUpdate }) {
+  const [company, setCompany] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [email, setEmail] = useState("");
+  const [primaryPhone, setPrimaryPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [stateProvince, setStateProvince] = useState("");
+  const [country, setCountry] = useState("");
+  const [zipPostalCode, setZipPostalCode] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchCompany = async () => {
+    if (!siteAccountId) return;
+    try {
+      const response = await ApiCustomer.get(`/api/site_account/${siteAccountId}`);
+      const data = response.data.data;
+      setCompany(data);
+      setCompanyName(data?.Company || "");
+      setEmail(data?.Email || "");
+      setPrimaryPhone(data?.PrimaryPhone || "");
+      setAddressLine1(data?.AddressLine1 || "");
+      setAddressLine2(data?.AddressLine2 || "");
+      setCity(data?.City || "");
+      setStateProvince(data?.StateProvince || "");
+      setCountry(data?.Country || "");
+      setZipPostalCode(data?.ZipPostalCode || "");
+    } catch (error) {
+      console.error("Error fetching company information:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (siteAccountId && isOpen) {
+      fetchCompany();
+    }
+  }, [siteAccountId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCompanyName("");
+      setEmail("");
+      setPrimaryPhone("");
+      setAddressLine1("");
+      setAddressLine2("");
+      setCity("");
+      setStateProvince("");
+      setCountry("");
+      setZipPostalCode("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!companyName || !email || !primaryPhone || !addressLine1 || !city || !country || !zipPostalCode) {
+      alert("Fields marked with * are required!");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, {
+        Company: companyName,
+        Email: email,
+        PrimaryPhone: primaryPhone,
+        AddressLine1: addressLine1,
+        AddressLine2: addressLine2,
+        City: city,
+        StateProvince: stateProvince,
+        Country: country,
+        ZipPostalCode: zipPostalCode,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating company:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchCompany(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Company Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the company. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name *" />
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
+          <Input value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary Phone *" />
+          <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1 *" />
+          <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
+          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />
+          <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} placeholder="State/Province" />
+          <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country *" />
+          <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} placeholder="Zip/Postal Code *" />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CompanyDelete ({ siteAccountId }) {
+  const handleDelete = async () => {
+    try {
+      await ApiCustomer.delete(`/api/site_account/${siteAccountId}`);
+    } catch (error) {
+      console.error("Error deleting asset:", error);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700">
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Asset</DialogTitle>
+          <DialogDescription>
+            Delete asset confirm. 
+          </DialogDescription>
         </DialogHeader>
         <h1>Anda yakin ingin menghapus data ini?</h1>
         <DialogFooter>
