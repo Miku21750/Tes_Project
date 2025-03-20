@@ -41,7 +41,12 @@ export async function GET(request) {
                 : undefined,
             skip: skip,
             take: limit,
-            orderBy: { ProductName: "asc" }
+            orderBy: { ProductName: "asc" },
+            include:
+            {
+                site_account: true,
+                contact_information:true
+            }
         });
 
         return NextResponse.json({

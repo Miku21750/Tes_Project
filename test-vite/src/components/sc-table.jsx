@@ -60,6 +60,7 @@ export function TableCompany({
 
   //refactor any Data to Arry for accepting table
   const companyData = selectedCompany || selectedAsset?.site_account || null;
+  console.log("Selected Asset : ", selectedAsset)
 
   const companies = companyData ? [
     {
@@ -70,6 +71,9 @@ export function TableCompany({
       text: `${companyData.AddressLine1} ${companyData.City} ${companyData.StateProvince} ${companyData.Country}-${companyData.ZipPostalCode} | Email: ${companyData.Email} | Phone : ${companyData.PrimaryPhone}`,
     },
   ] : null;
+
+
+  //contacts
     const contacts = selectedContact 
     ? (Array.isArray(selectedContact) 
         ? selectedContact 
@@ -90,6 +94,7 @@ export function TableCompany({
   console.log("Final contact in TableCompany:", selectedContact); // ✅ Debugging log
   
 
+  //asset
   // const assets = Array.isArray(selectedAsset) ? selectedAsset : [];
   const assets = Array.isArray(selectedAsset) && selectedAsset.length > 0 
   ? selectedAsset.map((asset) => ({

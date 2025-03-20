@@ -25,7 +25,7 @@ export async function GET(request) {
                         { City: { contains: search } },
                         { StateProvince: { contains: search } },
                         { ZipPostalCode: { contains: search } },
-                        { Company: { contains: search } }
+                        { site_account: { Company: { contains: search } } }
                     ]
                 }
                 : undefined // Jika search kosong, tidak pakai filter

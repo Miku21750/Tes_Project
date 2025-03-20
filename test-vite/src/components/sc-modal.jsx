@@ -137,11 +137,14 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         alert("Contact added successfully!");
       }
 
-      fetchContacts(); // ✅ Refresh contacts table
+      // fetchContacts(); // ✅ Refresh contacts table
 
-       // ✅ Reload contacts by fetching the latest data
-       const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
-       setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
+       // ✅ Ensure selectedCompany is not null before fetching contacts
+    if (selectedCompany?.SiteAccountID) {
+      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
+      setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
+      console.log("Updated Selected Contacts:", updatedContacts);
+    }
 
     } catch (error) {
       console.error("Error adding contact:", error);
@@ -152,7 +155,9 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
   // Function to fetch updated contacts
   const fetchContacts = async (companyId) => {
     try {
+      console.log("Fetching contacts for Company ID:", companyId); // ✅ Debugging
       const response = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${companyId}`);
+      console.log("response Fetch Contacts: ", response.data)
       return response.data.data; // ✅ Return updated contacts
     } catch (error) {
       console.error("Error fetching contacts:", error);
