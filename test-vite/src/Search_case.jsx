@@ -242,9 +242,9 @@ const Search_case = () => {
                   <Label htmlFor="serialnumber">Serial Number</Label>
                   <Input id="serialnumber" onChange={handleInputChange} className="border-b-black p-1"/>
                 </div>
-                <div className="space-y-0.5">
-                  <Label htmlFor="country">Country</Label>
-                  <SelectBar></SelectBar>
+                <div className="space-y-0.5 flex flex-col">
+                  <Label htmlFor="Country">Country</Label>
+                  <SelectBar id="Country" onChange={handleInputChange}></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="company">Company</Label>
@@ -292,7 +292,7 @@ const Search_case = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"><p className='text-2xl mb-1' onClick={handleSearchClick}>Search</p></Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11" onClick={handleSearchClick}><p className='text-2xl mb-1'>Search</p></Button>
               </CardFooter>
             </Card>
           </TabsContent>  
@@ -401,19 +401,19 @@ const Search_case = () => {
               </div>
             </TabsList>
             <Card className="drop-shadow-md">
-              <CardHeader>
-              <CardTitle className="flex justify-end">
-                  Clear All
+              <CardHeader className="flex-row justify-between">
+              <CardTitle>
+               Basic Informationdsada
                 </CardTitle>  
                 <CardTitle>
-                  Basic Information
+                  Basic Informationdad
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-5 grid-cols-3">
-                <div className="space-y-0.5">
+              <CardContent className="grid gap-5 grid-cols-5">
+                <div className="space-y-0.5 grid grid-cols-2 gap-x-2.5 col-span-2">
                   <Label htmlFor="Salutation">Salutation</Label>
+                  <Label htmlFor="PreferredLanguage" >Preferred Language</Label>
                   <SelectBar1 id="Salutation" onChange={handlerInputContactChange} />
-                  <Label htmlFor="PreferredLanguage" className="mt-2">Preferred Language</Label>
                   <SelectBar2 id="PreferredLanguage" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
@@ -424,11 +424,15 @@ const Search_case = () => {
                   <Label htmlFor="LastName">Last Name</Label>
                   <Input id="LastName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="Email">Email</Label>
+                  <Input id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
+                </div>
               </CardContent>
               <CardHeader className="mt-2">
                 <CardTitle>Phone Preferences</CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-5 grid-cols-3">
+              <CardContent className="grid gap-5 grid-cols-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="Phone">Phone</Label>
                   <Input id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
