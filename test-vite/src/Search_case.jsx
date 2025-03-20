@@ -67,7 +67,7 @@ const Search_case = () => {
   }
 
   //creating Asset Data
-  const [assets, setAssets] = useState([]);
+  const [ass, setAssets] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [siteAccounts, setSiteAccounts] = useState([]);
   
@@ -118,15 +118,33 @@ const Search_case = () => {
 
   //filter item
   
-  // const filteredAssets = assets.filter((asset) =>
+    // const filteredAssets = assets.filter((asset) =>
   //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
   //   asset.ProductName?.toLowerCase().includes(search.toLowerCase())
   // );
   // console.log("filtered Asset")
   // console.log(filteredAssets);
 
-
-
+    // Contoh data asset
+    const assets = [
+      {
+        AssetID: 1,
+        SerialNumber: "SN-12345",
+        ProductName: "Laptop X",
+        ProductNumber: "P-001",
+        ProductLine: "Electronics",
+        SiteAccountID: "SA-7890",
+      },
+      {
+        AssetID: 2,
+        SerialNumber: "SN-67890",
+        ProductName: "Monitor Y",
+        ProductNumber: "P-002",
+        ProductLine: "Displays",
+        SiteAccountID: "SA-5678",
+      },
+    ];
+    const filteredAssets = assets.filter((asset) => asset.ProductLine === "Electronics");
 
   //form section
   // section account
