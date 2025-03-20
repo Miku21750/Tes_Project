@@ -3,49 +3,63 @@ import { NextResponse } from "next/server";
 import prisma  from "../../../../prisma/client";
 
 export async function GET(request) {
-    //get search parameter
-    const { searchParams } = new URL(request.url);
+    try{
+        // Ambil parameter pencarian & pagination
+        const { searchParams } = new URL(request.url);
+        const search = searchParams.get("search") || "";
+        const page = parseInt(searchParams.get("page")) || 1;
+        const limit = parseInt(searchParams.get("limit")) || 10;
 
-    //extract query parameter
-    const serialNumber = searchParams.get("SerialNumber")
-    const productName = searchParams.get("ProductName")
+        console.log("Query Params:", { search, page, limit });
 
-    //prisma query filter
-    
-    const filters = {
-        SerialNumber : serialNumber ? { contains: serialNumber } : undefined,
-        ProductName : productName ? { contains: productName } : undefined,
-    };
-    // if(serialNumber){
-    //     filters.SerialNumber = { contains: serialNumber }
-    // }
-    // if(productName){
-    //     filters.ProductName = { contains: productName }
-    // }
-    //get all data
-    const asset_information = await prisma.asset_information.findMany({
-        where: Object.keys(filters).length > 0 ? filters : undefined,
-        include:
-        {
-            site_account: true,
-            contact_information:true
-        }
-    });
-    return NextResponse.json(
-        {
+        // Hitung jumlah data total
+        const totalCount = await prisma.asset_information.count({
+            where: search
+                ? {
+                    OR: [
+                        { serialNumber: { contains: search } },
+                        { productName: { contains: search } }
+                    ]
+                }
+                : undefined // Jika search kosong, tidak pakai filter
+        });
+
+        console.log("Total Data:", totalCount);
+
+        // Hitung offset berdasarkan halaman
+        const skip = (page - 1) * limit;
+
+        // Ambil data dengan filter & pagination
+        const asset_information = await prisma.asset_information.findMany({
+            where: search
+                ? {
+                    OR: [
+                        { SerialNumber: { contains: search } },
+                        { ProductName: { contains: search } }
+                    ]
+                }
+                : undefined,
+            skip: skip,
+            take: limit,
+            orderBy: { ProductName: "asc" }
+        });
+
+        return NextResponse.json({
             success: true,
-            message: "List Data Asset Information",
+            message: "List Data Assets Information",
             data: asset_information,
-        },
-        {
-            status:200,
-            headers: {
-                "Access-Control-Allow-Origin": "*", // Allow all origins
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        }
-    );
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: page
+        });
+    } catch (error) {
+        console.error("🔥 ERROR in GET API:", error);
+
+        return NextResponse.json({
+            success: false,
+            message: "Failed to fetch data",
+            error: error.message
+        }, { status: 500 });
+    }
 }
 
 export async function POST(request) {

@@ -199,3 +199,4 @@ model workorder {
 
   @@index([CaseID], map: "CaseID")
 }
+

@@ -3,43 +3,87 @@ import { NextResponse } from "next/server";
 import prisma  from "../../../../prisma/client";
 
 export async function GET(request) {
-    //get search parameter
-    const { searchParams } = new URL(request.url);
+    try{
+        // Ambil parameter pencarian & pagination
+        const { searchParams } = new URL(request.url);
+        const search = searchParams.get("search") || "";
+        const page = parseInt(searchParams.get("page")) || 1;
+        const limit = parseInt(searchParams.get("limit")) || 10;
 
-    //extract query parameter
-    const first_name = searchParams.get("first_name")
-    const last_name = searchParams.get("last_name")
-    const email = searchParams.get("email")
-    const siteAccountID = searchParams.get("SiteAccountID")
+        console.log("Query Params:", { search, page, limit });
 
-    //prisma query filter
-    const filters = {};
-    if(first_name){
-        filters.FirstName = { contains: first_name }
-    }
-    if(last_name){
-        filters.LastName = { contains: last_name }
-    }
-    if(email){
-        filters.Email = { contains: email }
-    }
-    if(siteAccountID){
-        filters.SiteAccountID = parseInt(siteAccountID, 10);
-    }
-    //get all data
-    const contact_information = await prisma.contact_information.findMany({
-        where: Object.keys(filters).length > 0 ? filters : undefined
-    });
-    return NextResponse.json(
-        {
+        // Hitung jumlah data total
+        const totalCount = await prisma.contact_information.count({
+            where: search
+                ? {
+                    OR: [
+                        { FirstName: { contains: search } },
+                        { LastName: { contains: search } },
+                        { Email: { contains: search } },
+                        { Phone: { contains: search } },
+                        { Country: { contains: search } },
+                        { City: { contains: search } },
+                        { StateProvince: { contains: search } },
+                        { ZipPostalCode: { contains: search } },
+                        { Company: { contains: search } }
+                    ]
+                }
+                : undefined // Jika search kosong, tidak pakai filter
+        });
+
+        console.log("Total Data:", totalCount);
+
+        // Hitung offset berdasarkan halaman
+        const skip = (page - 1) * limit;
+
+        // Ambil data dengan filter & pagination
+        const contact_information = await prisma.contact_information.findMany({
+            where: search
+                ? {
+                    OR: [
+                        { FirstName: { contains: search } },
+                        { LastName: { contains: search } },
+                        { Email: { contains: search } },
+                        { Phone: { contains: search } },
+                        { Country: { contains: search } },
+                        { City: { contains: search } },
+                        { StateProvince: { contains: search } },
+                        { ZipPostalCode: { contains: search } },
+                        { site_account: { Company: { contains: search } } } // 🔥 Tambahkan pencarian berdasarkan Company
+                    ]
+                }
+                : undefined,
+            skip: skip,
+            take: limit,
+            orderBy: { FirstName: "asc" },
+            include: {
+                site_account: {
+                    select: { Company: true } // 🔥 Ambil hanya field Company dari site_account
+                }
+            }
+        });
+        
+
+        return NextResponse.json({
             success: true,
-            message: "List Data Contact Information",
-            data: contact_information,
-        },
-        {
-            status:200,
-        }
-    );
+            message: "List Data Contacts Information",
+            data: contact_information.map(contact => ({
+                ...contact,
+                Company: contact.site_account?.Company || "No Company" // Tambahkan Company di level utama
+            })),
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: page
+        });
+        
+    } catch (error) {
+        console.error("🔥 ERROR in GET API:", error);
+
+        return NextResponse.json({
+            success: false,
+            message: "Failed to fetch data",
+            error: error.message
+        }, { status: 500 });
+    }
 }
 
 export async function POST(request) {
