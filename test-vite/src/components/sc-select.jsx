@@ -132,6 +132,22 @@ import {
     )
   }
 
+  export function SelectBarContact4({ id, onChange }) {
+    return (
+      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
+        <SelectTrigger className="w-[150px] border-black">
+          <SelectValue placeholder="Select Salutation"/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Mr. ">Mr. </SelectItem>
+            <SelectItem value="Mrs. ">Mrs. </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
+
   export function SelectBarRelated() {
     return (
       <Select>

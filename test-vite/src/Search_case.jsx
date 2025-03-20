@@ -1,13 +1,7 @@
 import { React, useState, useEffect } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
-import { InfoSide } from './components/info-sidebar'
-import { 
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarTrigger,
-} from './components/ui/sidebar' 
+
 
 
 //importing API
@@ -30,29 +24,7 @@ import {
   Plus,
 } from "lucide-react"
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-
 import {
   Tabs,
   TabsContent,
@@ -60,53 +32,26 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-import { DialogCloseButton, DialogCompanyBtn } from './components/assets-modal'
+import { DialogCloseButton } from './components/assets-modal'
 import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
-import { BtnModal, BtnModalContact, BtnModalAsset } from './components/sc-modal'
-import { TableContact, TableCompany, TableAsset } from './components/sc-table'
+import { TableCompany, TableContact, TableAsset } from './components/sc-table'
+import { BtnModal } from './components/sc-modal'
 
 const Search_case = () => {
 
   //create search state
-  const [search, setSearch] = useState({
-    Email: "",
-    SerialNumber: "",
-    Country: "",
-    Company: "",
-    ZipPostalCode: "",
-    City: "",
-    Phone: "",
-    AssetTag: "",
-    ContractID: "",
-    TransactionType: "",
-    TransactionID: "",
-    Opsi: "",
-    LicenseKey: "",
-    PIN: ""
-  });
-
+  const [search, setSearch] = useState("");
   
-  //state modal
   const [isModalAssetOpen, setIsModalAssetOpen] = useState(false);
-  const [isModalCompanyOpen, setIsModalCompanyOpen] = useState(false);
-  
+
   const [activeTab, setActiveTab] = useState("search"); // Default active tab
-  
+
   const handleSearchClick = () => {
-    console.log("BeforeChange:", activeTab);
-    console.log("Search Data:", search);
-    console.log(search);
-    // setIsModalAssetOpen(true); // Open modal
-    if(search.SerialNumber !== ""){
-      setIsModalAssetOpen(true);
-      setActiveTab('ci'); // Switch tab to target
-    }else if(search.Company !== ""){
-      setIsModalCompanyOpen(true);
-      setActiveTab('ci'); // Switch tab to target
-    }
-    
+    console.log("BeforeChange" + activeTab)
+    setIsModalAssetOpen(true); // Open modal
+    setActiveTab('ci'); // Switch tab to target
   };
   useEffect(() => {
     console.log("Updated Active Tab:", activeTab);
@@ -114,37 +59,33 @@ const Search_case = () => {
   
   const handleInputChange = (e) =>{
     // if (search.trim() !== "") { 
-      const { id, value } = e.target; // Get input field ID and value
-      setSearch((prev) => ({
-        ...prev,
-        [id]: value, // Update the corresponding field
-      }));
-      console.log(`Updated searchData:`, search);
-      // }
-      // console.log(search)
-      
-    }
-    
-    //creating Asset Data
-    const [assets, setAssets] = useState([]);
-    const [contacts, setContacts] = useState([]);
-    const [siteAccounts, setSiteAccounts] = useState([]);
-    
-    
-    //define method
-    const fetchDataAssets = async () => {
-      
-      //fetch data from API with Axios
-      await ApiCustomer.get('/api/asset-information')
-      .then(response => {
-        // console.log("Asset");
-        // console.log(response.data.data)
-        //assign response data to state "asset"
-        setAssets(response.data.data);
-      })
-      
-    }
-    
+      const searchQuery = e.target.value;
+      setSearch(searchQuery);
+      console.log("search" + search)
+    // }
+    console.log(search)
+  }
+
+  //creating Asset Data
+  const [assets, setAssets] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [siteAccounts, setSiteAccounts] = useState([]);
+  
+  
+  //define method
+  const fetchDataAssets = async () => {
+
+    //fetch data from API with Axios
+    await ApiCustomer.get('/api/asset-information')
+        .then(response => {
+            // console.log("Asset");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setAssets(response.data.data);
+          })
+          
+        }
+        
         const fetchDataContacts = async () => {
           //fetch data from API with Axios
           await ApiCustomer.get('/api/contact-information')
@@ -164,9 +105,9 @@ const Search_case = () => {
             // console.log(response.data.data)
             //assign response data to state "asset"
             setSiteAccounts(response.data.data);
-          })
-        }
-        
+        })
+  }
+
   //run hook useEffect
   useEffect(() => {
     //call method
@@ -174,60 +115,19 @@ const Search_case = () => {
     fetchDataContacts();
     fetchDataSiteAccounts();
   }, []);
-  
-  //resetData Search
-  useEffect(() => {
-    if (!isModalAssetOpen) {
-      setSearch({
-        Email: "",
-        SerialNumber: "",
-        Country: "",
-        Company: "",
-        ZipPostalCode: "",
-        City: "",
-        Phone: "",
-        AssetTag: "",
-        ContractID: "",
-        TransactionType: "",
-        TransactionID: "",
-        Opsi: "",
-        LicenseKey: "",
-        PIN: ""
-      });
-    }
-  }, [isModalAssetOpen]); // Runs whenever modal state changes
-  useEffect(() => {
-    if (!isModalCompanyOpen) {
-      setSearch({
-        Email: "",
-        SerialNumber: "",
-        Country: "",
-        Company: "",
-        ZipPostalCode: "",
-        City: "",
-        Phone: "",
-        AssetTag: "",
-        ContractID: "",
-        TransactionType: "",
-        TransactionID: "",
-        Opsi: "",
-        LicenseKey: "",
-        PIN: ""
-      });
-    }
-  }, [isModalCompanyOpen]); // Runs whenever modal state changes
 
   //filter item
+  
   // const filteredAssets = assets.filter((asset) =>
-    //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
+  //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
   //   asset.ProductName?.toLowerCase().includes(search.toLowerCase())
   // );
   // console.log("filtered Asset")
   // console.log(filteredAssets);
-  
-  
-  
-  
+
+
+
+
   //form section
   // section account
   //set Form Data
@@ -242,7 +142,7 @@ const Search_case = () => {
     Country: '',
     ZipPostalCode: ''
   })
-  
+
   //make handler
   const handlerInputSiteAccountChange = (e) => {
     const { id, value } = e.target
@@ -296,8 +196,8 @@ const Search_case = () => {
   };
   
   const handlerContactSubmit = async () => {
-    console.log("formDataContact");
     console.log(formDataContact);
+    console.log("formDataContact");
     try {
       const response = await ApiCustomer.post("/api/contact-information", formDataContact);
       console.log("Success:", response.data);
@@ -309,47 +209,13 @@ const Search_case = () => {
   };
 
   //handler table selected
-  const [selectedAsset, setSelectedAsset] = useState([]); // Store selected asset data
+  const [selectedAsset, setSelectedAsset] = useState(null); // Store selected asset data
 
   const handleSelectedAsset = (asset) => {
-    if (Array.isArray(asset)) {
-      setSelectedAsset(asset);
-      setSelectedSiteAccounts(asset[0]?.site_account || null); // ✅ Update affiliated company
-      setSelectedContact(asset[0]?.contact_information || null); // ✅ Update affiliated contact
-    } else if (asset) {
-      setSelectedAsset([asset]);
-      setSelectedSiteAccounts(asset.site_account || null);
-      setSelectedContact(asset.contact_information || null)
-    } else {
-      setSelectedAsset([]);
-      setSelectedSiteAccounts(null);
-      setSelectedContact(null);
-    }
-  };
-
-  useEffect(() => {
-    console.log("Updated selectedAsset:", selectedAsset);
-  }, [selectedAsset]); // Runs when `selectedAsset` updates
-  
-  
-
-  useEffect(() => {
-    console.log("Updated selectedAsset:", selectedAsset);
-  }, [selectedAsset]); // Runs when `selectedAsset` updates
-  
-
-  //handler site accunt
-  const [selectedSiteAccounts, setSelectedSiteAccounts] = useState([]);
-  
-  const handleSelectedSiteAccount = (company) => {
-    setSelectedSiteAccounts(company);
-    console.log("Company Selected:", selectedSiteAccounts);
+    console.log("Asset received in parent:", asset);
+    setSelectedAsset(asset);
   };
   
-
-  //todo : handler selected contact
-  const [selectedContact, setSelectedContact] = useState([]);
-
 
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
@@ -360,7 +226,9 @@ const Search_case = () => {
               <TabsTrigger value="search" className="cursor-pointer">Search</TabsTrigger>
               <TabsTrigger value="ci" className="cursor-pointer">Costumer Information</TabsTrigger>
             </div>
-
+            {/* <Button className="ml-50 cursor-pointer "><span></span>Customer Complaint</Button>
+            <Button className="cursor-pointer"><span></span>Customer Complaint Legal</Button> */}
+            {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
             <BtnModal></BtnModal>
           </TabsList>
 
@@ -369,60 +237,60 @@ const Search_case = () => {
             <Card className="drop-shadow-md">
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5"> 
-                  <Label htmlFor="Email">Email</Label>
-                  <Input id="Email" className="border-b-black p-1 "  />
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" className="border-b-black p-1 "  />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="SerialNumber">Serial Number</Label>
-                  <Input id="SerialNumber" onChange={handleInputChange} className="border-b-black p-1"/>
+                  <Label htmlFor="serialnumber">Serial Number</Label>
+                  <Input id="serialnumber" onChange={handleInputChange} className="border-b-black p-1"/>
                 </div>
                 <div className="space-y-0.5 flex flex-col">
                   <Label htmlFor="Country">Country</Label>
                   <SelectBar id="Country" onChange={handleInputChange}></SelectBar>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Company">Company</Label>
-                  <Input id="Company" className="border-b-black p-1"   onChange={handleInputChange} />
+                  <Label htmlFor="company">Company</Label>
+                  <Input id="company" className="border-b-black p-1"   />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="ZipPostalCode">Zip/Postal</Label>
-                  <Input id="ZipPostalCode" className="border-b-black p-1"  />
+                  <Label htmlFor="zippostal">Zip/Postal</Label>
+                  <Input id="zippostal" className="border-b-black p-1"  />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="City">City</Label>
-                  <Input id="City" className="border-b-black p-1"  />
+                  <Label htmlFor="city">City</Label>
+                  <Input id="city" className="border-b-black p-1"  />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Phone">Phone</Label>
-                  <Input id="Phone" className="border-b-black p-1"   />
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input id="phone" className="border-b-black p-1"   />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="AssetTag">Asset Tag</Label>
-                  <Input id="AssetTag" className="border-b-black p-1" />
+                  <Label htmlFor="assettag">Asset Tag</Label>
+                  <Input id="assettag" className="border-b-black p-1" />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="ContractID">Contrack Id</Label>
-                  <Input id="ContractID" className="border-b-black p-1"  />
+                  <Label htmlFor="contrackid">Contrack Id</Label>
+                  <Input id="contrackid" className="border-b-black p-1"  />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="TransactionType">Transaction Type</Label>
-                  <Input id="TransactionType" className="border-b-black p-1"  />
+                  <Label htmlFor="transactiontype">Transaction Type</Label>
+                  <Input id="transactiontype" className="border-b-black p-1"  />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="TransactiontID">Transaction Id</Label>
-                  <Input id="TransactiontID" className="border-b-black p-1" />
+                  <Label htmlFor="transactiontid">Transaction Id</Label>
+                  <Input id="transactiontid" className="border-b-black p-1" />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Opsi">Opsi</Label>
-                  <Input id="Opsi" className="border-b-black p-1" />
+                  <Label htmlFor="opsi">Opsi</Label>
+                  <Input id="opsi" className="border-b-black p-1" />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="LicenseKey">Lisense key</Label>
-                  <Input id="LicenseKey" className="border-b-black p-1"  />
+                  <Label htmlFor="lisensekey">Lisense key</Label>
+                  <Input id="lisensekey" className="border-b-black p-1"  />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="PIN">Pin</Label>
-                  <Input id="PIN" className="border-b-black p-1" />
+                  <Label htmlFor="pin">Pin</Label>
+                  <Input id="pin" className="border-b-black p-1" />
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
@@ -431,8 +299,8 @@ const Search_case = () => {
             </Card>
           </TabsContent>  
           
-          <TabsContent value="ci" className="flex flex-col gap-1">
-          <TabsList className="bg-white float-right mr-5 self-end">   
+          <TabsContent value="ci">
+          <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
               <DialogCloseButton 
                 isModalAssetOpen={isModalAssetOpen} 
@@ -441,26 +309,12 @@ const Search_case = () => {
                 setSearch={setSearch} 
                 onSelectAsset={handleSelectedAsset} 
               />
-              <DialogCompanyBtn 
-                isModalCompanyOpen={isModalCompanyOpen}
-                setIsModalCompanyOpen={setIsModalCompanyOpen}
-                search={search}
-                setSearch={setSearch}
-                onSelectCompany={handleSelectedSiteAccount}
-              />
           </TabsList>
           <div className='mb-5'>
             {/* TODO : Change this Variable Name */}
-            <TableCompany 
-              selectedAsset={selectedAsset} 
-              selectedCompany={selectedSiteAccounts} 
-              selectedContact={selectedContact}
-              setSelectedAsset={setSelectedAsset}
-              setSelectedSiteAccounts={setSelectedSiteAccounts}
-              setSelectedContact={setSelectedContact}
-            />
-            {/* <TableContact selectedAsset={selectedAsset} selectedCompany={selectedSiteAccounts} ></TableContact>
-            <TableAsset selectedAsset={selectedAsset} selectedCompany={selectedSiteAccounts} ></TableAsset> */}
+            <TableCompany selectedAsset={selectedAsset} />
+            <TableContact selectedAsset={selectedAsset}></TableContact>
+            <TableAsset selectedAsset={selectedAsset}></TableAsset>
           </div>
           </TabsContent>
 
@@ -479,14 +333,12 @@ const Search_case = () => {
                   Change your password here. After saving, you'll be logged out.
                 </CardDescription>
               </CardHeader> */}
-           
+              <CardHeader>
+                <CardTitle className="flex justify-end">
                   
-                <CardHeader className="flex-row justify-between">
-              <CardTitle>
+                </CardTitle>
+                <CardTitle >
                   Basic Information
-                </CardTitle>  
-                <CardTitle>
-                  Clear All
                 </CardTitle>
               </CardHeader>
               
@@ -530,7 +382,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <SelectBar onChange={handlerInputContactChange}></SelectBar>
+                  <SelectBar id="Country" onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
@@ -553,10 +405,10 @@ const Search_case = () => {
             <Card className="drop-shadow-md">
               <CardHeader className="flex-row justify-between">
               <CardTitle>
-               Basic Information
+               Basic Informationdsada
                 </CardTitle>  
                 <CardTitle>
-                  Clear All
+                  Basic Informationdad
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-5 grid-cols-5">
@@ -596,7 +448,7 @@ const Search_case = () => {
                   <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="WorkExtension">Work EXTN</Label>
+                  <Label htmlFor="WorkExtension">EXTN</Label>
                   <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
@@ -604,7 +456,7 @@ const Search_case = () => {
                   <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="OtherExtension"> Other EXTN</Label>
+                  <Label htmlFor="OtherExtension">EXTN</Label>
                   <Input id="OtherExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
@@ -634,12 +486,11 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <SelectBar id="Country" onChange={handlerInputContactChange}/>
+                  <SelectBar onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
                   <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
-
                 </div>
               </CardContent>
 

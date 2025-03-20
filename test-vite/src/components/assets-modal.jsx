@@ -94,14 +94,14 @@ export function DialogCloseButton({
   return (
     <Dialog open={isModalAssetOpen} onOpenChange={setIsModalAssetOpen}>
       <DialogTrigger asChild>
-        <Button
+        {/* <Button
           variant="outline"
           onClick={() => {
             setSearch("");
           }}
         >
           Assets
-        </Button>
+        </Button> */}
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl gap-y-10 shadow-white">
         <DialogHeader>
@@ -121,7 +121,7 @@ export function DialogCloseButton({
 
         <Table className="table-fixed border-spacing-0 mx-auto">
           <TableHeader>
-            <TableRow className="text-xl bg-blue-200">
+            <TableRow className="text-md bg-blue-200">
               {/* <TableHead></TableHead> */}
               <TableHead>Assets</TableHead>
               <TableHead>Serial Number</TableHead>
@@ -312,9 +312,9 @@ export function DialogCompanyBtn({
     }, [selectedSiteAccounts]); // Runs when `selectedSiteAccounts` updates
   return (
     <Dialog open={isModalCompanyOpen} onOpenChange={setIsModalCompanyOpen}>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button variant="outline">Companny</Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-4xl gap-y-10 shadow-white">
         <DialogHeader>
           <DialogTitle className="mb-5">Companny</DialogTitle>
@@ -337,8 +337,8 @@ export function DialogCompanyBtn({
                     <TableHead>Province</TableHead>
                     <TableHead>Country</TableHead>
                     <TableHead>Zip</TableHead>
-                    <TableHead>Opsi</TableHead>
                     <TableHead>Source</TableHead>
+                    {/* <TableHead>Opsi</TableHead> */}
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -353,13 +353,14 @@ export function DialogCompanyBtn({
                           : ""
                       }`}
                     >
-                      <TableCell>{company.Company}</TableCell>
+                      <TableCell className={'font-medium whitespace-break-spaces'}>{company.Company}</TableCell>
                       <TableCell>{company.AddressLine1}</TableCell>
                       <TableCell>{company.City}</TableCell>
                       <TableCell>{company.StateProvince}</TableCell>
                       <TableCell>{company.Country}</TableCell>
                       <TableCell>{company.ZipPostalCode}</TableCell>
                       <TableCell>{company.Source || "-"}</TableCell>
+                      <TableCell>{company.Opsi || "-"}</TableCell>
                     </TableRow>
                   ))
                 ) : filteredSiteAccount.length > 0 ? (
@@ -373,7 +374,7 @@ export function DialogCompanyBtn({
                           : ""
                       }`}
                     >
-                      <TableCell>{company.Company}</TableCell>
+                      <TableCell className={'font-medium whitespace-break-spaces'}>{company.Company}</TableCell>
                       <TableCell>{company.AddressLine1}</TableCell>
                       <TableCell>{company.City}</TableCell>
                       <TableCell>{company.StateProvince}</TableCell>
@@ -393,7 +394,7 @@ export function DialogCompanyBtn({
                           : ""
                       }`}
                     >
-                      <TableCell>{company.Company}</TableCell>
+                      <TableCell className={'font-medium whitespace-break-spaces'}>{company.Company}</TableCell>
                       <TableCell>{company.AddressLine1}</TableCell>
                       <TableCell>{company.City}</TableCell>
                       <TableCell>{company.StateProvince}</TableCell>
