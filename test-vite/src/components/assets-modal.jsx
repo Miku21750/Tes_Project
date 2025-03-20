@@ -252,9 +252,10 @@ export function DialogCompanyBtn({
     const [filteredSiteAccount, setFilteredSiteAccount] = useState([]);
     useEffect(() => {
       if (search.Company?.trim()) {
+        const lowerSearch = search.Company.toLowerCase().trim();
         setFilteredSiteAccount(
-          siteAccounts.filter((company) =>
-            company.Company?.toLowerCase().trim() === search.Company.toLowerCase().trim()
+          siteAccounts.filter(company =>
+            company.Company?.toLowerCase().includes(lowerSearch)
           )
         );
       } else {

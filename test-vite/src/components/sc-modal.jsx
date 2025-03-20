@@ -175,7 +175,7 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
           New Contacts
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[820px] h-150 bg-white">
+      <DialogContent className="sm:max-w-[1000px] h-150 bg-white">
         <DialogHeader>
           <div className="flex justify-between">
             <DialogTitle className="text-xl flex gap-2"><PhoneCall></PhoneCall>Contact Information</DialogTitle>
@@ -200,15 +200,11 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
           </div>
           <div className="space-y-0.5">
             <Label htmlFor="FirstName">First Name</Label>
-            <Input id="FirstName" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="FirstName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 ">
             <Label htmlFor="LastName">Last Name</Label>
-            <Input id="LastName" type="text" className="border-b-black p-1 w-50 text-sm" onChange={handlerInputContactChange} />
-          </div>
-          <div className="space-y-0.4 ml-5">
-            <Label htmlFor="Email">Email</Label>
-            <Input id="Email" type="text" className="border-b-black p-1 w-50 text-sm" onChange={handlerInputContactChange}/>
+            <Input id="LastName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 col-span-2">
             <Label htmlFor="Email">Email</Label>
@@ -247,7 +243,7 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
           </div> 
           <div className="space-y-0.4 ">
             <Label htmlFor="OtherExtension"> Other EXTN</Label>
-            <Input id="OtherExtension" type="text" className="border-b-black p-1 w-50 text-sm" onChange={handlerInputContactChange} />
+            <Input id="OtherExtension" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Fax">FAX</Label>
@@ -279,11 +275,9 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <Input id="City" type="text" className="border-b-black p-1 w-51 text-sm" onChange={handlerInputContactChange} />
+            <Input id="City" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
-            <Label htmlFor="ZipPostalCode" className="mt-0.5">Zip/Postal Code</Label>
-            <Input id="ZipPostalCode" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>

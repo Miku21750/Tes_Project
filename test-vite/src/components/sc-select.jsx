@@ -13,7 +13,7 @@ import {
   export function SelectBar({ id, onChange }) {
     return (
       <Select onValueChange={(value) => onChange({ target: { id, value}})}>
-        <SelectTrigger className="w-[full] border-black">
+        <SelectTrigger className="w-full border-black">
           <SelectValue placeholder="Select a Country"/>
         </SelectTrigger>
         <SelectContent>
