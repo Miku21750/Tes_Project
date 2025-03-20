@@ -147,3 +147,19 @@ import {
       </Select>
     )
   }
+
+  export function SelectBarRelated() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[90px] mt-0.5 h-7 font-semibold rounded-r-2xl border-none">Related
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Item">Item</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
