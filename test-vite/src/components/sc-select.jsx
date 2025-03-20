@@ -32,7 +32,7 @@ import {
   export function SelectBar1({ id, onChange }) {
     return (
       <Select onValueChange={(value) => onChange({ target: { id, value}})}>
-        <SelectTrigger className="w-[full] border-black">
+        <SelectTrigger className="w-full border-black">
           <SelectValue placeholder="Select Salutation"/>
         </SelectTrigger>
         <SelectContent>
@@ -48,7 +48,7 @@ import {
   export function SelectBar2({ id, onChange }) {
     return (
       <Select onValueChange={(value) => onChange({ target: { id, value}})}>
-        <SelectTrigger className="w-[full]  border-black">
+        <SelectTrigger className="w-full  border-black">
           <SelectValue placeholder="Select Prefered Language"/>
         </SelectTrigger>
         <SelectContent>
@@ -78,7 +78,6 @@ import {
       </Select>
     )
   }
-
 
   export function SelectBarContact() {
     return (
