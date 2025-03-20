@@ -35,7 +35,7 @@ model caseinformation {
   CaseStatus          String?              @db.VarChar(50)
   CasePriority        String?              @db.VarChar(50)
   CustomerSeverity    String?              @db.VarChar(50)
-  CreatedOn           DateTime?            @default(now()) @db.DateTime(0)
+  CreatedOn           DateTime             @default(now()) @db.Timestamp(0)
   CaseClosedDate      DateTime?            @db.DateTime(0)
   CaseNote            String?              @db.Text
   SymptomCode         String?              @db.VarChar(50)
@@ -60,7 +60,7 @@ model casenotes {
   VisibleExternally Boolean?         @default(false)
   MinutesSpent      Int?
   Note              String?          @db.Text
-  CreatedOn         DateTime?        @default(now()) @db.DateTime(0)
+  CreatedOn         DateTime         @default(now()) @db.Timestamp(0)
   caseinformation   caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "casenotes_ibfk_1")
 
   @@index([CaseID], map: "CaseID")
@@ -100,7 +100,7 @@ model materialorder {
   OrderNumber            String?                  @db.VarChar(100)
   OrderStatus            String?                  @db.VarChar(50)
   OrderType              String?                  @db.VarChar(50)
-  CreatedOn              DateTime?                @default(now()) @db.DateTime(0)
+  CreatedOn              DateTime                 @default(now()) @db.Timestamp(0)
   SalesOrderNumber       String?                  @db.VarChar(100)
   RMANumber              String?                  @db.VarChar(100)
   ReadyForClosureDate    DateTime?                @db.DateTime(0)
@@ -192,7 +192,7 @@ model workorder {
   PreferredTime    DateTime?        @db.Time(0)
   ShipmentCountry  String?          @db.VarChar(50)
   ShipmentState    String?          @db.VarChar(50)
-  CreatedOn        DateTime?        @default(now()) @db.DateTime(0)
+  CreatedOn        DateTime         @default(now()) @db.Timestamp(0)
   Owner            String?          @db.VarChar(100)
   materialorder    materialorder[]
   caseinformation  caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "workorder_ibfk_1")
