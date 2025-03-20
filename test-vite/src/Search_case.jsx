@@ -529,7 +529,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <SelectBar></SelectBar>
+                  <SelectBar id="Country" onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>

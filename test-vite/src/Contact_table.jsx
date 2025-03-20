@@ -1,57 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import ApiCustomer from "./api";
+import { AppleIcon } from "lucide-react";
+
+import { Button } from "./components/ui/button";
+import { BtnModalAsset, BtnModalContact,BtnModal } from "./components/sc-modal";
 
 export const Contact_table = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
   
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 1; // Jumlah data per halaman
-  const [contacts, setContacts] = useState([
-    {
-      ContactID: 1,
-      SiteAccountID: 101,
-      Salutation: "Mr.",
-      FirstName: "John",
-      LastName: "Doe",
-      Email: "john.doe@example.com",
-      PreferredLanguage: "English",
-      Phone: "+123456789",
-      Mobile: "+987654321",
-      WorkPhone: "+1122334455",
-      WorkExtension: "123",
-      OtherPhone: "+5544332211",
-      OtherExtension: "456",
-      Fax: "+6677889900",
-      AddressLine1: "123 Main St",
-      AddressLine2: "Apt 4B",
-      City: "New York",
-      StateProvince: "NY",
-      Country: "USA",
-      ZipPostalCode: "10001",
-    },
-    {
-      ContactID: 2,
-      SiteAccountID: 102,
-      Salutation: "Ms.",
-      FirstName: "Jane",
-      LastName: "Smith",
-      Email: "jane.smith@example.com",
-      PreferredLanguage: "French",
-      Phone: "+2233445566",
-      Mobile: "+7788990011",
-      WorkPhone: "+6655443322",
-      WorkExtension: "789",
-      OtherPhone: "+9988776655",
-      OtherExtension: "321",
-      Fax: "+5566778899",
-      AddressLine1: "456 Oak St",
-      AddressLine2: "Suite 300",
-      City: "Los Angeles",
-      StateProvince: "CA",
-      Country: "USA",
-      ZipPostalCode: "90012",
-    },
-  ]);
+    const itemsPerPage = 5; // Jumlah data per halaman
+    const [contacts, setContacts] = useState([]); //set state contact
 
+    //fetch data from API
+    const fetchDataContacts = async () => {
+      try {
+        const response = await ApiCustomer.get("/api/contact-information");
+        if(response.data.success) {
+          setContacts(response.data.data)
+        }
+      } catch (err) {
+        console.error("Error fetching Contact:", err);
+      }
+    }
+
+    // Load data when component mounts
+      useEffect(() => {
+        fetchDataContacts();
+      }, []);
   const filteredContacts = contacts.filter(contact =>
     Object.values(contact).some(value => 
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,6 +44,10 @@ export const Contact_table = () => {
     currentPage * itemsPerPage
   );
 
+  //modal edit
+  const openEditModal = (contact) => {
+    setFormDataContact(contact);
+  };
   
 
   return (
@@ -104,10 +84,11 @@ export const Contact_table = () => {
               <th className="border p-2">State/Province</th>
               <th className="border p-2">Country</th>
               <th className="border p-2">Zip/Postal Code</th>
+              <th className="border p-2">Action</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((contact) => (
+            {currentData.length > 0 ? (currentData.map((contact) => (
               <tr key={contact.ContactID} className="hover:bg-gray-100 text-center">
                 <td className="border p-2">{contact.ContactID}</td>
                 <td className="border p-2">{contact.SiteAccountID}</td>
@@ -129,13 +110,24 @@ export const Contact_table = () => {
                 <td className="border p-2">{contact.StateProvince}</td>
                 <td className="border p-2">{contact.Country}</td>
                 <td className="border p-2">{contact.ZipPostalCode}</td>
+                {/* Edit */}
+                <td className="border p-2">
+                  <Button variant="secondary" className="bg-white w-30 drop-shadow-md border-1 cursor-pointer text-xl" onClick={openEditModal}>Save</Button>
+                </td>
               </tr>
-            ))}
+            ))
+          ) : (
+            <tr>
+                <td colSpan="10" className="text-center p-4">
+                  No Contacts found.
+                </td>
+              </tr>
+          )}
           </tbody>
         </table>
-        {filteredContacts.length === 0 && (
+        {/* {filteredContacts.length === 0 && (
           <p className="text-center mt-4 text-gray-500">No contacts found.</p>
-        )}
+        )} */}
       </div>
 
       {/* Pagination */}

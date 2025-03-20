@@ -1,19 +1,40 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import ApiCustomer from "./api";
+
 
 export const Assets_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
 
-  const assetsinfo = [
-    { AssetID: 201, SerialNumber: "SN-123456", ProductName: "Laptop Pro X", ProductNumber: "LPX-001", ProductLine: "Electronics", SiteAccountID: 101 },
-    { AssetID: 202, SerialNumber: "SN-789012", ProductName: "Server Ultra", ProductNumber: "SVU-500", ProductLine: "Enterprise Hardware", SiteAccountID: 102 },
-    { AssetID: 203, SerialNumber: "SN-345678", ProductName: "Smartphone Elite", ProductNumber: "SPE-200", ProductLine: "Mobile Devices", SiteAccountID: 103 },
-    { AssetID: 204, SerialNumber: "SN-901234", ProductName: "Industrial Printer", ProductNumber: "IPR-800", ProductLine: "Printing Solutions", SiteAccountID: 104 },
-    { AssetID: 205, SerialNumber: "SN-567890", ProductName: "Wireless Router", ProductNumber: "WR-300", ProductLine: "Networking", SiteAccountID: 105 },
-  ];
+  // const assetsinfo = [
+  //   { AssetID: 201, SerialNumber: "SN-123456", ProductName: "Laptop Pro X", ProductNumber: "LPX-001", ProductLine: "Electronics", SiteAccountID: 101 },
+  //   { AssetID: 202, SerialNumber: "SN-789012", ProductName: "Server Ultra", ProductNumber: "SVU-500", ProductLine: "Enterprise Hardware", SiteAccountID: 102 },
+  //   { AssetID: 203, SerialNumber: "SN-345678", ProductName: "Smartphone Elite", ProductNumber: "SPE-200", ProductLine: "Mobile Devices", SiteAccountID: 103 },
+  //   { AssetID: 204, SerialNumber: "SN-901234", ProductName: "Industrial Printer", ProductNumber: "IPR-800", ProductLine: "Printing Solutions", SiteAccountID: 104 },
+  //   { AssetID: 205, SerialNumber: "SN-567890", ProductName: "Wireless Router", ProductNumber: "WR-300", ProductLine: "Networking", SiteAccountID: 105 },
+  // ];
+  const [assetsInfo, setAssetsInfo] = useState([]);
 
-  const filteredAssets = assetsinfo.filter(asset =>
+  //fetch data from API
+  const fetchDataAssets = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/asset-information");
+      if (response.data.success) {
+        setAssetsInfo(response.data.data); // ✅ Store in state
+      }
+    } catch (error) {
+      console.error("Error fetching site accounts:", error);
+    }
+  }
+
+  //loadData
+  useEffect(() => {
+    fetchDataAssets();
+  })
+
+
+  const filteredAssets = assetsInfo.filter(asset =>
     Object.values(asset).some(value => 
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -47,7 +68,7 @@ export const Assets_table = () => {
             </tr>
           </thead>
           <tbody>
-            {displayedAssets.map((asset) => (
+            {displayedAssets.length > 0 ? (displayedAssets.map((asset) => (
               <tr key={asset.AssetID} className="hover:bg-gray-100 text-center">
                 <td className="border p-2">{asset.AssetID}</td>
                 <td className="border p-2">{asset.SerialNumber}</td>
@@ -56,7 +77,14 @@ export const Assets_table = () => {
                 <td className="border p-2">{asset.ProductLine}</td>
                 <td className="border p-2">{asset.SiteAccountID}</td>
               </tr>
-            ))}
+            ))
+          ) : (
+            <tr>
+                <td colSpan="10" className="text-center p-4">
+                  No Assets found.
+                </td>
+              </tr>
+          )}
           </tbody>
         </table>
       </div>

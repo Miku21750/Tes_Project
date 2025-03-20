@@ -1,81 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import { BMCCompany } from "./components/sc-modal";
+import ApiCustomer from "./api";
+
+import { BtnModalContact, BtnModalAsset, BtnModal } from "@/components/sc-modal"
+import { Button } from "./components/ui/button";
 
 export const Company_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 1; // Jumlah data per halaman
+  const itemsPerPage = 5; // Jumlah data per halaman
+  const [siteAccounts, setSiteAccounts] = useState([]); //set state for SiteAccount
 
-  const companies = [
-    {
-      SiteAccountID: 101,
-      Company: "TechCorp",
-      Email: "contact@techcorp.com",
-      PrimaryPhone: "+1-800-555-1234",
-      AddressLine1: "123 Tech Street",
-      AddressLine2: "Suite 500",
-      City: "New York",
-      StateProvince: "NY",
-      Country: "USA",
-      ZipPostalCode: "10001",
-    },
-    {
-      SiteAccountID: 102,
-      Company: "FinBank",
-      Email: "support@finbank.com",
-      PrimaryPhone: "+44-20-7946-0123",
-      AddressLine1: "456 Finance Avenue",
-      AddressLine2: "",
-      City: "London",
-      StateProvince: "London",
-      Country: "UK",
-      ZipPostalCode: "EC1A 1BB",
-    },
-    {
-      SiteAccountID: 103,
-      Company: "HealthPlus",
-      Email: "info@healthplus.co.jp",
-      PrimaryPhone: "+81-3-1234-5678",
-      AddressLine1: "789 Wellness Road",
-      AddressLine2: "Building A",
-      City: "Tokyo",
-      StateProvince: "Tokyo",
-      Country: "Japan",
-      ZipPostalCode: "100-0001",
-    },
-    {
-      SiteAccountID: 104,
-      Company: "EduSmart",
-      Email: "hello@edusmart.edu",
-      PrimaryPhone: "+61-2-9876-5432",
-      AddressLine1: "12 Learning Lane",
-      AddressLine2: "Level 3",
-      City: "Sydney",
-      StateProvince: "NSW",
-      Country: "Australia",
-      ZipPostalCode: "2000",
-    },
-    {
-      SiteAccountID: 105,
-      Company: "GreenEnergy",
-      Email: "energy@green.com",
-      PrimaryPhone: "+49-30-123456",
-      AddressLine1: "99 Eco Blvd",
-      AddressLine2: "",
-      City: "Berlin",
-      StateProvince: "Berlin",
-      Country: "Germany",
-      ZipPostalCode: "10115",
-    },
-  ];
+  // const companies = [
+  //   {
+  //     SiteAccountID: 101,
+  //     Company: "TechCorp",
+  //     Email: "contact@techcorp.com",
+  //     PrimaryPhone: "+1-800-555-1234",
+  //     AddressLine1: "123 Tech Street",
+  //     AddressLine2: "Suite 500",
+  //     City: "New York",
+  //     StateProvince: "NY",
+  //     Country: "USA",
+  //     ZipPostalCode: "10001",
+  //   }
+  // ];
+
+  //fetch data from API
+  const fetchDataSiteAccounts = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/site_account");
+      if (response.data.success) {
+        setSiteAccounts(response.data.data); // ✅ Store in state
+      }
+    } catch (error) {
+      console.error("Error fetching site accounts:", error);
+    }
+  };
+
+  // Load data when component mounts
+  useEffect(() => {
+    fetchDataSiteAccounts();
+  }, []);
 
   // Filter data berdasarkan pencarian
-  const filteredCompanies = companies.filter(
+  const filteredCompanies = siteAccounts.filter(
     (company) =>
-      company.Company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.Email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.City.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.Country.toLowerCase().includes(searchTerm.toLowerCase())
+      company.Company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.Email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.City?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.Country?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Hitung total halaman
@@ -120,7 +94,7 @@ export const Company_table = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((company) => (
+            {currentData.length > 0 ? (currentData.map((company) => (
               <tr key={company.SiteAccountID} className="hover:bg-gray-100">
                 <td className="border p-2 text-center">{company.SiteAccountID}</td>
                 <td className="border p-2">{company.Company}</td>
@@ -133,7 +107,14 @@ export const Company_table = () => {
                 <td className="border p-2">{company.Country}</td>
                 <td className="border p-2">{company.ZipPostalCode}</td>
               </tr>
-            ))}
+            ))
+          ) : (
+            <tr>
+                <td colSpan="10" className="text-center p-4">
+                  No site accounts found.
+                </td>
+              </tr>
+          )}
           </tbody>
         </table>
       </div>

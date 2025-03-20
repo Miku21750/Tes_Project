@@ -192,7 +192,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavProjects projects={data.projects} />
         <NavRecent recent={data.recent}/>
-        <NavPinned pinned={data.pinned}></NavPinned>
+        <NavPinned pinned={data.pinned}/>
         <NavMywork mywork={data.mywork}/>
         <NavMain items={data.navMain} />
       </SidebarContent>
