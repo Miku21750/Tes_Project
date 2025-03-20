@@ -11,6 +11,9 @@ export const Company_table = () => {
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
 
+  //set modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // Fungsi untuk mengambil data dari API
   const fetchCompanies = async () => {
     setLoading(true);
@@ -81,7 +84,12 @@ export const Company_table = () => {
                   <td className="border p-2">{company.Country}</td>
                   <td className="border p-2 flex space-x-2">
                     <CompanyEdit siteAccountId={company.SiteAccountID} onUpdate={fetchCompanies}/>
-                    <CompanyDelete siteAccountId={company.SiteAccountID}/>
+                    <CompanyDelete 
+                      siteAccountId={company.SiteAccountID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchCompanies}
+                    />
                   </td>
                 </tr>
               ))

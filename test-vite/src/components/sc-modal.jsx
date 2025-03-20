@@ -663,12 +663,33 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
   );
 }
 
-export function CompanyDelete ({ siteAccountId }) {
+export function CompanyDelete ({ siteAccountId, isModalOpen, setIsModalOpen, onUpdate }) {
+    //set modal
   const handleDelete = async () => {
     try {
-      await ApiCustomer.delete(`/api/site_account/${siteAccountId}`);
+      const response = await ApiCustomer.delete(`/api/site_account/${siteAccountId}`);
+      
+      console.log("Server Response:", response.data);
+      if (response.status === 409 || response.data.success === false) {
+        // 🚨 Restriction triggered - Show alert message
+        alert(response.data.message || "Cannot delete this company due to restrictions.");
+        return;
+      }
+      
+      alert("Site Account deleted successfully! ✅");
+      // ✅ Close the modal if it's open
+      setIsModalOpen(false);
+      // ✅ Refresh the table by calling `onUpdate()`
+      if (onUpdate) {
+        onUpdate();
+      }
     } catch (error) {
-      console.error("Error deleting asset:", error);
+      if (error.response && error.response.status === 409) {
+        // 🚨 Handle 409 Conflict error from backend
+        alert(error.response.data.message || "Cannot delete! This company has related Contacts or Assets.");
+      } else {
+        alert("Failed to delete site account. Please try again.");
+      }
     }
   };
 

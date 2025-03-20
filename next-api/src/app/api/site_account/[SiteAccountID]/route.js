@@ -93,16 +93,42 @@ export async function PATCH(request, { params }) {
 }
 
 // DELETE DATA
-export async function DELETE(request, { params }) {
+export async function DELETE( request) {
     try {
-        const siteAccountID = parseInt(params.SiteAccountID);
+        // ✅ Extract SiteAccountID from URL
+        const url = new URL(request.url);
+        const siteAccountID = parseInt(url.pathname.split("/").pop(), 10); // Get last part of URL
+
         if (isNaN(siteAccountID)) {
             return NextResponse.json(
                 { success: false, message: "Invalid SiteAccountID" },
                 { status: 400 }
             );
         }
+        
+        // ✅ Check if related contacts exist
+        const contactCount = await prisma.contact_information.count({
+            where: { SiteAccountID: siteAccountID },
+        });
 
+        // ✅ Check if related assets exist
+        const assetCount = await prisma.asset_information.count({
+            where: { SiteAccountID: siteAccountID },
+        });
+
+        if (contactCount > 0 || assetCount > 0) {
+            return NextResponse.json(
+                { 
+                    success: false, 
+                    message: "Cannot delete! This company has related Contacts or Assets.",
+                    contacts: contactCount,
+                    assets: assetCount,
+                },
+                { status: 409 } // 409 Conflict status
+            );
+        }
+
+        // ✅ If no related records, proceed with deletion
         await prisma.site_account.delete({
             where: { SiteAccountID: siteAccountID },
         });
