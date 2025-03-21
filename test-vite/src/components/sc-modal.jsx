@@ -272,7 +272,7 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
 
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="text-md">Address</DialogTitle>
-          <Button className="bg-white text-gray-400  "><Copy></Copy>Same in Account Adress </Button>
+          <Button className="bg-white text-gray-400   "><Copy></Copy>Same in Account Adress </Button>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-3">

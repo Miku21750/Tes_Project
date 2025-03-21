@@ -472,7 +472,7 @@ const Search_case = () => {
                   <Label htmlFor="StateProvince">State/Province</Label>
                   <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.StateProvince}/>
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-0.5 flex flex-col">
                   <Label htmlFor="current">Country</Label>
                   <SelectBar id="Country" onChange={handlerInputContactChange}/>
                 </div>
@@ -576,7 +576,7 @@ const Search_case = () => {
                   <Label htmlFor="StateProvince">State/Province</Label>
                   <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-0.5 flex flex-col">
                   <Label htmlFor="current">Country</Label>
                   <SelectBar id="Country" onChange={handlerInputContactChange}/>
                 </div>
