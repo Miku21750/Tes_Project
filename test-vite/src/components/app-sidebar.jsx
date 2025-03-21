@@ -80,6 +80,10 @@ const data = {
           title: "Contact",
           url: "/master/Contact_table",
         },
+        {
+          title: "Case",
+          url: "/master/Case_table",
+        },
       ],
     },
     {

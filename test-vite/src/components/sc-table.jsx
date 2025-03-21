@@ -100,9 +100,9 @@ export function TableCompany({
   ? selectedAsset.map((asset) => ({
       AssetID: asset.AssetID,
       SerialNumber: asset.SerialNumber,
-      ProductName: asset.ProductName,
+      ProductName: asset.product_information?.ProductName,
       ProductNumber: asset.ProductNumber,
-      ProductLine: asset.ProductLine,
+      ProductLine: asset.product_information?.ProductLine,
       isparent: "-",
       parentasset: "-",
       source: "CRM",
@@ -135,6 +135,7 @@ export function TableCompany({
   
           // ✅ Ensure correct state updates
           if (result.data.assets.length > 0) {
+            console.log("Fetched assets:", result.data.assets);
             setSelectedAsset(result.data.assets);
           } else {
             setSelectedAsset([]);
@@ -311,9 +312,9 @@ export function TableAsset({ selectedAsset }) {
     {
       assetID : selectedAsset.AssetID,
       serialNumber : selectedAsset.SerialNumber,
-      productName : selectedAsset.ProductName,
+      productName : selectedAsset.product_information?.ProductName,
       productNumber : selectedAsset.ProductNumber,
-      productLine : selectedAsset.ProductLine,
+      productLine : selectedAsset.product_information?.ProductLine,
       // TODO : Search what tf is this mean
       isparent: "-",
       parentasset: "-",

@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -93,7 +95,16 @@ export function BtnModal() {
   );
 }
 
+/**
+ * TODO 
+ * VALIDATION WHERE INPUTED CONTACT ALREADY AVAILABLE
+ * CHECK EMAIL OR PHONE
+ */
+
 export function BtnModalContact({ selectedCompany, selectedContact, setSelectedContact }) {
+  //set modal state 
+  const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
+  
    const [formDataContact, setFormDataContact] = useState({
       Salutation: '',
       FirstName: '',
@@ -123,35 +134,6 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       setFormDataContact((prev) => ({ ...prev, [id]: value }));
     };
     
-    // Handle form submission
-  const handlerContactSubmit = async () => {
-    console.log("formDataContact", formDataContact);
-    try {
-      if (formDataContact.ContactID) {
-        // ✅ Update existing contact
-        await ApiCustomer.patch(`/api/contact-information/${formDataContact.ContactID}`, formDataContact);
-        alert("Contact updated successfully!");
-      } else {
-        // ✅ Add new contact
-        await ApiCustomer.post("/api/contact-information", formDataContact);
-        alert("Contact added successfully!");
-      }
-
-      // fetchContacts(); // ✅ Refresh contacts table
-
-       // ✅ Ensure selectedCompany is not null before fetching contacts
-    if (selectedCompany?.SiteAccountID) {
-      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
-      setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
-      console.log("Updated Selected Contacts:", updatedContacts);
-    }
-
-    } catch (error) {
-      console.error("Error adding contact:", error);
-    }
-  };
-
-  
   // Function to fetch updated contacts
   const fetchContacts = async (companyId) => {
     try {
@@ -164,6 +146,38 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       return [];
     }
   };
+  // Handle form submission
+  const handlerContactSubmit = async () => {
+    console.log("formDataContact", formDataContact);
+    try {
+      if (formDataContact.ContactID) {
+        // ✅ Update existing contact
+        await ApiCustomer.patch(`/api/contact-information/${formDataContact.ContactID}`, formDataContact);
+        setIsModalContactSearchInput(false)
+        alert("Contact updated successfully!");
+      } else {
+        // ✅ Add new contact
+        await ApiCustomer.post("/api/contact-information", formDataContact);
+        setIsModalContactSearchInput(false)
+        alert("Contact added successfully!");
+      }
+
+      // fetchContacts(); // ✅ Refresh contacts table
+
+       // ✅ Ensure selectedCompany is not null before fetching contacts
+    if (selectedCompany?.SiteAccountID) {
+      console.log("Selected Company :",selectedCompany);
+      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
+      setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
+      console.log("Updated Selected Contacts:", updatedContacts);
+    }
+
+    } catch (error) {
+      console.error("Error adding contact:", error);
+    }
+  };
+
+  
 
   // Edit function 
 
@@ -174,7 +188,7 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
 
 
   return (
-    <Dialog>
+    <Dialog open={isModalContactSearchInput} onOpenChange={setIsModalContactSearchInput}>
       <DialogTrigger asChild>
         <Button variant="outline" className="bg-white mt-0.5">
           New Contacts
@@ -311,6 +325,11 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
   );
 }
 
+
+/**
+ * TODO 
+ * MAKE ROUTE FOR PRODUCT
+ */
 export function BtnModalAsset() {
   //set asset
   const [assets, setAssets] = useState([])
@@ -338,7 +357,7 @@ export function BtnModalAsset() {
   const filteredAssets = searchAsset !== "" ? assets.filter(
     (asset) => 
       asset.SerialNumber?.toLowerCase().includes(searchAsset.toLowerCase()) || 
-      asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase()) || 
+      asset.product_information?.ProductName?.toLowerCase().includes(searchAsset.toLowerCase()) || 
       asset.ProductNumber?.toLowerCase().includes(searchAsset.toLowerCase())
   ) : [];
 
@@ -415,16 +434,16 @@ export function BtnModalAsset() {
             {filteredAssets.length > 0 ? (
               filteredAssets.map((asset) => (
                 <TableRow key={asset?.AssetID}>
-                <TableCell className="whitespace-break-spaces ">{asset?.ProductName}</TableCell>
-                <TableCell>{asset?.ProductNumber}</TableCell>
+                <TableCell className="whitespace-break-spaces ">{asset?.product_information?.ProductName}</TableCell>
+                <TableCell>{asset?.product_information?.ProductNumber}</TableCell>
                 <TableCell>{asset?.HWPorfitCenter ? asset?.HWPorfitCenter : '-' }</TableCell>
                 <TableCell>{asset?.contact_information !== null ? asset?.contact_information?.FirstName + ' ' + asset?.contact_information?.LastName : '-'   }</TableCell>
               </TableRow>
               ))
             ) : assets.length > 0 ? ( assets.map((asset) => (
               <TableRow key={asset?.AssetID}>
-                <TableCell className="whitespace-break-spaces ">{asset?.ProductName}</TableCell>
-                <TableCell>{asset?.ProductNumber}</TableCell>
+                <TableCell className="whitespace-break-spaces ">{asset?.product_information?.ProductName}</TableCell>
+                <TableCell>{asset?.product_information?.ProductNumber}</TableCell>
                 <TableCell>{asset?.HWPorfitCenter ? asset?.HWPorfitCenter : '-' }</TableCell>
                 <TableCell>{asset?.contact_information !== null ? asset?.contact_information?.FirstName + ' ' + asset?.contact_information?.LastName : '-'   }</TableCell>
               </TableRow>

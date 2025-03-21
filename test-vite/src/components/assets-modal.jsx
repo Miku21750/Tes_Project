@@ -82,12 +82,12 @@ export function DialogCloseButton({
   const filteredAssets = search.SerialNumber ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(search?.SerialNumber?.toLowerCase()) ||
-    asset.ProductName?.toLowerCase().includes(search?.SerialNumber?.toLowerCase())
+    asset.product_information?.ProductName?.toLowerCase().includes(search?.SerialNumber?.toLowerCase())
   ) : [];
   const filteredSearchAssets = searchAsset !== "" ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(searchAsset.toLowerCase()) ||
-    asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase())
+    asset.product_information?.ProductName?.toLowerCase().includes(searchAsset.toLowerCase())
   ) : [];
  
   
@@ -141,11 +141,11 @@ export function DialogCloseButton({
                   {/* <TableCell></TableCell> */}
                   <TableCell className="font-medium whitespace-break-spaces">
                     
-                    {asset.ProductName}
+                    {asset.product_information?.ProductName}
                   </TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
-                  <TableCell>{asset.ProductLine}</TableCell>
+                  <TableCell>{asset.product_information?.ProductLine}</TableCell>
                   <TableCell className="text-right">
                     {asset.site_account?.Company}
                   </TableCell>
@@ -161,11 +161,11 @@ export function DialogCloseButton({
                     
                   <TableCell className="font-medium whitespace-break-spaces">
                     
-                    {asset.ProductName}
+                    {asset.product_information?.ProductName}
                   </TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
-                  <TableCell>{asset.ProductLine}</TableCell>
+                  <TableCell>{asset.product_information?.ProductLine}</TableCell>
                   <TableCell className="text-right">
                     {asset.site_account?.Company}
                   </TableCell>
@@ -182,11 +182,11 @@ export function DialogCloseButton({
                   <input type="checkbox"/>
                   </TableCell>
                   <TableCell className="font-medium whitespace-break-spaces">
-                    {asset.ProductName}
+                    {asset.product_information?.ProductName}
                   </TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
-                  <TableCell>{asset.ProductLine}</TableCell>
+                  <TableCell>{asset.product_information?.ProductLine}</TableCell>
                   <TableCell className="text-right">
                     {asset.site_account?.Company}
                   </TableCell>
