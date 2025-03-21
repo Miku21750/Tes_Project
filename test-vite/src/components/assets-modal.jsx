@@ -178,9 +178,9 @@ export function DialogCloseButton({
                   className={`cursor-pointer hover:bg-gray-200 ${selectedAsset?.AssetID === asset.AssetID ? "bg-blue-300" : ""}`}
                   onClick={()=>handleSelectAsset(asset)}
                 >
-                  <TableCell>
+                  {/* <TableCell>
                   <input type="checkbox"/>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="font-medium whitespace-break-spaces">
                     {asset.ProductName}
                   </TableCell>
