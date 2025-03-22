@@ -1,42 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+import ApiCustomer from "./api";
 
 export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Jumlah data per halaman
-  const [casetable, setCaseTable] = useState([
-    {
-      CaseID: "51337",
-      CreatedOn: "2025-03-20",
-      CaseSubject: "ID/NBD/...",
-      CustomerAccount: "Bank Indonesia",
-      Primary: "Achnesia",
-      HW: "PIL001",
-      SerialNumber: "4CE310C...",
-      ProductNumber: "4NF92AV",
-      ProductName: "HP Z2 SE...",
-      CreatedName: "Muhammad Arif",
-      Owner: "Risa Martiana",
-      WorkGroup: "IDY_SB Ja...",
-    },
-    {
-      CaseID: "67890",
-      CreatedOn: "2025-03-19",
-      CaseSubject: "ID/NBD/...",
-      CustomerAccount: "PT.JAVA ABADI",
-      Primary: "Irma khainur",
-      HW: "P5U00",
-      SerialNumber: "1CZ9200",
-      ProductNumber: "4HF92AV",
-      ProductName: "HP ProDesk...",
-      CreatedName: "Kamisyah...",
-      Owner: "Kamisyah Ind...",
-      WorkGroup: "IDY_SB Ja...",
-    },
-  ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [caseData, setCaseData] = useState([]);
+  // const [casetable, setCaseTable] = useState([
+  //   {
+  //     CaseID: "51337",
+  //     CreatedOn: "2025-03-20",
+  //     CaseSubject: "ID/NBD/...",
+  //     CustomerAccount: "Bank Indonesia",
+  //     Primary: "Achnesia",
+  //     HW: "PIL001",
+  //     SerialNumber: "4CE310C...",
+  //     ProductNumber: "4NF92AV",
+  //     ProductName: "HP Z2 SE...",
+  //     CreatedName: "Muhammad Arif",
+  //     Owner: "Risa Martiana",
+  //     WorkGroup: "IDY_SB Ja...",
+  //   },
+  //   {
+  //     CaseID: "67890",
+  //     CreatedOn: "2025-03-19",
+  //     CaseSubject: "ID/NBD/...",
+  //     CustomerAccount: "PT.JAVA ABADI",
+  //     Primary: "Irma khainur",
+  //     HW: "P5U00",
+  //     SerialNumber: "1CZ9200",
+  //     ProductNumber: "4HF92AV",
+  //     ProductName: "HP ProDesk...",
+  //     CreatedName: "Kamisyah...",
+  //     Owner: "Kamisyah Ind...",
+  //     WorkGroup: "IDY_SB Ja...",
+  //   },
+  // ]);
+
+  const fetchCaseDataTable=async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/case-information");
+      if (response.data.success) {
+        setCaseData(response.data.data);
+      } else {
+        setError("Failed to fetch case data");
+      }
+    } catch (err) {
+      console.error("Error fetching case data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchCaseDataTable();
+  }, []);
 
   // Filter data berdasarkan pencarian
-  const filteredCaseTable = casetable.filter((item) =>
+  const filteredCaseTable = caseData.filter((item) =>
     Object.values(item).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -61,6 +89,13 @@ export const Case_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+
+      
+      {/* 🔹 Loading & Error Messages */}
+      {loading && <p>Loading cases...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>

@@ -38,6 +38,15 @@ export function TableCompany({
   setSelectedAsset,
   setSelectedSiteAccounts,
   setSelectedContact,
+
+  selectedAssetForCase,
+  setSelectedAssetForCase,
+  selectedContactForCase,
+  setSelectedContactForCase,
+  selectedCompanyForCase,
+  setSelectedCompanyForCase,
+  handleCreateCase,
+  handleSelectedAssetForCaseRelated
 }) {
 
   
@@ -72,6 +81,7 @@ export function TableCompany({
     },
   ] : null;
 
+  // setSelectedCompanyForCase(companies ? companies[0] : null)
 
   //contacts
     const contacts = selectedContact 
@@ -161,10 +171,19 @@ export function TableCompany({
   }
 
   
+  // useEffect(() => {
+  //   if (companies) {
+  //      // ✅ Update company when it exists
+  //   }
+  // }, [companies]); // ✅ Run only when `companies` updates
   
   console.log("selectedAsset:", selectedAsset);
   console.log("selectedCompany:", selectedCompany);
   console.log("selectedContact:", selectedContact);
+
+
+  
+
 
   return (
     // Company
@@ -223,7 +242,13 @@ export function TableCompany({
             </TableHeader>
             <TableBody>
               {contacts.length > 0 ? contacts.map((contact) => (
-                <TableRow key={contact.ContactID}>
+                <TableRow 
+                  key={contact.ContactID}
+                  onClick={() => setSelectedContactForCase(contact)}
+                  className={`cursor-pointer hover:bg-gray-200 ${
+                    selectedContactForCase?.ContactID === contact.ContactID ? "bg-blue-300" : ""
+                  }`}
+                >
                   <TableCell>{contact.FirstName}</TableCell>
                   <TableCell>{contact.LastName}</TableCell>
                   <TableCell>{contact.Email}</TableCell>
@@ -265,7 +290,13 @@ export function TableCompany({
             </TableHeader>
             <TableBody>
                 {assets.length > 0 ? assets.map((asset) => (
-                  <TableRow key={asset.AssetID}>
+                  <TableRow 
+                    key={asset.AssetID}
+                    onClick={() => handleSelectedAssetForCaseRelated(asset)} // ✅ Set selected asset
+                    className={`cursor-pointer hover:bg-gray-200 ${
+                      selectedAssetForCase?.AssetID === asset.AssetID ? "bg-blue-300" : ""
+                    }`}
+                  >
                     <TableCell>{asset.ProductName}</TableCell>
                     <TableCell>{asset.ProductNumber}</TableCell>
                     <TableCell>{asset.SerialNumber}</TableCell>
