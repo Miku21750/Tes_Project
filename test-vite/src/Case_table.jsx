@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 
+//for nav
+import { useNavigate } from "react-router";
+
 import ApiCustomer from "./api";
 
 export const Case_table = () => {
@@ -79,6 +82,10 @@ export const Case_table = () => {
     currentPage * itemsPerPage
   );
 
+
+  //navigate
+  const navigate = useNavigate();
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">ID Daily Aging Cases Javag FY</h2>
@@ -117,7 +124,7 @@ export const Case_table = () => {
           <tbody>
             {currentData.map((caseItem) => (
               <tr key={caseItem.CaseID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2">{caseItem.CaseID}</td>
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${caseItem.CaseID}`)} >{caseItem.CaseID}</td>
                 <td className="border p-2">{caseItem.CreatedOn}</td>
                 <td className="border p-2">{caseItem.CaseSubject}</td>
                 <td className="border p-2">{caseItem.CustomerAccount}</td>

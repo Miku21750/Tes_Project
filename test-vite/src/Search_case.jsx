@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
+import { useNavigate } from 'react-router'
 
 
 
@@ -303,12 +304,16 @@ const Search_case = () => {
     const [selectedContactForCase, setSelectedContactForCase] = useState(null);
     //state
     const [caseType, setCaseType] = useState(""); // ✅ Manage selected Case Type
+    
+    const navigate = useNavigate(); // ✅ Get the navigate function
 
       const handleCreateCase = async () => {
         if (!selectedAssetForCase && selectedContactForCase) {
           alert("Please select an asset/contact before creating a case!"); // 🔥 Prevent case creation
           return;
         }
+
+
           // ✅ Extract SiteAccountID only if it exists
         const siteAccountID = selectedSiteAccounts ? selectedSiteAccounts.SiteAccountID : null;
         
@@ -334,6 +339,7 @@ const Search_case = () => {
       
           await ApiCustomer.post("/api/case-information", newCase);
           alert("Case Created Successfully!");
+          navigate(`/case/${newCase.CaseID}`); // ✅ Redirect to case details page
         } catch (error) {
           console.error("Error creating case:", error);
         }
