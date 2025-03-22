@@ -12,8 +12,8 @@ export function AppAccordion() {
   return (
     <div className=" w-full flex flex-col">
       <Button>Account Info</Button>
-      <Button>Account Info</Button>
-      <Button>Account Info</Button>
+      <Button>Asset Info</Button>
+      <Button>Contact Info</Button>
       <Accordion type="single" collapsible className="w-full ">
           <AccordionItem value="item-1">
           <AccordionTrigger>Account Info</AccordionTrigger>
