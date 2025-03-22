@@ -81,7 +81,6 @@ export function TableCompany({
     },
   ] : null;
 
-  // setSelectedCompanyForCase(companies ? companies[0] : null)
 
   //contacts
     const contacts = selectedContact 

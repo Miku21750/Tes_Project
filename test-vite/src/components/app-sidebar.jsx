@@ -162,7 +162,7 @@ const data = {
 
   recent: [
     {
-      name: "Pinned",
+      name: "Recent",
       url: "#",
       icon: PieChart,
     }
