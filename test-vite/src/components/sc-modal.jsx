@@ -343,16 +343,24 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
  * TODO 
  * MAKE ROUTE FOR PRODUCT
  */
-export function BtnModalAsset() {
-  //set asset
-  const [assets, setAssets] = useState([])
-  //prevent infinite loop of calling fetchDataAssets
-  useEffect(() => {
-    fetchDataAssets();
-  }, []); 
-
-  //set search state
+export function BtnModalAsset(contactID) {
+  //handling dialog state
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [searchAsset, setSearchAsset] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const itemsPerPage = 10;
+  const [unownedAssets, setUnownedAssets] = useState([]);
+  const [loadingUnowned, setLoadingUnowned] = useState(false);
+  const [searchUnowned, setSearchUnowned] = useState("");
+
+
   //handle Change Input
   const handleSearchInputAssetsChange = (e) =>{
     const searchQuery = e.target.value;
@@ -365,18 +373,6 @@ export function BtnModalAsset() {
       asset.ProductNumber?.toLowerCase().includes(searchAsset.toLowerCase())
   ) : [];
 
-
-  //handling dialog state
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const itemsPerPage = 10;
-  const [unownedAssets, setUnownedAssets] = useState([]);
-  const [loadingUnowned, setLoadingUnowned] = useState(false);
-  const [searchUnowned, setSearchUnowned] = useState("");
-
-  
   useEffect(() => {
     if (!contactID) return;
     fetchDataAssets();
@@ -477,7 +473,9 @@ export function BtnModalAsset() {
           </TableHeader>
 
           <TableBody >
-            {assets.length > 0 ? ( assets.map((asset) => (
+            {loading ? <TableRow><TableCell colSpan={4}>Loading...</TableCell></TableRow> : 
+            error ? <TableRow><TableCell colSpan={4}>{error}</TableCell></TableRow> :
+            assets.length > 0 ? ( assets.map((asset) => (
               <TableRow key={asset?.AssetID}>
                 <TableCell className="whitespace-break-spaces ">{asset?.product_information?.ProductName}</TableCell>
                 <TableCell>{asset?.product_information?.ProductNumber}</TableCell>
