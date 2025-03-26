@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ApiCustomer from "@/api";
-import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
+import { AddAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
 
 export const Assets_table = () => {  
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,7 +34,7 @@ export const Assets_table = () => {
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Asset Information Table</h2>
       <div className="space-x-2">
-      <BtnModalAsset />
+      <AddAsset />
         {/* Input Pencarian */}
       <input
         type="text"
@@ -60,9 +60,6 @@ export const Assets_table = () => {
               <th className="border p-2">No</th>
               <th className="border p-2">Asset ID</th>
               <th className="border p-2">Serial Number</th>
-              <th className="border p-2">Product Name</th>
-              <th className="border p-2">Product Number</th>
-              <th className="border p-2">Product Line</th>
               <th className="border p-2">Site Account ID</th>
               <th className="border p-2">Actions</th>
             </tr>
@@ -76,9 +73,6 @@ export const Assets_table = () => {
                   </td>
                   <td className="border p-2">{asset.AssetID}</td>
                   <td className="border p-2">{asset.SerialNumber}</td>
-                  <td className="border p-2">{asset.product_information?.ProductName}</td>
-                  <td className="border p-2">{asset.ProductNumber}</td>
-                  <td className="border p-2">{asset.product_information?.ProductLine}</td>
                   <td className="border p-2">{asset.SiteAccountID}</td>
                   <td className="border p-2 flex space-x-2">
                     <AssetEdit 

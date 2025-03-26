@@ -57,10 +57,6 @@ export function BtnModal({
   caseType,
   setCaseType
 }) {
-  
-  
-
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -337,7 +333,6 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
     </Dialog>
   );
 }
-
 
 /**
  * TODO 
@@ -1000,3 +995,349 @@ export function ContactDelete ({ contactID }) {
     </Dialog>
   );
 };
+
+// export function AddAsset() {
+//   const [products, setProducts] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [searchAsset, setSearchAsset] = useState("");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalPages, setTotalPages] = useState(1);
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [selectedProduct, setSelectedProduct] = useState(null);
+//   const [isUpdating, setIsUpdating] = useState(false);
+//   const [isSearching, setIsSearching] = useState(false);
+//   const itemsPerPage = 10
+
+
+//   //handle Change Input
+//   const handleSearchInputAssetsChange = (e) =>{
+//     const searchQuery = e.target.value;
+//     setSearchAsset(searchQuery);
+//   }
+//   const filteredAssets = searchAsset !== "" ? assets.filter(
+//     (asset) => 
+//       asset.product_information?.ProductName?.toLowerCase().includes(searchAsset.toLowerCase()) || 
+//       asset.product_information?.ProductLine?.toLowerCase().includes(searchAsset.toLowerCase()) || 
+//       asset.ProductNumber?.toLowerCase().includes(searchAsset.toLowerCase())
+//   ) : [];
+
+//   useEffect(() => [contactID, currentPage, searchAsset]);
+
+//   const fetchDataProducts = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const response = await ApiCustomer.get(`/api/product-information/`, {
+//         params: { page: currentPage, limit: itemsPerPage, search: searchAsset },
+//       });
+
+//       setAssets(response.data.data);
+//       setTotalPages(response.data.totalPages);
+//     } catch (error) {
+//       setError("Failed to load asset data.");
+//     }
+//     setLoading(false);
+//   };
+
+//   const handleSearch = async () => {
+//     setIsSearching(true);
+//     setCurrentPage(1);
+//     await fetchDataAssets();
+//     setIsSearching(false);
+//   };
+
+//   const handleAddAsset = async () => {
+//     if (!selectedProduct) return;
+//     setIsUpdating(true);
+
+//     try {
+//       const response = await ApiCustomer.patch(`/api/asset-information//${selectedProduct.ProductID}`);
+
+//       if (response.status === 200) {
+//         alert("Product berhasil diperbarui!");
+//         fetchDataAssets();
+//       }
+//     } catch (error) {
+//       alert("Terjadi kesalahan saat memperbarui product.");
+//     }
+//     setIsUpdating(false);
+//   };
+
+//   return (
+//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+//       <DialogTrigger asChild>
+//         <Button variant="outline" className="bg-white mt-0.5" onClick={() => setIsOpen(true)}>
+//           Add Asset
+//         </Button>
+//       </DialogTrigger>
+//       <DialogContent className="sm:max-w-[800px] bg-white">
+//         <DialogHeader>
+//           <DialogTitle className="text-xl">Add Asset</DialogTitle>
+//           <DialogDescription>Add Asset</DialogDescription>
+//         </DialogHeader>
+
+//         <div className="flex gap-3">
+//           <Input
+//             className="border-2 border-black rounded-2xl w-55 text-md h-10"
+//             type="text"
+//             value={searchAsset}
+//             onChange={(e) => {
+//               setSearchAsset(e.target.value)
+//               setCurrentPage(1);
+//             }}
+//           />
+//           <Button variant="outline" className="bg-blue-700 text-white" onClick={handleSearch} disabled={isSearching}>
+//             {isSearching ? "Processing..." : "Search"}
+//           </Button>
+//         </div>
+
+//         <Table className="table-fixed border-spacing-0 mx-auto mt-2">
+//           <TableHeader>
+//             <TableRow className="bg-gray-200">
+//               <TableHead>Product Name</TableHead>
+//               <TableHead>Product Number</TableHead>
+//               <TableHead>Product Line</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//             {loadingUnowned ? (
+//               <TableRow>
+//                 <TableCell colSpan={4}>Loading...</TableCell>
+//               </TableRow>
+//             ) : products.length > 0 ? (
+//               products.map((product) => (
+//                 <TableRow
+//                   key={product.ProductID}
+//                   onClick={() => setSelectedAsset(asset)}
+//                   className={`cursor-pointer hover:bg-gray-200 ${
+//                     selectedProduct?.ProductID === product.ProductID ? "bg-blue-300" : ""
+//                   }`}
+//                 >
+//                   <TableCell>{product.ProductName}</TableCell>
+//                   <TableCell>{product.ProductNumber}</TableCell>
+//                   <TableCell>{product.ProductLine}</TableCell>
+//                 </TableRow>
+//               ))
+//             ) : (
+//               <TableRow>
+//                 <TableCell colSpan={4}>No Product Available</TableCell>
+//               </TableRow>
+//             )}
+//           </TableBody>
+//         </Table>
+
+//         <div className="flex justify-end gap-2 mt-2">
+//           <Button
+//             variant="outline"
+//             className="bg-blue-700 text-white"
+//             disabled={isUpdating || !selectedAsset}
+//           >
+//             {isUpdating ? "Processing..." : "Select"}
+//           </Button>
+//         </div>        
+
+//         <Table>
+//           <TableHeader>
+//             <TableRow className="bg-blue-200">
+//               <TableHead>Product Name</TableHead>
+//               <TableHead>Product Number</TableHead>
+//               <TableHead>Product Line</TableHead>
+//             </TableRow>
+//           </TableHeader>
+
+//           <TableBody >
+//             {loading ? <TableRow><TableCell colSpan={4}>Loading...</TableCell></TableRow> : 
+//             error ? <TableRow><TableCell colSpan={4}>{error}</TableCell></TableRow> :
+//             selectedDataProduct.length > 0 ? ( selectedDataProduct.map((product) => (
+//               <TableRow key={product?.ProductID}>
+//                 <TableCell className="whitespace-break-spaces ">{product?.product_information?.ProductName}</TableCell>
+//                 <TableCell>{product?.product_information?.ProductNumber}</TableCell>
+//               </TableRow>
+//              )) ) : (
+//                 <TableRow>
+//                   <TableCell
+//                     colSpan={5}
+//                     className="text-center font-medium whitespace-break-spaces"
+//                   >
+//                     Data Belum Tersedia
+//                   </TableCell>
+//                 </TableRow>
+//               )}
+//           </TableBody>
+//         </Table>
+
+//         <div className="flex justify-end gap-2 mt-2">
+//           <Input
+//             className="border-2 border-black rounded-2xl w-55 text-md h-10"
+//             type="text"
+//             value={inputSerialNumber}
+//           />
+//           <Button
+//             variant="outline"
+//             className="bg-blue-700 text-white"
+//             onClick={handleAddAsset}
+//             disabled={isUpdating || !selectedAsset}
+//           >
+//             {isUpdating ? "Processing..." : "Save"}
+//           </Button>
+//         </div>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+export function AddAsset() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchAsset, setSearchAsset] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedDataProduct, setSelectedDataProduct] = useState([]);
+  const [inputSerialNumber, setInputSerialNumber] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const itemsPerPage = 10;
+
+  const handleSearchInputAssetsChange = (e) => setSearchAsset(e.target.value);
+
+  useEffect(() => {
+    fetchDataProducts();
+  }, [currentPage, searchAsset]);
+
+  const fetchDataProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get(`/api/product-information/`, {
+        params: { page: currentPage, limit: itemsPerPage, search: searchAsset },
+      });
+      setProducts(response.data.data);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      setError("Failed to load asset data.");
+    }
+    setLoading(false);
+  };
+
+  const handleProductSelection = (product) => {
+    setSelectedProducts((prev) => {
+      if (prev.some((p) => p.ProductNumber === product.ProductNumber)) {
+        return prev.filter((p) => p.ProductNumber !== product.ProductNumber);
+      }
+      return [...prev, product];
+    });
+  };
+
+  const handleAddToSelected = () => {
+    setSelectedDataProduct(selectedProducts);
+    setSelectedProducts([]);
+  };
+
+  const handleAddAsset = async () => {
+    if (selectedDataProduct.length === 0 || !inputSerialNumber) return;
+    setIsUpdating(true);
+    try {
+      await Promise.all(
+        selectedDataProduct.map((product) =>
+          ApiCustomer.patch(`/api/asset-information/`, {
+            params: { SerialNumber: inputSerialNumber, ProductNumber: product.ProductNumber },            
+          })
+        )
+      );
+      alert("Asset(s) berhasil ditambahkan!");
+      setSelectedDataProduct([]);
+      setInputSerialNumber("");
+      fetchDataProducts();
+    } catch (error) {
+      alert("Terjadi kesalahan saat menambahkan asset.");
+    }
+    setIsUpdating(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="bg-white mt-0.5" onClick={() => setIsOpen(true)}>
+          Add Asset
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[800px] bg-white">
+        <DialogHeader>
+          <DialogTitle className="text-xl">Add Asset</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex gap-3">
+          <Input type="text" value={searchAsset} onChange={handleSearchInputAssetsChange} />
+          <Button onClick={fetchDataProducts} disabled={isSearching}>
+            {isSearching ? "Processing..." : "Search"}
+          </Button>
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gray-200">
+              <TableHead>Select</TableHead>
+              <TableHead>Product Name</TableHead>
+              <TableHead>Product Number</TableHead>
+              <TableHead>Product Line</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow><TableCell colSpan={3}>Loading...</TableCell></TableRow>
+            ) : products.length > 0 ? (
+              products.map((product) => (
+                <TableRow key={product.ProductNumber}>
+                  <TableCell>
+                    <input type="checkbox" checked={selectedProducts.some((p) => p.ProductNumber === product.ProductNumber)} onChange={() => handleProductSelection(product)} />
+                  </TableCell>
+                  <TableCell>{product.ProductName}</TableCell>
+                  <TableCell>{product.ProductNumber}</TableCell>
+                  <TableCell>{product.ProductLine}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow><TableCell colSpan={3}>No Product Available</TableCell></TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        <Button onClick={handleAddToSelected} disabled={selectedProducts.length === 0}>Select</Button>
+
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-blue-200">
+              <TableHead>Product Name</TableHead>
+              <TableHead>Product Number</TableHead>
+              <TableHead>Product Line</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {selectedDataProduct.length > 0 ? (
+              selectedDataProduct.map((product) => (
+                <TableRow key={product.ProductNumber}>
+                  <TableCell>{product.ProductName}</TableCell>
+                  <TableCell>{product.ProductNumber}</TableCell>
+                  <TableCell>{product.ProductLine}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow><TableCell colSpan={2}>No Selected Product</TableCell></TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        <div className="flex gap-2 mt-2">
+          <Input type="text" value={inputSerialNumber} onChange={(e) => setInputSerialNumber(e.target.value)} />
+          <Button onClick={handleAddAsset} disabled={isUpdating || selectedDataProduct.length === 0}>
+            {isUpdating ? "Processing..." : "Save"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

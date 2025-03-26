@@ -17,9 +17,7 @@ export async function GET(request) {
             where: search
                 ? {
                     OR: [
-                        { SerialNumber: { contains: search } },
-                        { ProductNumber: { contains: search } },
-                        { ProductName: { contains: search } }
+                        { SerialNumber: { contains: search } }
                     ]
                 }
                 : undefined // Jika search kosong, tidak pakai filter
@@ -35,20 +33,17 @@ export async function GET(request) {
             where: search
                 ? {
                     OR: [
-                        { SerialNumber: { contains: search } },
-                        { ProductNumber: { contains: search } },
-                        { product_information: { ProductName: { contains: search } } }
+                        { SerialNumber: { contains: search } }
                     ]
                 }
                 : undefined,
             skip: skip,
             take: limit,
-            orderBy: { product_information: { ProductName: "asc" } },
+            orderBy: { SerialNumber: "asc" },
             include:
             {
                 site_account: true,
                 contact_information:true,
-                product_information:true
             }
         });
 
