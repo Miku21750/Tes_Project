@@ -35,6 +35,7 @@ import {
   SelectBar1,
   SelectBar2,
  } from "@/components/sc-select";
+ import { SnInput } from "./sn-input";
 
 import { Pencil, Trash } from "lucide-react";
 //import API
@@ -74,8 +75,8 @@ export function BtnModal({
           <DialogTitle>Case Information</DialogTitle>
         </DialogHeader>
         <div className="flex items-center space-x-3">
-          <div className="w-55">
-            <Label htmlFor="CaseSubject" className="text-right">
+          <div className="">
+            <Label htmlFor="name" className="text-right">
               Case Subject
             </Label>
             <Input id="CaseSubject" className="col-span-3 border-b-black p-1" />
@@ -367,10 +368,14 @@ export function BtnModalAsset(contactID) {
       asset.product_information?.ProductName?.toLowerCase().includes(searchAsset.toLowerCase()) || 
       asset.ProductNumber?.toLowerCase().includes(searchAsset.toLowerCase())
   ) : [];
-
+  
+  
   useEffect(() => {
     if (!contactID) return;
+    fetchUnownedAssets();
     fetchDataAssets();
+    console.log("selectedContactForCase : ",selectedContactForCase)
+    console.log('ContactIDFromSelectedContact')
   }, [contactID, currentPage, searchAsset]);
 
   const fetchDataAssets = async () => {
@@ -382,24 +387,42 @@ export function BtnModalAsset(contactID) {
       });
 
       setAssets(response.data.data);
+      // setSelectedAsset(response.data.data);
       setTotalPages(response.data.totalPages);
+      return response.data.data;
     } catch (error) {
       setError("Failed to load asset data.");
+      console.error("Error fetching assets:", error);
+      return []; // ✅ Return an empty array instead of `undefined`
+    } finally{
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleSearch = async () => {
-    setIsSearching(true);
-    setCurrentPage(1);
-    await fetchDataAssets();
-    setIsSearching(false);
-  };
-
+  const fetchAssetTable = async (companyID = null, contactID = null) => {
+    try {
+      let query = '';
+      if(companyID !== null){
+        query += `SiteAccountID=${companyID}`
+      }
+      if(contactID !== null){
+        if(companyID !== null) query += `&`
+        query += `ContactID=${contactID}`
+      }
+      const response = await ApiCustomer.get(`/api/asset-information?${query}`);
+      console.log("response Fetch Contacts: ", response.data)
+      return response.data.data; // ✅ Return updated contacts
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      return [];
+    }
+  }
+  
+  
   const fetchUnownedAssets = async () => {
     setLoadingUnowned(true);
     try {
-      console.log(searchUnowned)
+      console.log("Search Unowned : ",searchUnowned)
       const response = await ApiCustomer.get(`/api/asset-information/kepemilikan/unowned`, {
         params: {page: 1, limit: 10, search: searchUnowned},
       });
@@ -411,28 +434,54 @@ export function BtnModalAsset(contactID) {
   };
 
   const handleUpdateAsset = async () => {
-    if (!selectedAsset) return;
+    if (!selectedAssetForCreatingAsset) return;
     setIsUpdating(true);
-
+    console.log(siteAccountID);
+    
     try {
-      const response = await ApiCustomer.patch(`/api/asset-information/kepemilikan/${selectedAsset.AssetID}`, {
-        contactID
+      const response = await ApiCustomer.patch(`/api/asset-information/kepemilikan/${selectedAssetForCreatingAsset.AssetID}`, {
+        contactID,
+        siteAccountID
       });
-
+      
       if (response.status === 200) {
+        const updatedAssets = await fetchAssetTable(siteAccountID, contactID);
+        setSelectedAsset(updatedAssets);
+        console.log("Selected Asset after Creating New One : ", updatedAssets);
         alert("Asset berhasil diperbarui!");
-        fetchDataAssets();
+
+        setIsOpen(false);
+        // fetchDataAssets();
+
+        if(selectedAssetForCreatingAsset?.AssetID){
+        }
       }
     } catch (error) {
-      alert("Terjadi kesalahan saat memperbarui asset.");
+      alert("Terjadi kesalahan saat memperbarui asset. ", error);
+      console.error("Terjadi kesalahan : ", error)
     }
     setIsUpdating(false);
+  };
+  
+  
+  const handleSearch = async () => {
+    setIsSearching(true);
+    setCurrentPage(1);
+    await fetchDataAssets();
+    setIsSearching(false);
+    await fetchUnownedAssets();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white mt-0.5" onClick={() => setIsOpen(true)}>
+        <Button 
+          variant="outline" 
+          // className="bg-white mt-0.5"
+          className={`mt-0.5 ${(!selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
+          onClick={() => setIsOpen(true)}
+          disabled={!selectedContactForCase } // 🔥 Button disabled if no contact selected
+        >
           New Asset
         </Button>
       </DialogTrigger>
@@ -442,22 +491,27 @@ export function BtnModalAsset(contactID) {
           <DialogDescription>Add Asset</DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-3">
-          <Input
-            className="border-2 border-black rounded-2xl w-55 text-md h-10"
-            type="text"
-            value={searchAsset}
-            onChange={(e) => {
-              setSearchAsset(e.target.value)
-              setCurrentPage(1);
-            }}
-          />
-          <Button variant="outline" className="bg-blue-700 text-white" onClick={handleSearch} disabled={isSearching}>
-            {isSearching ? "Processing..." : "Search"}
-          </Button>
+        <DialogHeader>
+          <DialogTitle className="text-md">Serial Number</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex gap-3">  
+          <Input className="border-2 border-black rounded-2xl w-55 text-md h-10" type="Search" onChange={handleSearchInputAssetsChange}></Input>
+          <Button variant="outline" className="w-30 rounded-2xl h-10 border-blue-600 border-2">Search</Button>
+          <div className="mt-2">
+          <Checkbox id="terms" className="w-5 h-5 border-2 border-black"/>
+            <label
+              htmlFor="terms"
+              className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2"
+            >
+              Not Available
+            </label>
+          </div>
+            <SnInput></SnInput>
         </div>
 
-        <Table>
+
+        <Table className="table-fixed border-spacing-0 mx-auto">
           <TableHeader>
             <TableRow className="bg-blue-200">
               <TableHead>Product Name</TableHead>
@@ -526,15 +580,15 @@ export function BtnModalAsset(contactID) {
               unownedAssets.map((asset) => (
                 <TableRow
                   key={asset.AssetID}
-                  onClick={() => setSelectedAsset(asset)}
+                  onClick={() => setSelectedAssetForCreatingAsset(asset)}
                   className={`cursor-pointer hover:bg-gray-200 ${
                     selectedAsset?.AssetID === asset.AssetID ? "bg-blue-300" : ""
                   }`}
                 >
                   <TableCell>{asset.SerialNumber}</TableCell>
-                  <TableCell>{asset.ProductName}</TableCell>
+                  <TableCell>{asset.product_information?.ProductName}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
-                  <TableCell>{asset.ProductLine}</TableCell>
+                  <TableCell>{asset.product_information?.ProductLine}</TableCell>
                 </TableRow>
               ))
             ) : (
@@ -550,7 +604,7 @@ export function BtnModalAsset(contactID) {
             variant="outline"
             className="bg-blue-700 text-white"
             onClick={handleUpdateAsset}
-            disabled={isUpdating || !selectedAsset}
+            disabled={isUpdating || !selectedAssetForCreatingAsset}
           >
             {isUpdating ? "Processing..." : "Select"}
           </Button>
