@@ -10,8 +10,8 @@ import { Case } from './Case';
 import { Company_table } from './Company_table';
 import { Assets_table } from './Assets_table';
 import { Contact_table } from './Contact_table';
-import { Case_table } from './Case_table';
-import { Bookings } from './bookings';
+// import { Case_table } from './Case_table';
+// import { Bookings } from './bookings';
 // import { CatalogService } from './CatalogService';
 
 createRoot(document.getElementById('root')).render(
@@ -22,10 +22,10 @@ createRoot(document.getElementById('root')).render(
           <Route index element={<Landing />} /> 
           <Route path='/search_case' element={<Search_case />} />  
           <Route path='/case/:caseId' element={<Case />} /> 
-          <Route path='/work' element={<Work />}/>
-          <Route path='/material_order' element={<MaterialOrder />}/>
-          <Route path='/mo_detail' element={<MoDetail />}/>
-          <Route path='/bookings' element={<Bookings/>}/>
+          {/* <Route path='/work' element={<Work />}/> */}
+          {/* <Route path='/material_order' element={<MaterialOrder />}/> */}
+          {/* <Route path='/mo_detail' element={<MoDetail />}/> */}
+          {/* <Route path='/bookings' element={<Bookings/>}/> */}
           {/* <Route path='/CatalogService' element={<CatalogService/>}/> */}
           <Route path='/master/Company_table' element={<Company_table />} /> 
           <Route path='/master/Assets_table' element={<Assets_table />} />

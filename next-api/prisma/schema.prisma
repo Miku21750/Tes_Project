@@ -1,5 +1,7 @@
+@ -1,75 +1,86 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./node_modules/@prisma/client"
 }
 
 datasource db {
@@ -9,15 +11,14 @@ datasource db {
 
 model asset_information {
   AssetID             Int                  @id @default(autoincrement())
-  SerialNumber        String               @db.VarChar(100)
-  ProductName         String?              @db.VarChar(255)
-  ProductNumber       String?              @db.VarChar(100)
-  ProductLine         String?              @db.VarChar(100)
+  SerialNumber        String               @db.VarChar(20)
+  ProductNumber       String               @db.VarChar(11)
   SiteAccountID       Int?
   ContactID           Int?
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
   caseinformation     caseinformation[]
+  confirm_service     confirm_service[]
 
   @@index([SiteAccountID], map: "SiteAccountID")
   @@index([ContactID], map: "ContactID")
@@ -40,6 +41,9 @@ model caseinformation {
   CaseNote            String?              @db.Text
   SymptomCode         String?              @db.VarChar(50)
   CaseResolution      String?              @db.Text
+  CreatedBy           Int?
+  Owner               Int?
+
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_2")
   asset_information   asset_information?   @relation(fields: [AssetID], references: [AssetID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_3")
@@ -50,6 +54,7 @@ model caseinformation {
   @@index([ContactID], map: "ContactID")
   @@index([SiteAccountID], map: "SiteAccountID")
 }
+//  WorkGround          Int?
 
 model casenotes {
   NoteID            Int              @id @default(autoincrement())
@@ -73,73 +78,12 @@ model contact_information {
   FirstName         String              @db.VarChar(100)
   LastName          String              @db.VarChar(100)
   Email             String?             @db.VarChar(255)
-  PreferredLanguage String?             @db.VarChar(50)
-  Phone             String?             @db.VarChar(50)
-  Mobile            String?             @db.VarChar(50)
-  WorkPhone         String?             @db.VarChar(50)
-  WorkExtension     String?             @db.VarChar(10)
-  OtherPhone        String?             @db.VarChar(50)
-  OtherExtension    String?             @db.VarChar(10)
-  Fax               String?             @db.VarChar(50)
-  AddressLine1      String?             @db.VarChar(255)
-  AddressLine2      String?             @db.VarChar(255)
-  City              String?             @db.VarChar(100)
-  StateProvince     String?             @db.VarChar(100)
-  Country           String?             @db.VarChar(100)
-  ZipPostalCode     String?             @db.VarChar(20)
-  asset_information asset_information[]
-  caseinformation   caseinformation[]
-  site_account      site_account?       @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "contact_information_ibfk_1")
-
-  @@index([SiteAccountID], map: "SiteAccountID")
-}
-
-model materialorder {
-  MOID                   Int                      @id @default(autoincrement())
-  WOID                   Int?
-  OrderNumber            String?                  @db.VarChar(100)
-  OrderStatus            String?                  @db.VarChar(50)
-  OrderType              String?                  @db.VarChar(50)
-  CreatedOn              DateTime                 @default(now()) @db.Timestamp(0)
-  SalesOrderNumber       String?                  @db.VarChar(100)
-  RMANumber              String?                  @db.VarChar(100)
-  ReadyForClosureDate    DateTime?                @db.DateTime(0)
-  Owner                  String?                  @db.VarChar(100)
-  workorder              workorder?               @relation(fields: [WOID], references: [WOID], onDelete: Restrict, onUpdate: Restrict, map: "materialorder_ibfk_1")
-  materialorderlineitems materialorderlineitems[]
-
-  @@index([WOID], map: "WOID")
-}
-
-model materialorderlineitems {
-  LineItemID    Int            @id @default(autoincrement())
-  MOID          Int?
-  LineNumber    Int?
-  PartNumber    String?        @db.VarChar(100)
-  Description   String?        @db.Text
-  ATPStatus     String?        @db.VarChar(50)
-  Price         Decimal?       @db.Decimal(10, 2)
-  Quantity      Int?
-  materialorder materialorder? @relation(fields: [MOID], references: [MOID], onDelete: Restrict, onUpdate: Restrict, map: "materialorderlineitems_ibfk_1")
-
-  @@index([MOID], map: "MOID")
-}
-
-model servicecatalog {
-  ServiceCatalogID     Int                    @id @default(autoincrement())
-  ProductNumber        String?                @db.VarChar(100)
-  ProductName          String?                @db.VarChar(255)
-  SerialNumber         String?                @db.VarChar(100)
-  WarrantyStatus       String?                @db.VarChar(50)
-  Currency             String?                @db.VarChar(10)
-  Price                Decimal?               @db.Decimal(10, 2)
-  Tax                  Decimal?               @db.Decimal(10, 2)
-  Total                Decimal?               @db.Decimal(10, 2)
-  servicecatalog_parts servicecatalog_parts[]
+@ -139,63 +150,229 @@
 }
 
 model servicecatalog_parts {
   PartID              Int             @id @default(autoincrement())
+  PartID              Int               @id @default(autoincrement())
   ServiceCatalogID    Int?
   PartNumber          String?         @db.VarChar(100)
   Keyword             String?         @db.VarChar(100)
@@ -159,6 +103,27 @@ model servicecatalog_parts {
   Tax                 Decimal?        @db.Decimal(10, 2)
   Total               Decimal?        @db.Decimal(10, 2)
   servicecatalog      servicecatalog? @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict, onUpdate: Restrict, map: "servicecatalog_parts_ibfk_1")
+  PartNumber          String?           @db.VarChar(100)
+  Keyword             String?           @db.VarChar(100)
+  PartDescription     String?           @db.Text
+  Orderability        String?           @db.VarChar(50)
+  RestrictionReason   String?           @db.Text
+  CSR_Flag            Boolean?          @default(false)
+  ROHS_Flag           Boolean?          @default(false)
+  Returnable_Flag     Boolean?          @default(false)
+  HardRoll_Flag       Boolean?          @default(false)
+  DangerousGoods_Flag Boolean?          @default(false)
+  LithiumBattery_Flag Boolean?          @default(false)
+  Oversize_Flag       Boolean?          @default(false)
+  Heavy_Flag          Boolean?          @default(false)
+  Price               Decimal?          @db.Decimal(10, 2)
+  FreightPrice        Decimal?          @db.Decimal(10, 2)
+  Shipping_Fee        Float             @db.Float
+  qty_parts           Int
+  Tax                 Decimal?          @db.Decimal(10, 2)
+  Total               Decimal?          @db.Decimal(10, 2)
+  confirm_service     confirm_service[]
+  servicecatalog      servicecatalog?   @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict, onUpdate: Restrict, map: "servicecatalog_parts_ibfk_1")
 
   @@index([ServiceCatalogID], map: "ServiceCatalogID")
 }
@@ -180,22 +145,163 @@ model site_account {
 }
 
 model workorder {
-  WOID             Int              @id @default(autoincrement())
-  CaseID           Int?
-  ServiceCatalogID Int?
-  WorkOrderNumber  String?          @db.VarChar(100)
-  WorkOrderType    String?          @db.VarChar(50)
-  Priority         String?          @db.VarChar(50)
-  SystemStatus     String?          @db.VarChar(50)
-  SubStatus        String?          @db.VarChar(50)
-  PreferredDay     DateTime?        @db.Date
-  PreferredTime    DateTime?        @db.Time(0)
-  ShipmentCountry  String?          @db.VarChar(50)
-  ShipmentState    String?          @db.VarChar(50)
-  CreatedOn        DateTime         @default(now()) @db.Timestamp(0)
-  Owner            String?          @db.VarChar(100)
-  materialorder    materialorder[]
-  caseinformation  caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "workorder_ibfk_1")
+  WOID                         Int                        @id @default(autoincrement())
+  CaseID                       Int?
+  ServiceCatalogID             Int?
+  WorkOrderNumber              String?                    @db.VarChar(100)
+  WorkOrderType                String?                    @db.VarChar(50)
+  Priority                     String?                    @db.VarChar(50)
+  SystemStatus                 String?                    @db.VarChar(50)
+  SubStatus                    String?                    @db.VarChar(50)
+  PartnerStatus                String?                    @db.VarChar(50)
+  WorkOrderDescription         String?                    @db.Text
+  PartnerNotes                 String?                    @db.Text
+  IncomingChannel              String?                    @db.VarChar(50)
+  PreferredDay                 DateTime?                  @db.Date
+  PreferredTime                DateTime?                  @db.Time(0)
+  ShipmentCountry              String?                    @db.VarChar(50)
+  ShipmentState                String?                    @db.VarChar(50)
+  CreatedOn                    DateTime?                  @default(now()) @db.DateTime(0)
+  Owner                        String?                    @db.VarChar(100)
 
+  // SLA in Customer Time Zone
+  SLAJeopardy                  String?                    @db.VarChar(50)
+  DueDateCustomer              DateTime?                  @db.DateTime(0)
+  CoverageWindow               String?                    @db.VarChar(100)
+  Response                     String?                    @db.VarChar(100)
+  OTCCode                      String?                    @db.VarChar(50)
+  RequestedDateTimeCustomer    DateTime?                  @db.DateTime(0)
+  GuaranteedFixTimeCustomer    DateTime?                  @db.DateTime(0)
+  EarlyStartDateTimeCustomer   DateTime?                  @db.DateTime(0)
+  LatestStartDateTimeCustomer  DateTime?                  @db.DateTime(0)
+  SLAReschedule                String?                    @db.VarChar(50)
+  ActiveScheduleDate           DateTime?                  @db.DateTime(0)
+  SLAErrorDescription          String?                    @db.Text
+  CasePriorityIndex            Int?
+
+  // Relations
+  caseinformation              caseinformation?           @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "workorder_ibfk_1")
+  serviceDelivery              workorder_service_delivery[]
+  serviceDeliveryAddress       workorder_service_delivery_address[]
+  skillsets                    workorder_service_delivery_skillset[]
+
+  materialorder                materialorder[]
   @@index([CaseID], map: "CaseID")
+}
+
+model workorder_service_delivery_address {
+  AddressID        Int      @id @default(autoincrement())
+  WOID             Int
+  CompanyName      String?  @db.VarChar(100)
+  ContactFirstName String?  @db.VarChar(100)  
+  ContactLastName  String?  @db.VarChar(100)
+  PhoneNumber      String?  @db.VarChar(50)
+  Email            String?  @db.VarChar(100)
+  AddressLine1     String?  @db.VarChar(200)
+  AddressLine2     String?  @db.VarChar(200)
+  AddressLine3     String?  @db.VarChar(200)
+  City             String?  @db.VarChar(100)
+  StateOrProvince  String?  @db.VarChar(100)
+  CountryOrRegion  String?  @db.VarChar(100)
+  PostalCode       String?  @db.VarChar(20)
+  TimeZone         String?  @db.VarChar(50)
+  ServiceTerritory String?  @db.VarChar(100)
+  BusinessSegment  String?  @db.VarChar(100)
+  Longitude        Float?   @db.Float
+  Latitude         Float?   @db.Float
+
+  workorder        workorder @relation(fields: [WOID], references: [WOID], onDelete: Cascade)
+}
+
+model workorder_service_delivery {
+  ServiceDeliveryID Int       @id @default(autoincrement())
+  WOID       Int
+  ServiceType       String?   @db.VarChar(100)
+  StartDateTime     DateTime? @db.DateTime(0)
+  EndDateTime       DateTime? @db.DateTime(0)
+
+  workorder         workorder @relation(fields: [WOID], references: [WOID], onDelete: Cascade)
+}
+
+model workorder_service_delivery_skillset {
+  SkillSetID   Int      @id @default(autoincrement())
+  WOID  Int
+  SkillCode    String?  @db.VarChar(50)
+  SkillLevel   String?  @db.VarChar(50)
+
+  workorder    workorder @relation(fields: [WOID], references: [WOID], onDelete: Cascade)
+}
+
+model product_information {
+  ProductNumber       String              @id @db.VarChar(11)
+  ProductLine         String              @db.VarChar(3)
+  ProductName         String              @db.VarChar(255)
+  ProductTypeID       Int
+  end_of_sales_date   DateTime?           @db.Date
+  end_of_support_date DateTime?           @db.Date
+  vendor              String?             @db.VarChar(50)
+  asset_information   asset_information[]
+  product_type        product_type        @relation(fields: [ProductTypeID], references: [ProductTypeID], onUpdate: Restrict, map: "product_information_ibfk_1")
+
+  @@index([ProductTypeID], map: "ProductTypeID")
+}
+
+model product_type {
+  ProductTypeID       Int                        @id @default(autoincrement())
+  ProductType         String                     @db.VarChar(50)
+  ProductTower        product_type_ProductTower?
+  ProductGroup        product_type_ProductGroup?
+  product_information product_information[]
+}
+
+model global_trade_check {
+  id_gtc              Int    @id @default(autoincrement())
+  global_trade_status String @db.VarChar(30)
+  embargoed_country   String @db.VarChar(30)
+  gt_override_reason  String @db.VarChar(30)
+  gt_details          String @db.VarChar(50)
+  screening_id        String @db.VarChar(25)
+  gt_active_listening String @db.VarChar(30)
+  gt_al_comments      String @db.VarChar(50)
+}
+
+model confirm_service {
+  id_confirmService    Int                  @id
+  AssetID              Int
+  Service_offerID      String               @db.VarChar(8)
+  PartID               Int
+  sub_total            Float                @db.Float
+  total                Float                @db.Float
+  Incident_Type        String               @db.VarChar(50)
+  asset_information    asset_information    @relation(fields: [AssetID], references: [AssetID], onDelete: Cascade, map: "asset_information")
+  servicecatalog_parts servicecatalog_parts @relation(fields: [PartID], references: [PartID], onDelete: Cascade, map: "servicecatalog_parts")
+  warranty_services    warranty_services    @relation(fields: [Service_offerID], references: [Service_offerID], onDelete: Cascade, map: "warranty_services")
+
+  @@index([AssetID], map: "asset_information")
+  @@index([PartID], map: "servicecatalog_parts")
+  @@index([Service_offerID], map: "warranty_services")
+}
+
+model warranty_services {
+  Service_offerID     String            @id @db.VarChar(8)
+  Service_description String            @db.VarChar(255)
+  CTat_RTime          String            @db.VarChar(5)
+  Price               Float             @db.Float
+  Shipping_Fee        Float             @db.Float
+  qty_ws              Int
+  Tax                 Float             @db.Float
+  Total               Float             @db.Float
+  confirm_service     confirm_service[]
+}
+
+enum product_type_ProductTower {
+  PSG
+  IPG
+  EMPTY_ENUM_VALUE @map("")
+}
+
+enum product_type_ProductGroup {
+  Commercial
+  Consumer
+  EMPTY_ENUM_VALUE @map("")
 }
