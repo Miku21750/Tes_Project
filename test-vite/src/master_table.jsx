@@ -409,7 +409,7 @@ export const Case_table = () => {
 
       Swal.fire({
         title: "Error!",
-        text: "Gagal mengambil data perusahaan.",
+        text: "Gagal mengambil data case.",
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -2873,35 +2873,35 @@ export const BookingDetailsTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2">Booking Detail ID</th>
-              <th className="border p-2">Booking ID</th>
-              <th className="border p-2">Resource ID</th>
-              <th className="border p-2">Resource Account ID</th>
-              <th className="border p-2">Subk Technician ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Status</th>
-              <th className="border p-2">Customer Time</th>
-              <th className="border p-2">User Time</th>
-              <th className="border p-2">Changed By</th>
-              <th className="border p-2">Changed At</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-center text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Booking Detail ID</th>
+              <th className="p-2 border">Booking ID</th>
+              <th className="p-2 border">Resource ID</th>
+              <th className="p-2 border">Resource Account ID</th>
+              <th className="p-2 border">Subk Technician ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Status</th>
+              <th className="p-2 border">Customer Time</th>
+              <th className="p-2 border">User Time</th>
+              <th className="p-2 border">Changed By</th>
+              <th className="p-2 border">Changed At</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+              <tr key={item.BookingDetailId} className="text-sm text-center hover:bg-gray-100">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/bookings/${item.BookingDetailId}`)}
                 >
                   {item.BookingDetailId}
                 </td>
-                <td className="border p-2">{item.BookingId}</td>
-                <td className="border p-2">{item.ResourceId}</td>
-                <td className="border p-2">{item.ResorceAccountId}</td>
-                <td className="border p-2">{item.SubkTechnicianId}</td>
-                <td className="border p-2">{item.Name}</td>
-                <td className="border p-2">{item.Status}</td>
+                <td className="p-2 border">{item.BookingId}</td>
+                <td className="p-2 border">{item.ResourceId}</td>
+                <td className="p-2 border">{item.ResorceAccountId}</td>
+                <td className="p-2 border">{item.SubkTechnicianId}</td>
+                <td className="p-2 border">{item.Name}</td>
+                <td className="p-2 border">{item.Status}</td>
 
                 <td className="p-2 text-left border">
                   <div>Start: {item.StartTimeCustomerTime ? new Date(item.StartTimeCustomerTime).toLocaleString() : "-"}</div>
@@ -3028,12 +3028,12 @@ export const RepairClassCodeTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Repair Class Code Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Repair Class Code Table</h2>
 
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -3046,28 +3046,28 @@ export const RepairClassCodeTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2">Code</th>
-              <th className="border p-2">Description</th>
-              <th className="border p-2">Definition</th>
-              <th className="border p-2">Payment Eligibility</th>
-              <th className="border p-2">Created On</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-center text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Code</th>
+              <th className="p-2 border">Description</th>
+              <th className="p-2 border">Definition</th>
+              <th className="p-2 border">Payment Eligibility</th>
+              <th className="p-2 border">Created On</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.Code} className="hover:bg-gray-100 text-center text-sm">
+              <tr key={item.Code} className="text-sm text-center hover:bg-gray-100">
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/repair-class-code/${item.Code}`)}
                 >
                   {item.Code}
                 </td>
-                <td className="border p-2">{item.Description}</td>
-                <td className="border p-2">{item.Definition}</td>
-                <td className="border p-2">{item.PaymentEligibility}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.Description}</td>
+                <td className="p-2 border">{item.Definition}</td>
+                <td className="p-2 border">{item.PaymentEligibility}</td>
+                <td className="p-2 border">
                   {item.CreatedOn
                     ? new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                         year: "numeric",
@@ -3076,7 +3076,7 @@ export const RepairClassCodeTable = () => {
                       })
                     : "-"}
                 </td>
-                <td className="border p-2 flex justify-center gap-2">
+                <td className="flex justify-center gap-2 p-2 border">
                   <RepairClassCodeEdit Code={item.Code} onUpdate={fetchData} />
                   <RepairClassCodeDelete
                     Code={item.Code}
@@ -3091,12 +3091,12 @@ export const RepairClassCodeTable = () => {
         </table>
 
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -3175,11 +3175,11 @@ export const ServiceCatalogTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Service Catalog Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Service Catalog Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -3193,36 +3193,36 @@ export const ServiceCatalogTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2">Service Catalog ID</th>
-              <th className="border p-2">Asset ID</th>
-              <th className="border p-2">Service Offer ID</th>
-              <th className="border p-2">Part Number</th>
-              <th className="border p-2">Warranty Status</th>
-              <th className="border p-2">Currency</th>
-              <th className="border p-2">Price</th>
-              <th className="border p-2">Tax</th>
-              <th className="border p-2">Total</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-center text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Service Catalog ID</th>
+              <th className="p-2 border">Asset ID</th>
+              <th className="p-2 border">Service Offer ID</th>
+              <th className="p-2 border">Part Number</th>
+              <th className="p-2 border">Warranty Status</th>
+              <th className="p-2 border">Currency</th>
+              <th className="p-2 border">Price</th>
+              <th className="p-2 border">Tax</th>
+              <th className="p-2 border">Total</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+              <tr key={item.ServiceCatalogID} className="text-sm text-center hover:bg-gray-100">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/service-log/${item.ServiceCatalogID}`)}
                 >
                   {item.ServiceCatalogID}
                 </td>
-                <td className="border p-2">{item.AssetID}</td>
-                <td className="border p-2">{item.Service_offerID}</td>
-                <td className="border p-2">{item.PartNumber || "-"}</td>
-                <td className="border p-2">{item.WarrantyStatus || "-"}</td>
-                <td className="border p-2">{item.Currency || "-"}</td>
-                <td className="border p-2">{item.Price ? parseFloat(item.Price).toFixed(2) : "-"}</td>
-                <td className="border p-2">{item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}</td>
-                <td className="border p-2">{item.Total ? parseFloat(item.Total).toFixed(2) : "-"}</td>
-                <td className="border p-2 flex justify-center gap-2">
+                <td className="p-2 border">{item.AssetID}</td>
+                <td className="p-2 border">{item.Service_offerID}</td>
+                <td className="p-2 border">{item.PartNumber || "-"}</td>
+                <td className="p-2 border">{item.WarrantyStatus || "-"}</td>
+                <td className="p-2 border">{item.Currency || "-"}</td>
+                <td className="p-2 border">{item.Price ? parseFloat(item.Price).toFixed(2) : "-"}</td>
+                <td className="p-2 border">{item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}</td>
+                <td className="p-2 border">{item.Total ? parseFloat(item.Total).toFixed(2) : "-"}</td>
+                <td className="flex justify-center gap-2 p-2 border">
                   {/* Optional Edit/Delete Components */}
                   <ServiceCatalogEdit ServiceCatalogID={item.ServiceCatalogID} onUpdate={fetchServiceCatalog} />
                   <ServiceCatalogDelete ServiceCatalogID={item.ServiceCatalogID} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchServiceCatalog} />
@@ -3233,12 +3233,12 @@ export const ServiceCatalogTable = () => {
         </table>
 
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -3317,7 +3317,7 @@ export const OTCCodeTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">OTC Codes Table</h2>
+      <h2 className="mb-4 text-xl font-bold">OTC Codes Table</h2>
       <input
         type="text"
         placeholder="Search..."
@@ -3342,7 +3342,7 @@ export const OTCCodeTable = () => {
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
+              <tr key={item.OTCCode} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   // onClick={() => navigate(`/bookings/${item.BookingId}`)}
@@ -3357,7 +3357,7 @@ export const OTCCodeTable = () => {
                     day: "numeric",
                   })}
                 </td>
-                <td className="border p-2 flex space-x-2 justify-center">
+                <td className="flex justify-center p-2 space-x-2 border">
                   <OTCEdit OTCCode={item.OTCCode} onUpdate={fetchOTCCode} />
                   <OTCDelete
                     OTCCode={item.OTCCode}
@@ -3536,7 +3536,7 @@ export const CrsTable = () => {
                     day: "numeric",
                   })}
                 </td>
-                <td className="border p-2 flex space-x-2 justify-center">
+                <td className="flex justify-center p-2 space-x-2 border">
                   <CrsEdit id_csr={item.id_csr} onUpdate={fetchCrs} />
                   <CrsDelete
                     id_csr={item.id_csr}

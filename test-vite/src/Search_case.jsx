@@ -431,6 +431,12 @@ const Search_case = () => {
   
 
     try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
       const response = await ApiCustomer.post(
         "/api/site_account",
         formDataSiteAccount
@@ -519,6 +525,7 @@ const Search_case = () => {
         .catch(console.error);
     }
   }, [formDataContact.StateProvince]);
+  
   const handlerContactSubmit = async () => {
   console.log(formDataContact);
 
@@ -540,6 +547,12 @@ const Search_case = () => {
   }
 
   try {
+    Swal.fire({
+      title: 'Saving Contact...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
     const response = await ApiCustomer.post(
       "/api/contact-information",
       formDataContact
@@ -647,6 +660,12 @@ const Search_case = () => {
     }
   
     try {
+      Swal.fire({
+        title: 'Saving Case...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
       const data = {
         user: getUserFromToken()
       }
@@ -770,8 +789,8 @@ const Search_case = () => {
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between rounded-none">
-              <div className="w-2xs p-2 text-white ">
+            <TabsList className="flex justify-between w-full rounded-none drop-shadow-xl bg-sky-700 h-15">
+              <div className="p-2 text-white w-2xs ">
                 <TabsTrigger value="search" className="cursor-pointer">
                   Search
                 </TabsTrigger>
@@ -779,14 +798,14 @@ const Search_case = () => {
                   Costumer Information
                 </TabsTrigger>
               </div>
-              {/* <Button className="ml-50 cursor-pointer "><span></span>Customer Complaint</Button>
+              {/* <Button className="cursor-pointer ml-50 "><span></span>Customer Complaint</Button>
             <Button className="cursor-pointer"><span></span>Customer Complaint Legal</Button> */}
               {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
-              <div className="flex gap-2 items-center">
-                <Button className="text-md rounded-2xl p-4 text-black bg-white font-bold">
+              <div className="flex items-center gap-2">
+                <Button className="p-4 font-bold text-black bg-white text-md rounded-2xl">
                   Create Legal Complaint
                 </Button>
-                <Button className="text-md rounded-2xl p-4 bg-transparent border-black border-2">
+                <Button className="p-4 bg-transparent border-2 border-black text-md rounded-2xl">
                   Create Complaint
                 </Button>
                 <BtnModal
@@ -799,7 +818,7 @@ const Search_case = () => {
                   setAccessories={setAccessories}
                 ></BtnModal>
                 <SidebarTrigger
-                  className="-ml-1 scale-125 mr-1"
+                  className="mr-1 -ml-1 scale-125"
                   icon={PanelRight}
                   color={"#ffffff"}
                 />
@@ -814,14 +833,14 @@ const Search_case = () => {
                 >
                   Clear All
                 </Button>
-                <CardContent className="grid gap-5 grid-cols-3">
+                <CardContent className="grid grid-cols-3 gap-5">
                   <div className="space-y-0.5">
                     <Label htmlFor="Email">Email</Label>
                     <Input
                       id="Email"
                       value={search.Email || ""}
                       onChange={handleInputChange}
-                      className="border-b-black p-1 "
+                      className="p-1 border-b-black "
                     />
                   </div>
                   <div className="space-y-0.5">
@@ -830,7 +849,7 @@ const Search_case = () => {
                       id="SerialNumber"
                       value={search.SerialNumber || ""}
                       onChange={handleInputChange}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                     />
                   </div>
                   <div className="space-y-0.5 flex flex-col">
@@ -854,7 +873,7 @@ const Search_case = () => {
                     <Input
                       id="Company"
                       value={search.Company || ""}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handleInputChange}
                     />
                   </div>
@@ -863,7 +882,7 @@ const Search_case = () => {
                     <Input 
                       id="ZipPostalCode" 
                       value={search.ZipPostalCode || ""}
-                      className="border-b-black p-1" 
+                      className="p-1 border-b-black" 
                       onChange={handleInputChange}
                     />
                   </div>
@@ -872,7 +891,7 @@ const Search_case = () => {
                     <Input 
                       id="City" 
                       value={search.City || ""}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handleInputChange}
                     />
                   </div>
@@ -882,7 +901,7 @@ const Search_case = () => {
                       id="Phone"
                       value={search.Phone || ""}
                       onChange={handleInputChange}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                     />
                   </div>
                   <div className="space-y-0.5">
@@ -890,7 +909,7 @@ const Search_case = () => {
                     <Input 
                       id="AssetTag" 
                       value={search.AssetTag || ""}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handleInputChange}
                     />
                   </div>
@@ -899,7 +918,7 @@ const Search_case = () => {
                     <Input 
                       id="ContractID" 
                       value={search.ContractID || ""}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handleInputChange}
                     />
                   </div>
@@ -908,7 +927,7 @@ const Search_case = () => {
                     <Input
                       id="TransactionType"
                       value={search.TransactionType || ""}
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handleInputChange}
                     />
                   </div>
@@ -917,7 +936,7 @@ const Search_case = () => {
                     <Input 
                     id="TransactiontID" 
                     value={search.TransactiontID || ""}
-                    className="border-b-black p-1"
+                    className="p-1 border-b-black"
                     onChange={handleInputChange}
                     />
                   </div>
@@ -926,33 +945,33 @@ const Search_case = () => {
                     <Input 
                     id="Opsi" 
                     value={search.Opsi || ""}
-                    className="border-b-black p-1"
+                    className="p-1 border-b-black"
                     onChange={handleInputChange}
                     />
                   </div>
                   {/* <div className="space-y-0.5">
                   <Label htmlFor="LicenseKey">Lisense key</Label>
-                  <Input id="LicenseKey" className="border-b-black p-1"  />
+                  <Input id="LicenseKey" className="p-1 border-b-black"  />
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="PIN">Pin</Label>
-                  <Input id="PIN" className="border-b-black p-1" />
+                  <Input id="PIN" className="p-1 border-b-black" />
                 </div> */}
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button
                     variant="secondary"
-                    className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"
+                    className="w-40 bg-white cursor-pointer drop-shadow-md border-1 h-11"
                     onClick={handleSearchClick}
                   >
-                    <p className="text-2xl mb-1">Search</p>
+                    <p className="mb-1 text-2xl">Search</p>
                   </Button>
                 </CardFooter>
               </Card>
             </TabsContent>
 
             <TabsContent value="ci" className="flex flex-col gap-1">
-              <TabsList className="bg-white float-right mr-5 self-end">
+              <TabsList className="self-end float-right mr-5 bg-white">
                 <TabsTrigger value="Account" className="cursor-pointer">
                   <span>
                     <Plus></Plus>
@@ -1007,7 +1026,7 @@ const Search_case = () => {
 
             <TabsContent value="Account">
               <TabsList className="flex h-[3em] bg-white">
-                <div className="w-2xs p-2 text-black">
+                <div className="p-2 text-black w-2xs">
                   <TabsTrigger value="Account" className="cursor-pointer">
                     Account
                   </TabsTrigger>
@@ -1031,18 +1050,18 @@ const Search_case = () => {
                     <Button className="self-end mr-2" variant="ghost" onClick={handleClearAllAcconunt}>
                       Clear All
                     </Button>
-                    <Button className="bg-white text-gray-400  self-end ">
+                    <Button className="self-end text-gray-400 bg-white ">
                       <Copy></Copy>Same in Account Address{" "}
                     </Button>
                   </CardTitle>
                 </CardHeader>
 
-                <CardContent className="grid gap-5 grid-cols-4">
+                <CardContent className="grid grid-cols-4 gap-5">
                   <div className="space-y-0.5">
                     <Label htmlFor="Company">Company<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="Company"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.Company}
                     />
@@ -1052,7 +1071,7 @@ const Search_case = () => {
                     <Input
                       id="Email"
                       type="email"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.Email}
                     />
@@ -1062,7 +1081,7 @@ const Search_case = () => {
                     <Input
                       id="PrimaryPhone"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.PrimaryPhone}
                     />
@@ -1072,7 +1091,7 @@ const Search_case = () => {
                     <Input
                       id="WhatsappNo"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.WhatsappNo}
                     />
@@ -1081,13 +1100,13 @@ const Search_case = () => {
                 <CardHeader className="mt-4">
                   <CardTitle>Address</CardTitle>
                 </CardHeader>
-                <CardContent className="grid gap-5 grid-cols-3">
+                <CardContent className="grid grid-cols-3 gap-5">
                   <div className="space-y-0.5">
                     <Label htmlFor="AddressLine1">Addres Line 1<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="AddressLine1"
                       type="email"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.AddressLine1}
                     />
@@ -1097,7 +1116,7 @@ const Search_case = () => {
                     <Input
                       id="AddressLine2"
                       type="email"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.AddressLine2}
                     />
@@ -1143,7 +1162,7 @@ const Search_case = () => {
                     <Input
                       id="ZipPostalCode"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.ZipPostalCode}
                     />
@@ -1152,7 +1171,7 @@ const Search_case = () => {
                 <CardFooter className="flex justify-end">
                   <Button
                     variant="secondary"
-                    className="bg-white drop-shadow-md border-1 cursor-pointer"
+                    className="bg-white cursor-pointer drop-shadow-md border-1"
                     onClick={handlerSiteAccountSubmit}
                   >
                     Verify & Save
@@ -1162,7 +1181,7 @@ const Search_case = () => {
             </TabsContent>
             <TabsContent value="Contact">
               <TabsList className="flex h-[3em] bg-white">
-                <div className="w-2xs p-2 text-black">
+                <div className="p-2 text-black w-2xs">
                   <TabsTrigger value="Account" className="cursor-pointer">
                     Account
                   </TabsTrigger>
@@ -1177,7 +1196,7 @@ const Search_case = () => {
                  Basic Information
                   </CardTitle>
                   <div>
-                    <Button className="bg-white text-gray-400  self-end "><Copy></Copy>Same in Account Adress </Button>
+                    <Button className="self-end text-gray-400 bg-white "><Copy></Copy>Same in Account Adress </Button>
                     <Button 
                     className="self-end mr-2" 
                     variant="ghost"
@@ -1185,7 +1204,7 @@ const Search_case = () => {
                     >Clear All</Button>
                   </div>
                 </CardHeader>
-                <CardContent className="grid gap-5 grid-cols-5">
+                <CardContent className="grid grid-cols-5 gap-5">
                   <div className="space-y-0.5 grid grid-cols-2 gap-x-2.5 col-span-2">
                     <Label htmlFor="Salutation">Salutation</Label>
                     <Label htmlFor="PreferredLanguage">
@@ -1220,7 +1239,7 @@ const Search_case = () => {
                     <Input
                       id="FirstName"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.FirstName}
                       onChange={handlerInputContactChange}
                     />
@@ -1232,7 +1251,7 @@ const Search_case = () => {
                     <Input
                       id="LastName"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.LastName}
                       onChange={handlerInputContactChange}
                     />
@@ -1244,7 +1263,7 @@ const Search_case = () => {
                     <Input
                       id="Email"
                       type="email"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.Email}
                       onChange={handlerInputContactChange}
                     />
@@ -1253,7 +1272,7 @@ const Search_case = () => {
                 <CardHeader className="mt-2">
                   <CardTitle>Phone Preferences</CardTitle>
                 </CardHeader>
-                <CardContent className="grid gap-5 grid-cols-4">
+                <CardContent className="grid grid-cols-4 gap-5">
                   <div className="space-y-0.5">
                     <Label htmlFor="Phone">Phone
                       
@@ -1262,7 +1281,7 @@ const Search_case = () => {
                     <Input
                       id="Phone"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.Phone}
                       onChange={handlerInputContactChange}
                     />
@@ -1275,7 +1294,7 @@ const Search_case = () => {
                     <Input
                       id="Mobile"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.Mobile}
                       onChange={handlerInputContactChange}
                     />
@@ -1285,7 +1304,7 @@ const Search_case = () => {
                     <Input
                       id="WorkPhone"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.WorkPhone}
                       onChange={handlerInputContactChange}
                     />
@@ -1295,7 +1314,7 @@ const Search_case = () => {
                     <Input
                       id="WorkExtension"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.WorkExtension}
                       onChange={handlerInputContactChange}
                     />
@@ -1305,7 +1324,7 @@ const Search_case = () => {
                     <Input
                       id="OtherPhone"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.OtherPhone}
                       onChange={handlerInputContactChange}
                     />
@@ -1315,7 +1334,7 @@ const Search_case = () => {
                     <Input
                       id="OtherExtension"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.OtherExtension}
                       onChange={handlerInputContactChange}
                     />
@@ -1325,7 +1344,7 @@ const Search_case = () => {
                     <Input
                       id="Fax"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.Fax}
                       onChange={handlerInputContactChange}
                     />
@@ -1334,7 +1353,7 @@ const Search_case = () => {
                 <CardHeader className="mt-2">
                   <CardTitle>Address</CardTitle>
                 </CardHeader>
-                <CardContent className="grid gap-5 grid-cols-3">
+                <CardContent className="grid grid-cols-3 gap-5">
                   <div className="space-y-0.5">
                     <Label htmlFor="AddressLine1">Address Line 1
                       
@@ -1343,7 +1362,7 @@ const Search_case = () => {
                     <Input
                       id="AddressLine1"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.AddressLine1}
                       onChange={handlerInputContactChange}
                     />
@@ -1353,7 +1372,7 @@ const Search_case = () => {
                     <Input
                       id="AddressLine2"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.AddressLine2}
                       onChange={handlerInputContactChange}
                     />
@@ -1366,7 +1385,7 @@ const Search_case = () => {
                     <SelectBar
                       id="City"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.City}
                       onChange={handlerInputContactChange}
                       options={citiesContact}
@@ -1381,7 +1400,7 @@ const Search_case = () => {
                     <SelectBar
                       id="StateProvince"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.StateProvince}
                       onChange={handlerInputContactChange}
                       options={provinces}
@@ -1415,7 +1434,7 @@ const Search_case = () => {
                     <Input
                       id="ZipPostalCode"
                       type="text"
-                      className="border-b-black p-1"
+                      className="p-1 border-b-black"
                       value={formDataContact.ZipPostalCode}
                       onChange={handlerInputContactChange}
                     />
@@ -1424,14 +1443,14 @@ const Search_case = () => {
                 <CardFooter className="flex justify-end gap-4">
                   <Button
                     variant="secondary"
-                    className="bg-white drop-shadow-md border-1 cursor-pointer w-20"
+                    className="w-20 bg-white cursor-pointer drop-shadow-md border-1"
                     onClick={handlerContactSubmit}
                   >
                     Save
                   </Button>
                   <Button
                     variant="secondary"
-                    className="bg-white drop-shadow-md border-1 cursor-pointer"
+                    className="bg-white cursor-pointer drop-shadow-md border-1"
                     onClick={handlerContactSubmit}
                   >
                     Verify & Save

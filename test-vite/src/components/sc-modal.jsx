@@ -46,6 +46,8 @@ import {
    SelectValue,
   } from '@/components/ui/select'
 
+
+import { useNavigate } from 'react-router';
   
  import { SnInput } from "./sn-input";
 import { Textarea } from "./ui/textarea";
@@ -113,7 +115,7 @@ export function BtnModal({
       <Button 
         variant="outline" 
         disabled={!selectedAssetForCase || !selectedContactForCase}
-        className={`mr-4 ${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`}
+        className={`mr-4 ${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500 text-white"}`}
       >
         <Plus className="mr-2" />Create Case
       </Button>
@@ -336,6 +338,12 @@ export function BtnModalContact({
   const handlerContactSubmit = async () => {
     console.log("formDataContact", formDataContact);
     try {
+      Swal.fire({
+        title: 'Saving Case...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
       let responseMessage = '';
   
       if (formDataContact.ContactID) {
@@ -4467,10 +4475,12 @@ export function BtnModalsServiceCatalog({
   
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false)
+  const [loadingCO, setLoadingCO] = useState(false)
   const [error, setError] = useState(false)
   const [currentStep, setCurrentStep] = useState(1);
   const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
   const [modalPart, setModalPart] = useState(false);
+  const navigate = useNavigate();
   //product information
   const fetchDataAssets = async () => {
     try {
@@ -4623,9 +4633,19 @@ export function BtnModalsServiceCatalog({
   //createorder
   const createOrder = async () => {
     try {
+      setLoadingCO(true);
       const data = {
         user: getUserFromToken()
-      }
+      }      
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Case.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
       const res = await ApiCustomer.post("/api/service-log/create-order", {
         AssetID: assetForWorkOrderCreation.AssetID,
         CaseID: caseDetails.CaseID,
@@ -4634,7 +4654,7 @@ export function BtnModalsServiceCatalog({
         IncidentType: selected,
         OwnerID: data.user.id,
       });
-  
+      
       await Swal.fire({
         title: "Success!",
         text: "Order added successfully!",
@@ -4642,23 +4662,25 @@ export function BtnModalsServiceCatalog({
         timer: 1500,
         showConfirmButton: false,
         allowEscapeKey: false,
-      }).then(()=>{
-        setOpen(false);
-        const WOID = res.data.WOID
-        const MOID = res.data.MOID
-        switch (serviceCatalogType) {
-          case "CSR":
-            window.open(`/material-order/${MOID}`, '_blank');
-            break;
-
-          case "workorder":
-            window.open(`/work/${WOID}`, '_blank');  
-            break;
-
-          default:
-            break;
-        }
       });
+      
+      setOpen(false);
+      const WOID = res.data.WOID
+      const MOID = res.data.MOID
+      switch (serviceCatalogType) {
+        case "CSR":
+          window.open(`/material-order/${MOID}`, '_blank');
+          // navigate(`/material-order/${MOID}`, '_blank');
+          break;
+
+        case "workorder":
+          window.open(`/work/${WOID}`, '_blank');
+          // navigate(`/work/${WOID}`, '_blank');
+          break;
+
+        default:
+          break;
+        }
     } catch (err) {
       console.error("❌ Order Creation Failed:", err);
       Swal.fire({
@@ -4669,11 +4691,10 @@ export function BtnModalsServiceCatalog({
         showConfirmButton: false,
         allowEscapeKey: false,
       });
+    } finally {
+      setLoadingCO(false);
     }
   };
-  
-
-
   
 
   function renderStepContent() {
@@ -4929,6 +4950,7 @@ export function BtnModalsServiceCatalog({
         );
   
       case 3:
+        
         return (
           <DialogContent className="sm:max-w-[fit] sm:max-h-[full] p-0 bg-white [&>button]:hidden ">
             <DialogHeader>
@@ -5040,7 +5062,7 @@ export function BtnModalsServiceCatalog({
               <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Previous</Button>
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
-              <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
+              <Button variant={'search'} className="" onClick={createOrder} disabled={loadingCO}>Create Order</Button>
               
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
               <Select onChange={setSelected} defaultValue="DepotRepair">
@@ -6059,7 +6081,7 @@ export function SubkTechnicianAdd() {
             id="ResourceAccountId"
             value={formData.ResourceAccountId}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             <option value="">-- Select Resource Account --</option>
             {resourceAccounts.map((ra) => (
@@ -6201,7 +6223,7 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
             id="ResourceAccountId"
             value={resourceAccountId}
             onChange={(e) => setResourceAccountId(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             <option value="">-- Select Resource Account --</option>
             {resourceAccounts.map((ra) => (
@@ -7128,7 +7150,7 @@ export function BookingDetailsAdd({ onUpdate }) {
               id="BookingID"
               value={resourceAccountId}
               onChange={(e) => setResourceAccountId(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full px-3 py-2 border border-gray-300 rounded"
             >
               <option value="">-- Select Resource Account --</option>
               {resourceAccounts.map((ra) => (
@@ -7372,28 +7394,28 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
         <div className="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
           <div>
             <label htmlFor="BookingId">Booking ID</label>
-            <select id="BookingId" value={form.BookingId} onChange={handleChange} className="w-full border p-2 rounded">
+            <select id="BookingId" value={form.BookingId} onChange={handleChange} className="w-full p-2 border rounded">
               <option value="">-- Select Booking --</option>
               {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
             </select>
           </div>
           <div>
             <label htmlFor="ResourceId">Resource ID</label>
-            <select id="ResourceId" value={form.ResourceId} onChange={handleChange} className="w-full border p-2 rounded">
+            <select id="ResourceId" value={form.ResourceId} onChange={handleChange} className="w-full p-2 border rounded">
               <option value="">-- Select Resource --</option>
               {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
             </select>
           </div>
           <div>
             <label htmlFor="ResourceAccountId">Resource Account ID</label>
-             <select id="ResourceAccountId" value={form.ResourceAccountId} onChange={handleChange} className="w-full border p-2 rounded">
+             <select id="ResourceAccountId" value={form.ResourceAccountId} onChange={handleChange} className="w-full p-2 border rounded">
               <option value="">-- Select Account --</option>
               {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
             </select>
           </div>
           <div>
             <label htmlFor="SubkTechnicianId">Subk Technician ID</label>
-            <select id="SubkTechnicianId" value={form.SubkTechnicianId} onChange={handleChange} className="w-full border p-2 rounded">
+            <select id="SubkTechnicianId" value={form.SubkTechnicianId} onChange={handleChange} className="w-full p-2 border rounded">
               <option value="">-- Select Technician --</option>
               {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
             </select>
@@ -7458,7 +7480,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           </div>
         </div>
 
-        {/* <div className="mt-6 grid grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-2 gap-4 mt-6">
           <div>
             <label htmlFor="ChangedBy">Changed By (User ID)</label>
             <Input id="ChangedBy" type="number" value={form.ChangedBy} onChange={handleChange} />
@@ -7596,7 +7618,7 @@ export function RepairClassCodeAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Repair Class Code</Button>
+        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Repair Class Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -7619,7 +7641,7 @@ export function RepairClassCodeAdd() {
             id="PaymentEligibility"
             value={formData.PaymentEligibility}
             onChange={handleInputChange}
-            className="w-full border p-2 rounded"
+            className="w-full p-2 border rounded"
           >
             <option value="">-- Select Eligibility --</option>
             <option value="Eligible">Eligible</option>
@@ -7731,7 +7753,7 @@ export function RepairClassCodeEdit({ Code }) {
           <select
             value={paymentEligibility}
             onChange={(e) => setPaymentEligibility(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            className="w-full px-3 py-2 border rounded"
           >
             <option value="">-- Select Payment Eligibility --</option>
             <option value="Eligible">Eligible</option>
@@ -7912,7 +7934,7 @@ export function ServiceCatalogAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Service Catalog</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Service Catalog</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -8084,7 +8106,7 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
-          <Pencil className="h-4 w-4" />
+          <Pencil className="w-4 h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
