@@ -62,8 +62,9 @@ model caseinformation {
   otcCodeTable                                  OTCCodeTable?        @relation(fields: [OTCCode], references: [OTCCode])
   ProblemDescription                            String?              @db.VarChar(255)
   CaseProductNote                               String?              @db.Text
-  accessory accessory[]
-  
+  accessory                                     accessory[]
+  ActionLog                                     ActionLog[]
+
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
   @@index([ContactID], map: "ContactID")
@@ -84,12 +85,12 @@ model OTCCodeTable {
 }
 
 model accessory {
-  id            Int            @id @default(autoincrement())
-  CaseID        String         // FK to caseinformation
-  Accessories   String
-  Note          String?
-  CT_SNCode     String?
-  case          caseinformation @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+  id          Int             @id @default(autoincrement())
+  CaseID      String // FK to caseinformation
+  Accessories String
+  Note        String?
+  CT_SNCode   String?
+  case        caseinformation @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
 
   @@index([CaseID])
 }
@@ -124,6 +125,20 @@ model AuditLog {
   timestamp DateTime @default(now())
 }
 
+model ActionLog {
+  id             Int      @id @default(autoincrement())
+  CaseId         String
+  ReferenceId    String?
+  model          String   @db.VarChar(100)
+  dataOld        String   @db.VarChar(50)
+  dataNew        String   @db.VarChar(50)
+  changedBy      Int?
+  ChangeAt       DateTime @default(now())
+  logDescription String?  @db.Text
+
+  changedByUser      User?            @relation(fields: [changedBy], references: [IDUser]) // Define the relation
+  CaseID_toActionLog caseinformation? @relation(fields: [CaseId], references: [CaseID])
+}
 
 model contact_information {
   ContactID         Int                 @id @default(autoincrement())
@@ -206,55 +221,53 @@ model materialorder {
 }
 
 model materialorderlineitems {
-  LineItemID                 Int                         @id @default(autoincrement())
-  MOID                       String?                     @db.VarChar(13)
-  LineNumber                 Int?
-  PartNumber                 String?                     @db.VarChar(100)
-  Description                String?                     @db.Text
-  ATPStatus                  String?                     @db.VarChar(50)
-  Quantity                   Int?
-  Status                     MaterialOrderLineItemStatus @default(New)
-  Price                Decimal?                    @db.Decimal(10, 2)
+  LineItemID  Int                         @id @default(autoincrement())
+  MOID        String?                     @db.VarChar(13)
+  LineNumber  Int?
+  PartNumber  String?                     @db.VarChar(100)
+  Description String?                     @db.Text
+  ATPStatus   String?                     @db.VarChar(50)
+  Quantity    Int?
+  Status      MaterialOrderLineItemStatus @default(New)
+  Price       Decimal?                    @db.Decimal(10, 2)
 
   // Revisi Tambahan
-  FunctionalEquivalence      String?                     @db.VarChar(100)
-  MediaHandlingPart          String?                     @db.VarChar(100)
-  PickPackInstructions       String?                     @db.Text
-  CollectionInstructions     CollectionInstructionType?  @default(None)
-  CustomerResponse           String?                     @db.Text
-  RejectedReason             String?                     @db.Text
-  OtherReason                String?                     @db.Text
-  PartAuthorizationReason    String?                     @db.Text
-  PartAuthorizationDetail    String?                     @db.Text
-  OriginalPartNumber         String?                     @db.VarChar(100)
-  OfferedPartNumber          String?                     @db.VarChar(100)
-  OfferedPartDescription     String?                     @db.Text
-  MainComponent              String?                     @db.VarChar(100)
-  
-  SerialNumber               String?                     @db.VarChar(100)
-  RemovedPartNumber          String?                     @db.VarChar(100)
-  RemovedSerialNumber        String?                     @db.VarChar(100)
-  RemovedPartDescription     String?                     @db.Text
+  FunctionalEquivalence   String?                    @db.VarChar(100)
+  MediaHandlingPart       String?                    @db.VarChar(100)
+  PickPackInstructions    String?                    @db.Text
+  CollectionInstructions  CollectionInstructionType? @default(None)
+  CustomerResponse        String?                    @db.Text
+  RejectedReason          String?                    @db.Text
+  OtherReason             String?                    @db.Text
+  PartAuthorizationReason String?                    @db.Text
+  PartAuthorizationDetail String?                    @db.Text
+  OriginalPartNumber      String?                    @db.VarChar(100)
+  OfferedPartNumber       String?                    @db.VarChar(100)
+  OfferedPartDescription  String?                    @db.Text
+  MainComponent           String?                    @db.VarChar(100)
 
-  
+  SerialNumber           String? @db.VarChar(100)
+  RemovedPartNumber      String? @db.VarChar(100)
+  RemovedSerialNumber    String? @db.VarChar(100)
+  RemovedPartDescription String? @db.Text
+
   // Foreign key ke Failure
-  FailureId                  Int? 
-  failure                    Failure?                    @relation(fields: [FailureId], references: [FailureId], onDelete: SetNull)
+  FailureId Int?
+  failure   Failure? @relation(fields: [FailureId], references: [FailureId], onDelete: SetNull)
 
-  materialorder              materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
-  servicecatalog_parts       servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
+  materialorder        materialorder?        @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
+  servicecatalog_parts servicecatalog_parts? @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
 
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
 }
 
 model Failure {
-  FailureId   Int                       @id @default(autoincrement())
+  FailureId   Int     @id @default(autoincrement())
   Name        String
   Description String?
 
   materialorderlineitems materialorderlineitems[]
-
 }
 
 model product_information {
@@ -400,6 +413,7 @@ model User {
 
   workorders_owned     workorder[]     @relation("UserWorkOrders")
   materialorders_owned materialorder[] @relation("UserMaterialOrders")
+  ActionLog            ActionLog[]
 }
 
 model warranty_services {
@@ -667,7 +681,6 @@ enum CaseStatus {
   Escalated
   Quote_Approved
   Pending_Quote
-
 }
 
 enum ShippingPriority {

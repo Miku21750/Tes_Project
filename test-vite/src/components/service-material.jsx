@@ -48,7 +48,40 @@ export const ServiceMaterial = () => {
   
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
-  
+
+  const [materialOrderInformation ,setMaterialOrderInformation] = useState({
+    MOID: '',
+    orderNumber: '',
+    serviceOfferID: '',
+    serviceDescription: '',
+    orderType: '',
+    shippingPriority: '',
+    readyForClosureDate:  '',
+    caseID: '',
+    contact: null,
+    deliveryRequestedDateCustomerTime: '',
+    collectionRequestedDate: '',
+    promoCode: '',
+    customerInducedDamage:  false,
+    accidentalDamageProtection: false,
+    defectiveMediaRetention: false,
+    notificationNumber: '',
+    salesOrderNumber: '',
+    resourceName: '',
+    resourceId: '',
+    workOrder: null,
+    parentMO: null,
+    isBCPOrder: false,
+    materialOrderType: '',
+    eotOrderNumber: '',
+  });
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
+  };
   const [deliveryRequiredDate, setDeliveryRequiredDate] = useState(null);
   const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
   const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);

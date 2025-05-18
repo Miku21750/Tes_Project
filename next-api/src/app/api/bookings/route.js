@@ -130,6 +130,7 @@ export async function POST(request) {
         }
       })
 
+
       return { BookingId: booking.BookingId };
     });
 

@@ -253,8 +253,16 @@ export const ServiceWork = () => {
           console.log("Res Main Account : ", resMainAccount);
           console.log("res wo general : ",WOGeneral)
         }
+        if(resWO.data.data.RequestedDateTimeCustomer == null){
+          Swal.fire({
+            icon: "warning",
+            title: "Warning",
+            text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
+          });
+        }else{
 
-        Swal.close();
+          Swal.close();
+        }
       } catch (err) {
         console.error("Fetch error:", err);
         Swal.fire({
@@ -1001,6 +1009,7 @@ export const ServiceWork = () => {
                     + New Bookable Resource
                   </Link> */}
                 <NewBookableResourceBooking
+                  CaseID={caseInformation?.CaseID}
                   WOID={workOrders.WOID}
                   CreatedBy={user.id}
                   RequestedDateTimeCustomer={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}

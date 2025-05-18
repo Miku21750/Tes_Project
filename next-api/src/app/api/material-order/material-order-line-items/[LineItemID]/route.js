@@ -30,7 +30,11 @@ export async function GET(request, { params }) {
             },
             include: {
                 servicecatalog_parts: true,
-                materialorder: true,
+                materialorder: {
+                    include: {
+                        workorder: true
+                    }
+                },
             },
         });
 
@@ -109,8 +113,9 @@ export async function PATCH(request, {params}) {
           } = body;
         console.log(body);
 
-        
+        console.log(FailureId, typeof(FailureId))
         const parsedFailureId = parseInt(FailureId);
+        console.log(parsedFailureId, typeof(parsedFailureId))
 
         // Update data
         const updatedMOLineItems = await prisma.materialorderlineitems.update({
@@ -140,6 +145,7 @@ export async function PATCH(request, {params}) {
         return NextResponse.json({
             success: true,
             message: "Data Line Items Information Updated!",
+            
             data: updatedMOLineItems
         }, { status: 200 });
 

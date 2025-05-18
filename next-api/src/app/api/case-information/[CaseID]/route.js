@@ -20,7 +20,15 @@ export async function GET(request, { params }) {
             CaseID: caseID,
         },
         include: { 
-            asset_information: true, 
+            asset_information: {
+                include:{
+                    product_information: {
+                        include: {
+                            product_type: true
+                        }
+                    }
+                }
+            } ,
             contact_information: true, 
             site_account: true,
             servicecatalog: {
@@ -72,49 +80,46 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
     const { CaseID } = await params;
     const caseID = CaseID;
-    const { 
-        SiteAccountID,
-        ContactID,
-        AssetID,
-        CaseSubject,
-        CaseType,
-        KCI_Flag,
-        IncomingChannel,
-        CaseStatus,
-        CasePriority,
-        CustomerSeverity,
-        CaseClosedDate,
-        CaseNote,
-        SymptomCode,
-        CaseResolution,
-        OTCCode,
-        id_csr,
-    } = await request.json();   
+    const body = await request.json();
 
-    //update data
-    const case_information = await prisma.caseinformation.update({
-        where: {
-            CaseID: caseID,
-        },
-        data: {
-            SiteAccountID: SiteAccountID,
-            ContactID: ContactID,
-            AssetID: AssetID,
-            CaseSubject: CaseSubject,
-            CaseType: CaseType,
-            KCI_Flag: KCI_Flag,
-            IncomingChannel: IncomingChannel,
-            CaseStatus: CaseStatus,
-            CasePriority: CasePriority,
-            CustomerSeverity: CustomerSeverity,
-            CaseClosedDate: CaseClosedDate,
-            CaseNote: CaseNote,
-            SymptomCode: SymptomCode,
-            CaseResolution: CaseResolution,
-            OTCCode: OTCCode,
-            id_csr: id_csr,
+    // Build data object dynamically
+    const updatableFields = [
+        'SiteAccountID',
+        'ContactID',
+        'AssetID',
+        'CaseSubject',
+        'CaseType',
+        'KCI_Flag',
+        'IncomingChannel',
+        'CaseStatus',
+        'CasePriority',
+        'CustomerSeverity',
+        'CaseClosedDate',
+        'CaseNote',
+        'SymptomCode',
+        'CaseResolution',
+        'OTCCode',
+        'id_csr',
+    ];
+
+    const dataToUpdate = {};
+
+    const existing = await prisma.caseinformation.findUnique({ where: { CaseID: caseID } });
+
+    for (const field of updatableFields) {
+        if (
+            body[field] !== undefined &&
+            body[field] !== null &&
+            body[field] !== existing[field]
+        ) {
+            dataToUpdate[field] = body[field];
         }
-    })
+    }
+
+    const case_information = await prisma.caseinformation.update({
+        where: { CaseID: caseID },
+        data: dataToUpdate,
+    });
 
     return NextResponse.json(
         {

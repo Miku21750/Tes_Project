@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SearchCommandBlock, SelectBarRelated } from "./sc-select";
 import { ArrowDownNarrowWideIcon, Car, Lock, Plus, RotateCw, Search } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -99,7 +99,7 @@ export const ServiceMoDetail = () => {
       const data = res.data.data;
   
       setMoLineItems(data);
-      console.log( data)
+      console.log(data)
   
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
@@ -183,7 +183,7 @@ export const ServiceMoDetail = () => {
       )}
       {moLineItems.MOID ? (
         // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
-        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID} moLineItems={moLineItems}/>
       ) : ''}
       {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">
@@ -408,18 +408,17 @@ export const ServiceMoDetail = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="mo_failure">
-          <Card className="rounded-md ">
-              <span className="ml-5 text-xl font-bold">Failure & Usage Details
-              </span>
-              <CardContent className="grid grid-flow-col grid-rows-5 gap-5 h-70">
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Failure Analysis
-                  </span>
-                  <span className="ml-40">...</span>
-                </div>
-
+          <TabsContent value="mo_failure" className={"p-1 flex flex-col gap-4"}>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg">Failure & Usage Details</CardTitle>
+                <hr/>
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10">
+              
+                <CaseField label="Failure Analysis" icon>
+                  <Input variant="invisible" placeholder="---"/>
+                </CaseField>
                 {/* <div className="flex font-bold"> */}
                   {/* <span className="ml-46">...</span> */}
                   <FailureSelect
@@ -428,136 +427,112 @@ export const ServiceMoDetail = () => {
                   />
                 {/* </div> */}
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Additional Failure Code</span>
-                  <span className="ml-25">...</span>
-                </div>
+                <CaseField label="Additional Failure Code" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Serial Number <span className="text-red-400">*</span></span>
-                  {/* <span className="ml-42">...</span> */}
-                  <input 
-                  type="text" 
-                  className="ml-42"
-                  name="serialNumber"
-                  value={MODetailInput.serialNumber}
-                  onChange={handleChange}
-                  placeholder="---" />
-                </div>
+                <CaseField label="Serial Number" icon>
+                  <Input
+                    variant="invisible"
+                    name="serialNumber"
+                    value={MODetailInput.serialNumber}
+                    onChange={handleChange}
+                    placeholder="---" 
+                    />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Part Usage Code
-                  </span>
-                  <span className="ml-38">...</span>
-                </div>
+               
+                <CaseField label="Part Usage Code" icon>
+                    <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Part Consumption
-                  </span>
-                  <span className="ml-51">...</span>
-                </div>
+                <CaseField label="Part Consumption" icon>
+                    <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Part Order Consumption Comment
-                  </span>
-                  <span className="ml-20">...</span>
-                </div>
+                <CaseField label="Part Order Consumption Comment" icon>
+                    <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Number <span className="text-red-400">*</span>
-                  </span>
-                  {/* <span className="ml-43">...</span> */}                  
-                  <input type="text" 
-                  className="ml-43"
-                  name="removedPartNumber"
-                  value={MODetailInput.removedPartNumber}
-                  onChange={handleChange}
-                  placeholder="---" />
-                </div>
+                <CaseField label="Removed Part Number " icon>
+                    <Input 
+                    variant="invisible" 
+                    name="removedPartNumber"
+                    value={MODetailInput.removedPartNumber}
+                    onChange={handleChange}
+                    placeholder="---"
+                    />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Removed Serial Number <span className="text-red-400">*</span>
-                  </span>
-                  {/* <span className="ml-41">...</span> */}                  
-                  <input type="text" 
-                  className="ml-41"
-                  name="removedSerialNumber"
-                  value={MODetailInput.removedSerialNumber}
-                  onChange={handleChange}
-                  placeholder="---" />
-                </div>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Desc <span className="text-red-400">*</span>
-                  </span>
-                  {/* <span className="ml-50">...</span> */}
-                  <input type="text" 
-                  className="ml-50"
-                  name="removedPartDescription"
-                  value={MODetailInput.removedPartDescription}
-                  onChange={handleChange}
-                  placeholder="---" />
-                </div>
+                <CaseField label="Removed Serial Number " icon>
+                    <Input 
+                    variant="invisible" 
+                    name="removedSerialNumber"
+                    value={MODetailInput.removedSerialNumber}
+                    onChange={handleChange}
+                    placeholder="---"
+                    />
+                </CaseField>
+
+
+                
+                <CaseField label="Removed Part Desc" icon>
+                    <Input 
+                    variant="invisible" 
+                    name="removedPartDescription"
+                    value={MODetailInput.removedPartDescription}
+                    onChange={handleChange}
+                    placeholder="---"
+                    />
+                </CaseField>
+
               </CardContent>
             </Card>
 
             <Card className="rounded-md "> 
-              <span className="ml-5 text-xl font-bold">Part Return Details</span>
-              <CardContent className="grid grid-flow-col grid-rows-5 gap-5 h-80">
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Returnable Code</span>
-                  <span className="ml-40">...</span>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Part Return Details</CardTitle>
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10">
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Type Code Identifier</span>
-                  <span className="ml-20">...</span>
-                </div>
+                <CaseField label="Returnable Code" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                  <span>Return_Instructions</span>
-                  <span className="ml-35">...</span>
-                </div>
+                <CaseField label="Return Type Code Identifier" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Tracking Number</span>
-                  <span className="ml-25">...</span>
-                </div>
+                 <CaseField label="Return Instructions" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Return Override Flag</span>
-                  <span className="ml-32">...</span>
-                </div>
+                 <CaseField label="Return Tracking Number" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Ovveride Reason</span>
-                  <span className="ml-30">...</span>
-                </div>
+                  <CaseField label="Return Override Flag" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">RMA</span>
-                  <span className="ml-66">...</span>
-                </div>
+                 <CaseField label="Return Ovveride Reason" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>RMA Identifier</span>
-                  <span className="ml-48">...</span>
-                </div>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Deadline</span>
-                  <span className="ml-45.5">...</span>
-                </div>
+                <CaseField label="RMA" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+
+                
+                <CaseField label="RMA Identifier" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+
+                <CaseField label="Return Deadline" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -580,6 +555,7 @@ export const ServiceMoDetail = () => {
             </Card>
 
           </TabsContent>
+
         </Tabs>
       </CardContent>
     </Card>
@@ -608,7 +584,7 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
     ApiCustomer.get(`/api/failure/${failureId}`).then((res) => {
       const f = res.data.data;
       const label = `${f.Name} — ${f.Description ?? ''}`;
-      setInputValue(label);
+      setInputValue(f.FailureId);
     }).catch(() => {
       setInputValue(''); // Kosongkan jika tidak ditemukan
     });
@@ -617,7 +593,7 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
 
 
   const fetchFailures = debounce((query) => {
-    if (query.length < 2) return;
+      if (!query || query.length < 2) return;
     ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
       const limited = res.data.slice(0, 3).map(f => ({
         value: f.FailureId.toString(),
@@ -627,20 +603,29 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
     });
   }, 300);
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
+  const handleInputChange = (value) => {
     setInputValue(value);
     fetchFailures(value);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: value,
+    }));
   };
+  
 
   const handleSelect = (selected) => {
     setInputValue(selected.label);
-    setSearchResults([]);
+    setSearchResults([
+      selected,
+      ...searchResults.filter((opt) => opt.value !== selected.value),
+
+    ]);
     setMODetailInput((prev) => ({
       ...prev,
       failureId: selected.value,
       failureName: selected.label,
     }));
+    console.log("selected.value",selected.value)
   };
 
   // Handle focus and blur events
@@ -653,20 +638,20 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
   };
 
   return (
-    <CaseField label={"Failure Code"} span={2} star>
+    <CaseField label={"Failure Code"} star>
       <div className="relative w-full">
-        <Input
-          variant={"invisible"}
-          value={inputValue}
-          onChange={handleInputChange}
+     
+        <SearchCommandBlock
+          name="failureId"
+          value={String(inputValue) }
+          onChange={handleInputChange}    
           placeholder="Search Failure..."
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          options={searchResults}
         />
 
         {/* Show dropdown only if results exist and input is focused */}
         {isFocused && (
-          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
+          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
             {searchResults.length > 0 ? (
               searchResults.map((opt) => (
                 <li

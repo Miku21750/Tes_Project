@@ -188,13 +188,15 @@ export async function POST(request) {
           CreatedBy: parseInt(CreatedBy),
           ProblemDescription: ProblemDescription,
           CaseProductNote : CaseNoteProduct,
-          accessory: {
-            create: accessories.map((acc) => ({
-              Accessories: acc.name,
-              Note: acc.note,
-              CT_SNCode: acc.code,
-            })),
-          },
+          ...(Array.isArray(accessories) && accessories.length > 0 && {
+            accessory: {
+              create: accessories.map((acc) => ({
+                Accessories: acc.name,
+                Note: acc.note,
+                CT_SNCode: acc.code,
+              })),
+            },
+          }),
         },
     });
 

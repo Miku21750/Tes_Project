@@ -38,7 +38,8 @@ import { Labor } from './labor';
 import { ResourceAccountTable } from './master_table';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';
-
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
 createRoot(document.getElementById('root')).render(
   <StrictMode> 
     <BrowserRouter>

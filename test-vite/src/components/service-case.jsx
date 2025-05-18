@@ -81,7 +81,8 @@ import DatePicker from './date-picker'
 
 import { SearchCommandBlock } from "./sc-select";
 
-
+import { pdf } from '@react-pdf/renderer';
+import ServiceRequestPDF from './service-request-form'; // adjust path if needed
 
 
 export const TabsService = ({ 
@@ -163,7 +164,7 @@ export const TabsService = ({
     setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
- const handleSave = async () => {
+ const handleSave = async (redirect = true) => {
   console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
 
   try {
@@ -193,7 +194,7 @@ export const TabsService = ({
     }
 
     let savedModules = [];
-
+    const dataToUpdate = {};
     for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
       switch (target) {
 
@@ -208,21 +209,17 @@ export const TabsService = ({
       Note: modifiedNote,
       CaseID: caseDetails.CaseID
     });
+      dataToUpdate.CaseNote = response.data.data.NoteID;
 
     const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
     setCaseNotes({ NotesDisplay: NotedDisplay, 
           ActionType: caseNoteFormData.ActionType,
           LogType: caseNoteFormData.LogType,
           VisibleExternally: caseNoteFormData.VisibleExternally,});
-
-    let dataUpdated = {
-      CaseNote: response.data.data.NoteID
-    };
     
-    if (selectedSymptom) {
-      dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+     if (selectedSymptom) {
+      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
     }
-    await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated);
 
     savedModules.push("Note");
   }
@@ -241,7 +238,8 @@ export const TabsService = ({
 
         case 'ENTITLEMENT':
           if (entitlementEdited) {
-            await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, entitlementStatus);
+            console.log(entitlementStatus);
+            Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
             savedModules.push("Entitlement");
           }
           break;
@@ -259,9 +257,7 @@ export const TabsService = ({
                 ...csrForm,
                 caseResolutionCode: csrForm.caseResolutionCode || "",
               });
-              await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
-                id_csr: response.data.data.id_csr
-              });
+              dataToUpdate.id_csr = response.data.data.id_csr;
             }
             savedModules.push("CSR");
           }
@@ -270,13 +266,28 @@ export const TabsService = ({
           case 'CASE':
          if (caseFilled) {
               try {
-                await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
-                  ...caseForm,
+                const oldStatus = caseDetails.CaseStatus;
+                const newStatus = caseForm.CaseStatus;
+                 Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
-                  CaseStatus: caseForm.CaseStatus || "",
+                  CaseStatus: newStatus || "",
                 });
                 savedModules.push("Case");
-                swal.fire({
+                if (oldStatus !== newStatus) {
+                  const token = {
+                    user: getUserFromToken()
+                  }
+                  await ApiCustomer.post("/api/actionlog", {
+                    CaseId: `${caseDetails.CaseID}`,
+                    ReferenceId: ``,
+                    model: "Case",
+                    dataOld: oldStatus,
+                    dataNew: newStatus,
+                    changedBy: token.user.id,
+                    logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
+                  });
+                }
+                Swal.fire({
                   icon: "success",
                   title: "Berhasil Disimpan",
                   text: "Data Case berhasil disimpan.",
@@ -298,20 +309,27 @@ export const TabsService = ({
           }
           break;
       }
+
+      if (Object.keys(dataToUpdate).length > 0) {
+        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
+      }
     }
 
     // Satu alert saja jika banyak data berhasil disimpan
     if (savedModules.length > 0) {
-      await Swal.fire({
-        icon: "success",
-        title: "Berhasil Disimpan",
-        text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
-        timer: 2500,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-      window.location.reload();
+      if(redirect){
+        await Swal.fire({
+          icon: "success",
+          title: "Berhasil Disimpan",
+          text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+          timer: 2500,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
+        window.location.reload();
+      }
+      return true
     }
 
   } catch (error) {
@@ -372,6 +390,17 @@ export const TabsService = ({
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "SRF", onClick: async () => {
+      // console.log("Case Details ; ",caseDetails);
+      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Service_Request_Form.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
@@ -382,6 +411,7 @@ export const TabsService = ({
     { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
   ];
+  console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
@@ -390,6 +420,16 @@ export const TabsService = ({
     setServiceCatalogType(type)
   };
   const saveAndCloseCase = async () => {
+
+    if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Case Resolution",
+      text: "You must select a Case Resolution Code before closing the case.",
+    });
+    return;
+  }
+
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
       text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
@@ -404,6 +444,7 @@ export const TabsService = ({
       return; // User canceled
     }
     try {
+      
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update the Case.",
@@ -413,6 +454,8 @@ export const TabsService = ({
           Swal.showLoading();
         },
       });
+      const success = await handleSave(false);
+      if (!success) return; // Stop if failed
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
@@ -422,6 +465,18 @@ export const TabsService = ({
       );
       if (res.data.success) {
         // Success alert
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: ``,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: res.data.data.CaseStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${res.data.data.CaseStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -591,6 +646,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 
       const result = response.data;
       console.log(response);
+      
 
       if (!result.success) {
         return Swal.fire({
@@ -676,6 +732,18 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
       );
       if (res.data.success) {
         // Success alert
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${workOrders.CaseID}`,
+          ReferenceId: `${workOrders.WOID}`,
+          model: "Work Orders",
+          dataOld: workOrders.SystemStatus,
+          dataNew: res.data.data.SystemStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -794,6 +862,18 @@ export const TabsServiceMO = ({ materialOrders }) => {
       );
       if (res.data.success) {
         // Success alert
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${materialOrders.workorder?.CaseID}`,
+          ReferenceId: `${materialOrders.MOID}`,
+          model: "Material Orders",
+          dataOld: materialOrders.OrderStatus,
+          dataNew: res.data.data.OrderStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -866,9 +946,8 @@ export const TabsServiceMO = ({ materialOrders }) => {
   );
 };
 
-export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
   const navigate = useNavigate();
-  console.log(MOLineDetails);
 
   const buttons = [
     {
@@ -901,7 +980,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
 
-  const saveMOLI = async () => {
+  const saveMOLI = async (LineItemID, shouldRedirect = true) => {
     try {
       Swal.fire({
         title: 'Saving...',
@@ -925,16 +1004,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
         RemovedPartDescription: MOLineDetails.removedPartDescription,
       });
       if (res.data.success) {
-        // Success alert
-        Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
-          text: res.data.message,
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          navigate(`/mo_detail/${LineItemID}`)
-        })
+        if (shouldRedirect) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: res.data.message,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            navigate(`/mo_detail/${LineItemID}`);
+          });
+        }
+        return true; // Indicate success
       } else {
         // Error from API
         Swal.fire({
@@ -962,6 +1043,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
           Swal.showLoading();
         },
       });
+      const success = await saveMOLI(LineItemID, false);
+      if (!success) return; // Stop if saveMOLI failed
       const res = await ApiCustomer.patch(
         `/api/material-order/material-order-line-items/${LineItemID}`,
         {
@@ -969,6 +1052,19 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
         }
       );
       if (res.data.success) {
+        console.log("MATERIAL ORDeR IN CLOSED POSTED : ", moLineItems)
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
+          ReferenceId: `${moLineItems.MOID}`,
+          model: "Material Order Line Item",
+          dataOld: moLineItems.Status,
+          dataNew: "Closed",
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
+        })
         // Success alert
         Swal.fire({
           icon: "success",
@@ -995,6 +1091,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
       });
     }
   };
+
   return (
     <>
       <div className="flex items-center border-1 ">
@@ -1009,7 +1106,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-
+    {console.log(MOLineDetails)}
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
@@ -1118,6 +1215,8 @@ export const ServiceCase = ({
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
+
+  const [actionLogs, setActionLogs] = useState([]);
 
   const fetchCustomerData = async () => {
     try {
@@ -1373,8 +1472,18 @@ const fetchCase = async () => {
   }
 };
 
+const fetchActionLog = async () => {
+  try {
+    const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
+    setActionLogs(actionlog.data.data)
+  } catch (error) {
+    console.error("Error fetching ActionLog:", err);
+  }
+}
+
+
   
-  //notes handler
+  //handler all case
   useEffect(() => {
     fetchCustomerData();
     fetchAssetInformation();
@@ -1399,6 +1508,7 @@ const fetchCase = async () => {
     fetchOTCCode();
     fetchCsr();
     fetchCase();
+    fetchActionLog();
   }, []);
 
   useEffect(() => {
@@ -1628,15 +1738,15 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Case Status">
-      <SearchCommandBlock
-  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-  onChange={(label) => {
-    const enumValue = labelToStatusEnum[label];
-    onChangeCase("CaseStatus")(enumValue);
-  }}
-  placeholder="--Select--"
-  options={Object.values(statusEnumToLabel)}
-/>
+                <SearchCommandBlock
+                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                  onChange={(label) => {
+                    const enumValue = labelToStatusEnum[label];
+                    onChangeCase("CaseStatus")(enumValue);
+                  }}
+                  placeholder="--Select--"
+                  options={Object.values(statusEnumToLabel)}
+                />
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock
@@ -2000,8 +2110,8 @@ const [endDate, setEndDate] = useState(null);
               <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
             </tr>
           ))}
-          {(!dataFetchAssetInformation?.accessories ||
-            dataFetchAssetInformation.accessories.length === 0) && (
+          {(!caseDetails.accessory ||
+            caseDetails.accessory.length === 0) && (
             <tr>
               <td className="border px-4 py-2 text-center" colSpan={5}>
                 No accessories found.
@@ -2066,6 +2176,7 @@ const [endDate, setEndDate] = useState(null);
                     // readOnly
                   ></DatePicker>{" "}
                 </CaseField>
+                {console.log(entitlementStatus)}
                 <CaseField label="OTC Code" icon span={2}>
                   <SearchCommandBlock
                     options={otcCode}
@@ -2343,7 +2454,7 @@ const [endDate, setEndDate] = useState(null);
                     value={formData?.NotesDisplay}
                   >
 
-                    {console.log(caseNotes)}
+                    
                   </textarea>
                 </div>
               </CardContent>
@@ -2359,30 +2470,34 @@ const [endDate, setEndDate] = useState(null);
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[60px]">No</TableHead>
+                  <TableHead>ReferenceId</TableHead>
                   <TableHead>Change By</TableHead>
                   <TableHead>Old Status</TableHead>
                   <TableHead>New Status</TableHead>
                   <TableHead>Change At</TableHead>
+                  <TableHead>Log Description</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* {actionLogs?.length > 0 ? (
+                {actionLogs?.length > 0 ? (
                   actionLogs.map((log, index) => (
                     <TableRow key={log.id || index}>
                       <TableCell>{index + 1}</TableCell>
-                      <TableCell>{log.changedBy}</TableCell>
-                      <TableCell>{log.oldStatus}</TableCell>
-                      <TableCell>{log.newStatus}</TableCell>
-                      <TableCell>{new Date(log.changedAt).toLocaleString()}</TableCell>
+                      <TableCell>{log.ReferenceId}</TableCell>
+                      <TableCell>{log.changedByUser?.Name}</TableCell>
+                      <TableCell>{log.dataOld}</TableCell>
+                      <TableCell>{log.dataNew}</TableCell>
+                      <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                      <TableCell>{log.logDescription}</TableCell>
                     </TableRow>
                   ))
-                ) : ( */}
+                ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center italic">
                       No action logs available.
                     </TableCell>
                   </TableRow>
-                {/* )} */}
+                )}
               </TableBody>
             </Table>
           </CardContent>

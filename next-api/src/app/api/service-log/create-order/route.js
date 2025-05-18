@@ -23,17 +23,15 @@ export async function POST(request) {
         });
 
          // 2. Create ServiceCatalog for each selected warranty
-        for (const ws of selectedWarrantyServices) {
-            await prisma.servicecatalog.create({
+        await prisma.servicecatalog.create({
             data: {
                 AssetID,
-                Service_offerID: ws.Service_offerID,
-                Price: ws.Price,
-                Tax: ws.Tax,
-                Total: ws.Total
+                Service_offerID: selectedWarrantyServices.Service_offerID,
+                Price: selectedWarrantyServices.Price,
+                Tax: selectedWarrantyServices.Tax,
+                Total: selectedWarrantyServices.Total
             }
-            });
-        }
+        });
     
         // 3. Create Material Order (One only)
         const MOID = await generateID("MO-", "materialorder", "MOID");
