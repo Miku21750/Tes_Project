@@ -30,8 +30,11 @@ export function LoginForm({ className, ...props }) {
         password,
       });
       console.log("Login success:", res.data);
-      const { token } = res.data;
-      login(token);
+      const { accessToken } = res.data;
+      if (!accessToken) {
+        throw new Error("Missing access token in response");
+      }
+      login(accessToken);
 
       Swal.fire({
         title: "Success",

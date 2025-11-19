@@ -1,11 +1,15 @@
-import { Navigate, Outlet } from "react-router";
-
+import { Navigate } from "react-router";
 import App from "@/App";
+import { useAuth } from "@/context/auth-context";
 
 export const GateKeepingRouting = () => {
-    const token = localStorage.getItem('token');
+    const { user, loading } = useAuth();
 
-    if(!token) {
+    if (loading) {
+        return null;
+    }
+
+    if(!user) {
         return <Navigate to="/lorem" replace />
     }
 

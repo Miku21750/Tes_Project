@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
-import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-import crypto from "crypto"; 
-
-
-const JWT_SECRET =  process.env.JWT_SECRET || '' 
+import crypto from "crypto";
+import { createAccessToken } from "@/utils/auth";
 
 // GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {
@@ -144,23 +141,13 @@ export async function PATCH(request, { params }) {
     });
 
     
-    const newToken = jwt.sign(
-      {
-        id: updatedUser.IDUser,
-        email: updatedUser.Email,
-        role: updatedUser.Role,
-        name: updatedUser.Name,
-        avatar: updatedUser.ProfilePhoto || "",
-      },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
+    const { token: accessToken, expiresAt } = createAccessToken(updatedUser);
 
     return NextResponse.json({
       success: true,
       message: "Data user berhasil diperbarui",
-      token: newToken,
+      accessToken,
+      expiresAt,
       data: updatedUser
     }, { status: 200 });
 

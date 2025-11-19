@@ -1,17 +1,17 @@
 import { jwtDecode } from "jwt-decode";
 
-const TOKEN_KEY = "token";
+let inMemoryToken = null;
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return inMemoryToken;
 }
 
 export function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
+  inMemoryToken = token || null;
 }
 
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  inMemoryToken = null;
 }
 
 export function isTokenExpired(decodedToken) {
@@ -34,7 +34,16 @@ export function getUserFromToken(tokenOverride) {
       return null;
     }
 
-    return decoded; // berisi: { id, email, role, iat, exp }
+    return {
+      id: decoded.sub ?? decoded.id ?? decoded.userId ?? null,
+      email: decoded.email ?? "",
+      role: decoded.role ?? "",
+      name: decoded.name ?? decoded.email ?? "",
+      avatar: decoded.avatar ?? "",
+      exp: decoded.exp,
+      iat: decoded.iat,
+      raw: decoded
+    };
   } catch (error) {
     console.error("Failed to decode token:", error);
     clearToken();

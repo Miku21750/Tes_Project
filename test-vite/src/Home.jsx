@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from './components/ui/button';
 import { FindCase } from './components/model/sc-modal'; // Assuming this is a modal trigger
 import { useNavigate } from 'react-router-dom'; // Corrected import for useNavigate
+import { useAuth } from '@/context/auth-context';
 
 export const Home = () => {
     const navigate = useNavigate();
-    const token = localStorage.getItem('token');
+    const { user, loading } = useAuth();
+    const isLoggedIn = Boolean(user);
 
     return (
         <div className="relative min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/bg-1.jpg')" }}>
@@ -81,7 +83,14 @@ export const Home = () => {
                                 </CardDescription>
                             </CardContent>
                             <CardFooter>
-                                {token ? (
+                                {loading ? (
+                                    <Button
+                                        className="text-lg md:text-xl px-4 py-2 text-white bg-emerald-600 rounded-md shadow-md"
+                                        disabled
+                                    >
+                                        Checking session...
+                                    </Button>
+                                ) : isLoggedIn ? (
                                     <Button
                                         className="text-lg md:text-xl px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
                                         onClick={() => navigate('/app')}

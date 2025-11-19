@@ -17,7 +17,7 @@ import { usePalette, useColor } from 'color-thief-react';
 
 
 export function UserProfile() {
-    const {user} = useAuth();
+    const {user, login, refreshSession} = useAuth();
     const [dominantColor, setDominantColor] = useState([0, 200, 255]); const imgRef = useRef(null);
     
 
@@ -31,7 +31,7 @@ export function UserProfile() {
         NewPassword: "",
         ProfilePhoto: null,
         Signature: null,
-        Role: user.role
+        Role: user?.role ?? ""
     })
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
@@ -139,7 +139,11 @@ export function UserProfile() {
                 },
             })
             if (res.data.data) {
-                localStorage.setItem("token", res.data.token);
+                if (res.data.accessToken) {
+                    login(res.data.accessToken);
+                } else {
+                    await refreshSession().catch(() => null);
+                }
                 setIsDialogEditOpen(false);
 
                 toast("data berhasil diupdate");
@@ -211,9 +215,9 @@ export function UserProfile() {
                     )}
                     <Badge
                         variant="outline"
-                        className={user.role == 'admin' ? 'bg-amber-200' : 'bg-gray-200'}
+                        className={user?.role == 'admin' ? 'bg-amber-200' : 'bg-gray-200'}
                     >
-                        Role: {user.role}
+                        Role: {user?.role ?? 'user'}
                     </Badge>
 
             <Dialog open={isDialogEditOpen} onOpenChange={setIsDialogEditOpen}>

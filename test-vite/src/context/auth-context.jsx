@@ -1,67 +1,101 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
-import { getUserFromToken, setToken, clearToken, getToken } from "@/lib/utils/auth";
+import ApiCustomer from "@/api";
+import { getUserFromToken, setToken, clearToken } from "@/lib/utils/auth";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const logoutTimerRef = useRef(null);
+    const refreshTimerRef = useRef(null);
+    const refreshAccessTokenRef = useRef(null);
 
-    const clearLogoutTimer = useCallback(() => {
-        if (logoutTimerRef.current) {
-            clearTimeout(logoutTimerRef.current);
-            logoutTimerRef.current = null;
+    const clearRefreshTimer = useCallback(() => {
+        if (refreshTimerRef.current) {
+            clearTimeout(refreshTimerRef.current);
+            refreshTimerRef.current = null;
         }
     }, []);
 
-    const logout = useCallback(() => {
-        clearLogoutTimer();
-        clearToken();
-        setUser(null);
-    }, [clearLogoutTimer]);
-
-    const scheduleLogout = useCallback((tokenPayload) => {
-        clearLogoutTimer();
-
-        if (!tokenPayload?.exp) {
-            return;
+    const applySession = useCallback((token) => {
+        clearRefreshTimer();
+        if (!token) {
+            clearToken();
+            setUser(null);
+            return null;
         }
 
-        const expiresInMs = tokenPayload.exp * 1000 - Date.now();
-
-        if (expiresInMs <= 0) {
-            logout();
-            return;
-        }
-
-        logoutTimerRef.current = setTimeout(() => {
-            logout();
-        }, expiresInMs);
-    }, [logout, clearLogoutTimer]);
-
-    const login = useCallback((token) => {
         setToken(token);
-        const userData = getUserFromToken(token);
-        setUser(userData);
-        scheduleLogout(userData);
-    }, [scheduleLogout]);
+        const nextUser = getUserFromToken(token);
+        setUser(nextUser);
+        return nextUser;
+    }, [clearRefreshTimer]);
+
+    const scheduleRefresh = useCallback((payload) => {
+        clearRefreshTimer();
+        if (!payload?.exp) {
+            return;
+        }
+
+        const msUntilExpiry = payload.exp * 1000 - Date.now();
+        const refreshIn = Math.max(msUntilExpiry - 30_000, 0);
+
+        refreshTimerRef.current = setTimeout(() => {
+            refreshAccessTokenRef.current?.().catch(() => {
+                applySession(null);
+            });
+        }, refreshIn);
+    }, [applySession, clearRefreshTimer]);
+
+    const refreshAccessToken = useCallback(async () => {
+        try {
+            const { data } = await ApiCustomer.post("/api/auth/refresh");
+            if (!data?.accessToken) {
+                throw new Error("Missing access token in refresh response");
+            }
+
+            const payload = applySession(data.accessToken);
+            scheduleRefresh(payload);
+            return payload;
+        } catch (error) {
+            applySession(null);
+            throw error;
+        }
+    }, [applySession, scheduleRefresh]);
 
     useEffect(() => {
-        const token = getToken();
-        const userData = token ? getUserFromToken(token) : null;
+        refreshAccessTokenRef.current = refreshAccessToken;
+    }, [refreshAccessToken]);
 
-        setUser(userData);
-        scheduleLogout(userData);
-        setLoading(false);
+    const login = useCallback((token) => {
+        const payload = applySession(token);
+        scheduleRefresh(payload);
+    }, [applySession, scheduleRefresh]);
+
+    const logout = useCallback(async () => {
+        clearRefreshTimer();
+        applySession(null);
+        try {
+            await ApiCustomer.post("/api/auth/logout");
+        } catch (error) {
+            console.error("Failed to logout", error);
+        }
+    }, [applySession, clearRefreshTimer]);
+
+    const refreshSession = useCallback(() => refreshAccessToken(), [refreshAccessToken]);
+
+    useEffect(() => {
+        refreshAccessToken()
+            .catch(() => null)
+            .finally(() => setLoading(false));
 
         return () => {
-            clearLogoutTimer();
+            clearRefreshTimer();
         };
-    }, [scheduleLogout, clearLogoutTimer]);
+    }, [refreshAccessToken, clearRefreshTimer]);
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, refreshSession }}>
             {children}
         </AuthContext.Provider>
     );

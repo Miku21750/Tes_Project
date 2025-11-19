@@ -29,6 +29,7 @@ import { format } from "date-fns";
 import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
 import { formatDateForInput,formatDate } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
 /**
  * @fileoverview Create Case page (SearchCase_V3)
@@ -222,24 +223,6 @@ function classNames(...s) {
 }
 
 /**
- * Safely parse user id from JWT stored in localStorage under 'token'.
- * Returns null if token absent/invalid.
- * @returns {{id: any}|null}
- */
-function getUserFromTokenSafe() {
-  try {
-    const raw = localStorage.getItem("token");
-    if (!raw) return null;
-    const payload = JSON.parse(atob(raw.split(".")[1]));
-    return { id: payload?.id ?? payload?.userId,
-      user: payload
-     };
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Utility object for formatting and parsing dates between UI and DB formats.
  */
 const DateHelper = {
@@ -277,6 +260,7 @@ const DateHelper = {
  */
 export default function NewCaseForm() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Global state
   const [loading, setLoading] = useState(false);
@@ -1079,7 +1063,10 @@ export default function NewCaseForm() {
     
     setLoading(true);
     try {
-      const user = getUserFromTokenSafe();
+      if (!user) {
+        toast.error("User tidak valid. Silakan login kembali.");
+        return;
+      }
 
       const pickLabel = (value) => {
         if (value && typeof value === "object") {

@@ -77,7 +77,6 @@ const {
   FailureTable,
   BookingStatusTable,
 } = masterTables;
-import { getUserFromToken } from "./lib/utils/auth";
 
 
 
