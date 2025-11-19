@@ -32,11 +32,13 @@ import {
 
 import Swal from "sweetalert2"
 import { useSheet } from "@/context/sheet-context"
+import { useAuth } from "@/context/auth-context";
 
 export function NavUser({
   user
 }) {
   const navigate = useNavigate();
+  const { logout: signOut } = useAuth();
 
   const goToProfile = () => {
     navigate("/app/profiles");
@@ -46,18 +48,17 @@ export function NavUser({
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  const logout = () => {
-    localStorage.removeItem('token');
-  
+  const handleLogout = async () => {
+    await signOut();
     Swal.fire({
       title: "Success",
       text: "User has been logged out",
       icon: "success",
       allowOutsideClick: false,
-      timer: 1500, 
+      timer: 1500,
       showConfirmButton: false
     }).then(() => {
-      window.location.href = '/lorem'; 
+      window.location.href = '/lorem';
     });
   };
   
@@ -117,7 +118,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 "}>
+            <DropdownMenuItem onClick={handleLogout} className={"cursor-pointer bg-red-300 "}>
             <span  className="flex items-center gap-2">
               <LogOut className="w-5 h-5" />
               <span>Log out</span>

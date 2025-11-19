@@ -27,7 +27,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-import { getUserFromToken } from "@/lib/utils/auth"
+import { useAuth } from "@/context/auth-context";
 import { Separator } from "../ui/separator"
 import { Hpicon, Javagicon } from "../icon";
 import { useDraft } from "../DraftContext";
@@ -39,8 +39,9 @@ export function AppSidebar({
   ...props
 }) {
   const { drafts } = useDraft();
+  const { user } = useAuth();
   if (!drafts) {
-    return null; 
+    return null;
   }
   const data = {
     // user: {
@@ -48,7 +49,7 @@ export function AppSidebar({
     //   email: "m@example.com",
     //   avatar: "/avatars/shadcn.jpg",
     // },
-    user: getUserFromToken(),
+    user: user ?? { name: "", email: "", avatar: "" },
     teams: [
       {
         name: "PT Javag",

@@ -77,7 +77,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
-import { getUserFromToken } from "@/lib/utils/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import ServiceRequestPDF from "../service-request-form";
 import { pdf } from '@react-pdf/renderer';
@@ -5156,8 +5155,14 @@ console.log("Asset Info OTC : ",isOutWarranty)
           allowEscapeKey: false,
           didOpen: () => Swal.showLoading()
         });
+        if (!user) {
+          Swal.close();
+          toast.error("User session expired. Please login again.");
+          return;
+        }
+
         const data = {
-          user: getUserFromToken()
+          user
         }
 
 
@@ -7947,7 +7952,11 @@ export function BookingDetailsAdd({ onUpdate }) {
   };
   
   const handleSubmit = async () => {
-    const userSubmit = getUserFromToken();
+    const userSubmit = user;
+    if (!userSubmit) {
+      toast.error("User session expired. Please login again.");
+      return;
+    }
     try {
       const payload = {
         ...formData,
@@ -8186,7 +8195,11 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
 
   // Submit edited data
   const handleSubmit = async () => {
-    const userSubmit = getUserFromToken();
+    const userSubmit = user;
+    if (!userSubmit) {
+      toast.error("User session expired. Please login again.");
+      return;
+    }
 
     try {
       const payload = {

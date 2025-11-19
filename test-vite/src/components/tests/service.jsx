@@ -47,13 +47,16 @@ import ApiCustomer from "@/api";
 
 import { CaseField, QuickWOInput } from "../quick-wo-input";
 import { NewBookableResourceBooking } from "../service-booking";
-import { getUserFromToken } from "@/lib/utils/auth";
+import { useAuth } from "@/context/auth-context";
 
 import { useNavigate } from "react-router";
 import DatePicker from "../date-picker";
 
 export const ServiceWork = () => {
-  const user = getUserFromToken();
+  const { user } = useAuth();
+  if (!user) {
+    return null;
+  }
   const { woid } = useParams();
 
   const [workOrders, setWorkOrders] = useState([]);

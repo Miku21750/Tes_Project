@@ -1,8 +1,12 @@
 import { Navigate } from "react-router";
-import { getUserFromToken } from "@/lib/utils/auth";
+import { useAuth } from "@/context/auth-context";
 
 export const MasterGateKeeping = ( { children, allow }) => {
-    const user = getUserFromToken();
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return null;
+    }
     // if(!user || user.role !== 'admin'){
     //     /**
     //      * TODO

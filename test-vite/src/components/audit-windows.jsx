@@ -2,11 +2,16 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Navigate } from 'react-router'
+import { useAuth } from '@/context/auth-context'
 
 export const Auditwindows = () => {
-      const token = localStorage.getItem('token');
-  
-      if(!token) {
+      const { user, loading } = useAuth();
+
+      if (loading) {
+          return null;
+      }
+
+      if(!user) {
           return <Navigate to="/lorem" replace />
       }
   return (

@@ -576,6 +576,19 @@ model User {
 
   quotationtable quotationtable[] @relation("UserQuotationAdmin")
   invoicetable   invoicetable[]   @relation("UserInvoiceAdmin")
+  refreshTokens  RefreshToken[]
+}
+
+model RefreshToken {
+  id          Int      @id @default(autoincrement())
+  hashedToken String   @unique @db.Char(64)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [IDUser], onDelete: Cascade)
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
 }
 
 model warranty_services {

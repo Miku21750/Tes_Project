@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-
-const JWT_SECRET = process.env.JWT_SECRET || "";
+import {
+    applyRefreshCookie,
+    createAccessToken,
+    generateRefreshToken
+} from "@/utils/auth";
 
 const loginSchema = z.object({
     identifier: z
@@ -73,25 +75,21 @@ export async function POST(request) {
             return NextResponse.json({ success: false, message: "Incorrect password" }, { status: 401 });
         }
 
-        const token = jwt.sign(
-            {
-                id: user.IDUser,
-                email: user.Email,
-                role: user.Role,
-                name: user.Name,
-                avatar: user.ProfilePhoto || ""
-            },
-            JWT_SECRET,
-            { expiresIn: "7d" }
-        );
+        const { token, expiresAt } = createAccessToken(user);
+        const { token: refreshToken, hashedToken, expiresAt: refreshExpiresAt } = generateRefreshToken();
 
-        const decodedToken = jwt.decode(token);
-        const expiresAt = decodedToken?.exp ? decodedToken.exp * 1000 : null;
+        await prisma.refreshToken.create({
+            data: {
+                userId: user.IDUser,
+                hashedToken,
+                expiresAt: refreshExpiresAt
+            }
+        });
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             message: "Login successful",
-            token,
+            accessToken: token,
             expiresAt,
             data: {
                 id: user.IDUser,
@@ -101,6 +99,10 @@ export async function POST(request) {
                 profile: user.ProfilePhoto
             }
         });
+
+        applyRefreshCookie(response, refreshToken);
+
+        return response;
     } catch (error) {
         console.error("🔥 Login Error:", error);
         return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
