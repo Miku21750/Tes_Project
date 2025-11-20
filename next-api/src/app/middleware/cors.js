@@ -1,22 +1,66 @@
 import { NextResponse } from "next/server";
 import jwt from 'jsonwebtoken';
 
+
 const JWT_SECRET = process.env.JWT_SECRET || ''
+export const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "https://javag-tracs.site"
+];
 
-export function middleware() {
+
+
+export function middleware(req) {
     // retrieve the current response
-    const res = NextResponse.next()
 
-    // add the CORS headers to the response
-    res.headers.append('Access-Control-Allow-Credentials', "true")
-    res.headers.append('Access-Control-Allow-Origin', '*') // replace this your actual origin
-    res.headers.append('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT')
-    res.headers.append(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    )
+    const origin = req.headers.get("origin");
+    const isAllowed = allowedOrigins.includes(origin);
 
-    return res
+    console.log("REQ ORIGIN:", origin);
+    console.log("IS ALLOWED:", isAllowed);
+
+    // Build base response
+    let res = NextResponse.next();
+
+    // --- Apply CORS headers ---
+    if (isAllowed) {
+        res.headers.set("Access-Control-Allow-Origin", origin);
+    }
+
+    res.headers.set("Access-Control-Allow-Credentials", "true");
+    res.headers.set(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.headers.set(
+        "Access-Control-Allow-Methods",
+        "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    );
+
+    // --- Handle OPTIONS preflight early! ---
+    if (req.method === "OPTIONS") {
+        const preflight = new NextResponse(null, { status: 200 });
+        if (isAllowed) preflight.headers.set("Access-Control-Allow-Origin", origin);
+
+        preflight.headers.set("Access-Control-Allow-Credentials", "true");
+        preflight.headers.set(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+        );
+        preflight.headers.set(
+        "Access-Control-Allow-Methods",
+        "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+        );
+
+        return preflight;
+    }
+
+    return res;
+
+
 }
 
 // specify the path regex to apply the middleware to

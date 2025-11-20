@@ -47,11 +47,11 @@ export async function GET(request) {
             currentPage: page,
         }, {
             status: 200,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
+            // headers: {
+            //     "Access-Control-Allow-Origin": "*",
+            //     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            //     "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            // },
         });
     } catch (error) {
         console.error("🔥 ERROR in GET Bookings API:", error);

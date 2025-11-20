@@ -3,13 +3,16 @@ import { clearToken, getToken, setToken } from "@/lib/utils/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+
 const ApiCustomer = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true
 });
+ApiCustomer.defaults.withCredentials = true;
 
 ApiCustomer.interceptors.request.use((config) => {
     const token = getToken();
+    console.log("INTERCEPTOR TOKEN:", token);
     if (token) {
         config.headers = config.headers ?? {};
         config.headers.Authorization = `Bearer ${token}`;

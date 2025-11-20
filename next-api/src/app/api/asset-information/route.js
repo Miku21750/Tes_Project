@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import prisma  from "../../../../prisma/client";
+import { allowedOrigins } from "../../../../next.config.mjs";
 
 const toDateOrNull = (value) => {
     if (!value) return null;
@@ -10,6 +11,7 @@ const toDateOrNull = (value) => {
 
 export async function GET(request) {
     try{
+
         // Ambil parameter pencarian & pagination
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
@@ -82,14 +84,9 @@ export async function GET(request) {
             totalPages: Math.ceil(totalCount / limit),
             currentPage: page
         },
-    {
-        status: 200,
-        headers: {
-            "Access-Control-Allow-Origin": "*", // Allow all origins
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        },
-    });
+        {
+            status: 200
+        });
     } catch (error) {
         console.error("🔥 ERROR in GET API:", error);
 

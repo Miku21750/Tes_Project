@@ -9,6 +9,8 @@ const REFRESH_TOKEN_TTL_DAYS = parseInt(process.env.JWT_REFRESH_TOKEN_TTL_DAYS |
 export const REFRESH_TOKEN_TTL_MS = REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
 export const REFRESH_COOKIE_NAME = "refresh_token";
 
+const isProd = process.env.NODE_ENV === "production"
+
 export function createAccessToken(user) {
   const payload = {
     sub: user.IDUser,
@@ -17,8 +19,8 @@ export function createAccessToken(user) {
     role: user.Role,
     name: user.Name,
     avatar: user.ProfilePhoto || "",
-    iss: JWT_ISSUER,
-    aud: JWT_AUDIENCE,
+    // iss: JWT_ISSUER,
+    // aud: JWT_AUDIENCE,
     jti: crypto.randomUUID()
   };
 
@@ -40,9 +42,11 @@ export function verifyAccessToken(token) {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE
     });
+    console.log("JWT DECODED:", payload);
 
     return { valid: true, payload };
   } catch (error) {
+    console.log("JWT ERROR:", error.message);
     return { valid: false, error };
   }
 }
@@ -59,11 +63,12 @@ export function generateRefreshToken() {
 }
 
 export function applyRefreshCookie(response, value, { maxAge = REFRESH_TOKEN_TTL_MS / 1000 } = {}) {
+  console.log("prod ", process.env.NODE_ENV === "production")
   response.cookies.set(REFRESH_COOKIE_NAME, value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/api/auth",
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
     maxAge
   });
 
