@@ -180,7 +180,7 @@ export default function DatePicker({
   return (
     <div ref={containerRef} className={cn("flex w-full gap-4", isNarrow ? "flex-col" : "flex-row", className)}>
       {/* 📅 Date Picker */}
-      <Popover open={showDatePopover} onOpenChange={setShowDatePopover}>
+      <Popover open={showDatePopover} onOpenChange={setShowDatePopover} >
         <div className="relative w-full">
           <Input
             type="text"
@@ -199,7 +199,7 @@ export default function DatePicker({
           </PopoverTrigger>
         </div>
 
-        <PopoverContent className={cn("p-4 w-full min-w-[260px]  shadow-xl rounded-2xl", !hide ? "sm:w-full" : "sm:w-[340px]")}>
+        <PopoverContent portal className={cn("p-4 w-full min-w-[260px] z-[9999] shadow-xl rounded-2xl", !hide ? "sm:w-full" : "sm:w-[340px]")}>
           <div className="flex">
             <div className="flex-1">
               <div className="flex justify-between">

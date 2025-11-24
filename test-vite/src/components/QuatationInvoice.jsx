@@ -89,6 +89,12 @@ const styles = StyleSheet.create({
     width: '68%',
     fontSize: 9,
   },
+  value1: {
+    width: '68%',
+    fontSize: 9,
+    textAlign: 'justify',
+    textIndent: -5,
+  },
   colon: {
     width: '2%',
     fontSize: 9,
@@ -179,6 +185,16 @@ const Section = ({ title, children }) => (
   </View>
 );
 
+const List = ({ items }) => (
+  <View>
+    {items.map((item, index) => (
+      <Text key={index} style={styles.value1}>
+        • {item}
+      </Text>
+    ))}
+  </View>
+)
+
 export const QuotationInvoice = ({
   caseDetails,
   customerSignature,
@@ -223,7 +239,8 @@ export const QuotationInvoice = ({
               :
             </Text>
             <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
-              {initialData?.quotationNo ?? null}
+              {/* {initialData?.quotationNo ?? null}\ */}
+              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo ?? "N/A"}
             </Text>
 
             <Text style={styles.label}>Case Type</Text>
@@ -241,16 +258,19 @@ export const QuotationInvoice = ({
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
               {caseDetails?.CreatedOn
-                ? new Date(caseDetails.CreatedOn).toLocaleDateString()
+                ? new Date(caseDetails.CreatedOn).toLocaleString()
                 : "N/A"}
             </Text>
 
             <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {initialData?.quotationDate
+              {/* {initialData?.quotationDate
                 ? new Date(initialData.quotationDate).toLocaleDateString()
-                : "N/A"}
+                : "N/A"} */}
+              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate ? 
+              new Date (caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate).toLocaleString() : "N/A" 
+              }
             </Text>
 
             <Text style={styles.label}>Problem Desc</Text>
@@ -559,11 +579,7 @@ export const QuotationInvoice = ({
           </Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
-            {/* IDK WHERE IS THIS OUTPUT */}
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
-            ipsam necessitatibus dolor labore beatae earum nam neque praesentium
-            sunt suscipit, quis perspiciatis. Obcaecati iure excepturi mollitia
-            similique in accusantium exercitationem.
+           
           </Text>
         </View>
       </View>
@@ -573,33 +589,35 @@ export const QuotationInvoice = ({
               <Text style={styles.label}>Validity</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                7 (seven) calender days
               </Text>
               <Text style={styles.label}>Delivery Time</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                2 (two) weeks from date of PO confirmation & subject to spare part availibility
               </Text>
               <Text style={styles.label}>Payment</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                Cash or transfer
               </Text>
               <Text style={styles.label}>Warranty</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                1 (one) month for the same part
               </Text>
               <Text style={styles.label}>Cancellation Fee</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                Rp. 121.000,
               </Text>
               <Text style={styles.label}>Others</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                N / A
-              </Text>
+              <List items={[
+                "Defective part(s) should be returned to HP",
+                "No cancellation accepted after PO confirmation (full quotation charge will apply after PO confirmation)",
+                "Any damaged part(s) that has been replaced shall be the property of HP Indonesia (Suku cadang yang rusak pada barang yang diperbaiki akan menjadi milik HP Indonesia)",
+              ]}/>
             </View>
           </View>
         </Section>
@@ -611,7 +629,7 @@ export const QuotationInvoice = ({
         >
           <View style={{ flexDirection: "column", alignItems: "center" }} >
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              Received By
+              Sincerely yours
             </Text>
             <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
@@ -623,7 +641,7 @@ export const QuotationInvoice = ({
           </View>
           <View style={{ flexDirection: "column", alignItems: "center" }} >
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              Received By
+              Accepted by
             </Text>
             <Image src={customerSignature} style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
@@ -638,8 +656,10 @@ export const QuotationInvoice = ({
                 : "N/A"}
             </Text>
           </View>
-       
       </View>
+          <Text style={styles.textSmall}>
+            * This PDF Quotation auto generated by system.
+          </Text>
     </Page>
   </Document>
 );

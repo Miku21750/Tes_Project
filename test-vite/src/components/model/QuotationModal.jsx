@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { Separator } from "../ui/separator";
 import { pdf } from "@react-pdf/renderer";
 import { QuotationInvoice } from "../QuatationInvoice";
+import DatePicker from "../date-picker";
 
 const formatDateForInput = (value) => {
   const date = value ? new Date(value) : new Date();
@@ -49,6 +50,12 @@ const formatDateForInput = (value) => {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+
+const safeDate = (val) => {
+  const d = new Date(val);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
 
 const normaliseLineItems = (items = [], prevItems = []) => {
   return items.map((item, index) => {
@@ -182,11 +189,11 @@ const QuotationDialog = ({
   }, []);
 
   const defaultFormState = useMemo(() => {
-    const quotationDate =
-      formatDateForInput(initialData.quotationDate) || formatDateForInput();
-    const quoteApproveDate = isPendingQuote
-      ? formatDateForInput(initialData.quoteApproveDate) || formatDateForInput()
-      : "";
+    const quotationDate = initialData.quotationDate;
+      // formatDateForInput(initialData.quotationDate) || formatDateForInput();
+    const quoteApproveDate = isPendingQuote ? initialData.quoteApproveDate : null;
+      // ? formatDateForInput(initialData.quoteApproveDate) || formatDateForInput()
+      // : "";
 
     const decision = initialData.quoteDecision;
     let mappedDecision = "";
@@ -202,13 +209,13 @@ const QuotationDialog = ({
       vatValue: initialData.vatValue ?? "",
       quotationNote: null,
       laborFee: initialData.laborFee ?? "",
-      quotationDate,
+      quotationDate: safeDate(initialData.quotationDate),
       useNewQuotationNo:
         initialData.useNewQuotationNo ??
         (isQuoteRequested ? true : false),
       sendWa: initialData.sendWa ?? false,
       sendEmail: initialData.sendEmail ?? false,
-      quoteApproveDate,
+      quoteApproveDate: isPendingQuote ? safeDate(initialData.quoteApproveDate) : null,
       quoteDecision: mappedDecision,
       lineItems: normaliseLineItems(materialItems),
       userAssign: initialData.userAssign ?? undefined
@@ -221,7 +228,7 @@ const QuotationDialog = ({
   ]);
 
   const [form, setForm] = useState(defaultFormState);
-
+  
   const resetForm = useCallback(() => {
     setForm(defaultFormState);
     setFieldErrors({});
@@ -267,8 +274,8 @@ const QuotationDialog = ({
       ...prev,
       useNewQuotationNo: isQuoteRequested ? true : prev.useNewQuotationNo,
       quoteApproveDate: isPendingQuote
-        ? prev.quoteApproveDate || formatDateForInput()
-        : "",
+        ? prev.quoteApproveDate || new Date()
+        : null,
       quoteDecision: isPendingQuote ? prev.quoteDecision : "",
     }));
   }, [isPendingQuote, isQuoteRequested]);
@@ -437,7 +444,7 @@ const QuotationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1 ">
+      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1">
         <DialogHeader
           className={"flex flex-row justify-between gap-4 px-10 py-4  border-b"}
         >
@@ -473,12 +480,11 @@ const QuotationDialog = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1 flex-1">
                 {isPendingQuote && (
                   <CaseField label="Quote Approve Date" star className="gap-1">
-                    <Input
-                      type="date"
+                    <DatePicker
                       disabled={formDisabled}
                       value={form.quoteApproveDate}
-                      onChange={(e) =>
-                        handleFieldChange("quoteApproveDate", e.target.value)
+                      onChange={(value) =>
+                        handleFieldChange("quoteApproveDate", value)
                       }
                     />
                     {fieldErrors.quoteApproveDate && (
@@ -513,12 +519,11 @@ const QuotationDialog = ({
                 </CaseField>
 
                 <CaseField label="Quotation Date" star className="gap-1">
-                  <Input
-                    type="date"
+                  <DatePicker
                     disabled={formDisabled}
                     value={form.quotationDate}
-                    onChange={(e) =>
-                      handleFieldChange("quotationDate", e.target.value)
+                    onChange={(value) =>
+                      handleFieldChange("quotationDate", value)
                     }
                   />
                   {fieldErrors.quotationDate && (

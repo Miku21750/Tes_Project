@@ -2270,7 +2270,7 @@ if (caseDetails.CaseStatus !== "Close") {
                       onChange={e => onChangeCase("CaseID_Manual")(e.target.value)}
                     />                    
                 </CaseField>
-
+                
                 <CaseField label="Case ID manual Date" className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditApo}>  
                     <DatePicker
                         value={caseForm?.CaseID_Manual_Date ? new Date(caseForm.CaseID_Manual_Date) : null}
