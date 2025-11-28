@@ -94,6 +94,8 @@ model caseinformation {
   accessory                                     accessory[]
   ActionLog                                     ActionLog[]
   casephotos                                    casephotos[]
+  down_payment_table                            down_payment_table[]
+  quotationtable                                quotationtable[]
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -237,6 +239,27 @@ model global_trade_check {
   caseinformation caseinformation[]
 }
 
+model down_payment_table {
+  ID_DP_table Int @id @default(autoincrement())
+
+  //FK Key
+  CaseID          String?
+  caseinformation caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict)
+
+  DPAmount Decimal  @default(0) @db.Decimal(12, 2)
+  DPDate   DateTime @default(now()) @db.DateTime(0)
+
+  PaymentType String? @db.VarChar(20)
+  DPNote      String? @db.Text
+
+  //SYSTEM 
+  CreatedBy     Int
+  CreatedByUser User @relation("UserDPAdmin", fields: [CreatedBy], references: [IDUser], onDelete: Restrict)
+
+  CreatedOn DateTime @default(now()) @db.DateTime(0)
+  ChangedOn DateTime @default(now()) @db.DateTime(0)
+}
+
 model invoicetable {
   InvoiceNo         String         @id @db.VarChar(8)
   QuotationNo       String         @db.VarChar(8)
@@ -255,6 +278,9 @@ model invoicetable {
 
   CreatedBy     Int
   CreatedByUser User @relation("UserInvoiceAdmin", fields: [CreatedBy], references: [IDUser], onDelete: Restrict)
+
+  CreatedOn DateTime @default(now()) @db.DateTime(0)
+  ChangedOn DateTime @default(now()) @db.DateTime(0)
 }
 
 model quotationtable {
@@ -273,6 +299,9 @@ model quotationtable {
   SendWa                Boolean            @default(false)
   SendEmail             Boolean            @default(false)
   QuoteDecision         QuotationDecision?
+
+  CaseID          String?
+  caseinformation caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict)
 
   GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
   quotation_lineitem quotation_lineitem[]
@@ -313,8 +342,8 @@ model materialorder {
   AccidentalDamageProtection Boolean?          @default(false)
   DefectiveMediaRetention    Boolean?          @default(false)
 
-  DeliveryRequestedDate   DateTime?       @db.DateTime(0)
-  CollectionRequestedDate DateTime?       @db.DateTime(0)
+  DeliveryRequestedDate   DateTime?       @db.DateTime(0) //ETA Delivery Required Date (Customer Time)
+  CollectionRequestedDate DateTime?       @db.DateTime(0) //Part on Hand CE Date
   PromoCode               String?         @db.VarChar(50)
   NotificationNumber      String?         @db.VarChar(100)
   ParentMOID              String?         @db.VarChar(13)
@@ -577,6 +606,7 @@ model User {
   quotationtable quotationtable[] @relation("UserQuotationAdmin")
   invoicetable   invoicetable[]   @relation("UserInvoiceAdmin")
   refreshTokens  RefreshToken[]
+  down_payment_table down_payment_table[] @relation("UserDPAdmin")
 }
 
 model RefreshToken {
