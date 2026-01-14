@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 import { notifySocket } from "../../../../../lib/SocketClient";
 import { Prisma } from "@prisma/client";
-import redis, { deleteByPattern, redisKey } from "../../../../../lib/redis";
+import redis, { deleteByPattern } from "../../../../../lib/redis";
 
 export async function GET(request, { params }) {
     //get params id
@@ -17,7 +17,7 @@ export async function GET(request, { params }) {
         );
     }
 
-    const cacheKey = redisKey(`case:detail:${caseID}`);
+    const cacheKey = `case:detail:${caseID}`;
     const cached = await redis.get(cacheKey);
     if (cached) {
         return NextResponse.json(JSON.parse(cached), { status: 200 });

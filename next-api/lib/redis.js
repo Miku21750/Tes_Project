@@ -1,11 +1,6 @@
 import Redis from "ioredis";
 
 const globalForRedis = global;
-const ENV = process.env.NODE_ENV || "development";
-
-export function redisKey(key) {
-  return `${ENV}:${key}`;
-}
 
 const redis =
   globalForRedis.redis ||

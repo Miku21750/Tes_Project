@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../prisma/client";
-import redis, { deleteByPattern, redisKey } from "../../../../lib/redis";
+import redis, { deleteByPattern } from "../../../../lib/redis";
 
 export async function GET(request) {
   try {
@@ -14,7 +14,7 @@ export async function GET(request) {
     // if (tower) whereCondition.ProductTower = { equals: tower };
     // if (group) whereCondition.ProductGroup = { equals: group };
 
-    const cacheKey = redisKey(`servicecatalog-parts:list:${searchParams.toString() || "all"}`);
+    const cacheKey = `servicecatalog-parts:list:${searchParams.toString() || "all"}`;
     const cached = await redis.get(cacheKey);
     if (cached) {
       return NextResponse.json(JSON.parse(cached), {

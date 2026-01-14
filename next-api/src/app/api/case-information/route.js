@@ -6,7 +6,7 @@ import prisma, { setUserIdProvider }  from "../../../../prisma/client";
 import { generateID } from "@/utils/generateID";
 import { notifySocket } from "../../../../lib/SocketClient";
 import { getTokenUserId } from "@/app/middleware/auth";
-import redis, { deleteByPattern, redisKey } from "../../../../lib/redis";
+import redis, { deleteByPattern } from "../../../../lib/redis";
 // import * as XLSX from 'xlsx';
 
 export async function GET(request) {
@@ -14,7 +14,7 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
 
-  const cacheKey = redisKey(`case:list:${searchParams.toString() || "all"}`);
+  const cacheKey = `case:list:${searchParams.toString() || "all"}`;
 
   const cached = await redis.get(cacheKey);
   if (cached) {
