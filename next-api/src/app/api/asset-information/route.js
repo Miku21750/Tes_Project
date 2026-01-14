@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import prisma  from "../../../../prisma/client";
-import redis, { deleteByPattern } from "../../../../lib/redis";
+import redis, { deleteByPattern, redisKey } from "../../../../lib/redis";
 
 const toDateOrNull = (value) => {
     if (!value) return null;
@@ -22,7 +22,7 @@ export async function GET(request) {
         const limit = parseInt(searchParams.get("limit")) || 100;
 
 
-        const cacheKey = `asset:list:${searchParams.toString() || "all"}`;
+        const cacheKey = redisKey(`asset:list:${searchParams.toString() || "all"}`);
         const cached = await redis.get(cacheKey);
         if (cached) {
             return NextResponse.json(JSON.parse(cached), {

@@ -1096,7 +1096,7 @@ const suffixToRoleMap = {
   FD: "fd", 
 };
 
-function extractRoleFromStatus(status) {
+export function extractRoleFromStatus(status) {
   const match = status.match(/^(NEW_Assign|Assign)([A-Za-z]+)/);
   if (match) {
     const suffix = match[2];

@@ -30,6 +30,7 @@ import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/s
 import { toast } from "sonner";
 import { formatDateForInput,formatDate } from "@/lib/utils";
 import Swal from "sweetalert2";
+import { extractRoleFromStatus, STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
 
 /**
  * @fileoverview Create Case page (SearchCase_V3)
@@ -199,15 +200,21 @@ import Swal from "sweetalert2";
 
 const CASE_TYPES = ["Bench", "Onsite", "DOA"];
 const CASE_STATUS = [
-  "NEW Assign to CE",
-  "NEW Assign to Product Store",
-  "New Assign to API",
+  "NEW_AssignCE",
+  "NEW_AssignPS",
+  "NEW_AssignAPO",
+  "New",
   "Open",
   "Close",
   "InActive",
   "NEW_POPDoc"
 ];
 const WARRANTY_STATUS = ["In Warranty", "Out Warranty"];
+
+const LABEL_TO_STATUS_ENUM = Object.entries(STATUS_ENUM_TO_LABEL).reduce((acc, [key, val]) => {
+  acc[val] = key;
+  return acc;
+}, {});
 
 // ----------------------------
 // Helpers
@@ -298,7 +305,8 @@ export default function NewCaseForm() {
   );
   const [caseSubject, setCaseSubject] = useState("");
   const [referenceCase, setReferenceCase] = useState("");
-  const [caseStatus, setCaseStatus] = useState("Open");
+  const [caseStatus, setCaseStatus] = useState("New");
+  const [hideAssignTo, setHideAssignTo] = useState(false);
   const [caseType, setCaseType] = useState("Bench");
   const [problemDesc, setProblemDesc] = useState("");
   const [caseNote, setCaseNote] = useState("");
@@ -716,7 +724,7 @@ export default function NewCaseForm() {
       const res = await ApiCustomer.get(`/api/case-information`, {
         params: {
           AssetID: assetID,
-          CaseStatus: "Open", // atau ambil semua status, tergantung kebutuhan
+          CaseStatus: "New", // atau ambil semua status, tergantung kebutuhan
         },
       });
 
@@ -1003,7 +1011,7 @@ export default function NewCaseForm() {
       if (warrantySearchValue !== "01T" && needWarrantyApproval) {
     setNeedWarrantyApproval(false);
   }
-    needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus("Open");
+    needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus("New");
   }, [warrantySearchValue, needWarrantyApproval])
 
   const onCreateCase = async () => {
@@ -1128,7 +1136,7 @@ export default function NewCaseForm() {
             }
           : null;
 
-      const caseStatusValue = needWarrantyApproval ? "NEW_POPDoc" : "New";
+      const caseStatusValue = needWarrantyApproval ? "NEW_POPDoc" : caseStatus;
 
       /** @type {CaseCreatePayload} */
       const casePayload = {
@@ -1136,7 +1144,7 @@ export default function NewCaseForm() {
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
-        CaseStatus: caseStatusValue,
+        CaseStatus: caseStatus,
         CasePriority: "Medium",
         CustomerSeverity: "Normal",
         CaseClosedDate: null,
@@ -1146,6 +1154,7 @@ export default function NewCaseForm() {
         CreatedBy: user?.id,
         ProblemDescription: problemDesc,
         CaseNoteProduct: caseNote,
+        ReferenceCase: referenceCase
       };
 
       const references = {
@@ -1473,13 +1482,32 @@ export default function NewCaseForm() {
             
             <div className="space-y-2 col-span-2">
               <Label>Case Status <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-              <Select value={caseStatus} onValueChange={setCaseStatus}>
+              <Select 
+                value={caseStatus} 
+                onValueChange={async (label) => {
+                  const enumValue = LABEL_TO_STATUS_ENUM[label]
+                  setCaseStatus(enumValue || caseStatus)
+                  const isNewAssign = typeof enumValue === "string" && enumValue?.startsWith("NEW_Assign");
+                  setHideAssignTo(isNewAssign);
+
+                  if(isNewAssign){
+                    const role = extractRoleFromStatus(enumValue);
+                    if(role){
+                      try {
+                        fetch
+                      } catch (err) {
+                        
+                      }
+                    }
+                  }
+                }}
+              >
                 <SelectTrigger className={"ring-1 ring-gray-400 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                   <SelectValue placeholder="Select Case Status" />
                 </SelectTrigger>
                 <SelectContent>
                   {CASE_STATUS.map((s) => (
-                    <SelectItem value={s} key={s}>{s}</SelectItem>
+                    <SelectItem value={s} key={s}>{STATUS_ENUM_TO_LABEL[s]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
