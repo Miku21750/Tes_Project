@@ -27,7 +27,7 @@ const ErrorPage = () => {
     <div id="error-page" style={{ padding: "2rem", textAlign: "center" }}>
       <h1>Oops! {errorStatus}</h1>
       <p>Sorry, an unexpected error has occurred.</p>
-      <p>
+      <p className="bg-fuchsia-200 rounded-2xl p-2 font-black italic text-xl">
         <i>{errorMessage}</i>
       </p>
       <p>I think i dont why, Better luck next time</p>

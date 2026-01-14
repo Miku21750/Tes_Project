@@ -38,7 +38,7 @@ import { PartTemplateButton, PartImport } from "@/components/importFileComponent
 import { FailureAdd, 
   FailureEdit, 
   FailureDelete } from "@/components/model/sc-modal";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -1825,9 +1825,10 @@ const sortedData = useMemo(() => {
               >
                 <TableCell
                   className="p-2 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-sky-300 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/case/${caseItem.CaseID}`)}
                 >
+              <Link to={ `/app/case/${caseItem.CaseID}` } >
                   {caseItem.CaseID}
+              </Link>
                 </TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CaseSubject}</TableCell>

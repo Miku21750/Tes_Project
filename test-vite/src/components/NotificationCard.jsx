@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 
 export function NotificationCard({ }) {
     const { user } = useAuth();
-    const { notifications, deleteNotification, clearNotification } = useNotifications();
+    const { notifications, deleteNotification } = useNotifications();
 
     const typeColors = {
         created: "bg-blue-100 text-blue-700",

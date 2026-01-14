@@ -32,7 +32,9 @@ export function GlobalLogListener() {
         <div className="font-semibold text-gray-900">Case {notif.caseId}</div>
         <div className="text-sm text-gray-600">{notif.description}</div>
       </div>
-    ));
+    ),{
+      position: "top-right",
+    });
   });
   if (loading || !user) {
     return null; // don’t render listener until auth is ready
