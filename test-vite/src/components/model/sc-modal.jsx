@@ -257,29 +257,42 @@ export function BtnModalContact({
       AddressLine2: '',
       City: '',
       StateProvince: '',
-      Country: '',
+      Country: 'Indonesia',
       ZipPostalCode: '',
       SiteAccountID: typeof selectedCompany === "object" 
       ? selectedCompany.SiteAccountID ?? "" 
       : selectedCompany
     });
 
-     useEffect(() => {
-        fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+    const isIndonesia =
+      (formDataContact.Country || "").toLowerCase() === "indonesia";
+
+    useEffect(() => {
+      fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+        .then((res) => res.json())
+        .then(setProvinces)
+        .catch(console.error);
+    }, []);
+
+    useEffect(() => {
+      if (!isIndonesia) {
+        setCities([]);
+        return;
+      }
+      const selectedProvince = provinces.find(
+        (p) => p.name === formDataContact.StateProvince
+      );
+      if (selectedProvince) {
+        fetch(
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`
+        )
           .then((res) => res.json())
-          .then(setProvinces)
+          .then(setCities)
           .catch(console.error);
-      }, []);
-    
-      useEffect(() => {
-        const selectedProvince = provinces.find((p) => p.name === formDataContact.StateProvince);
-        if (selectedProvince) {
-          fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`)
-            .then((res) => res.json())
-            .then(setCities)
-            .catch(console.error);
-        }
-      }, [formDataContact.StateProvince]);
+      } else {
+        setCities([]);
+      }
+    }, [formDataContact.StateProvince, isIndonesia, provinces]);
     
     //handle input
     const handlerInputContactChange = (eOrId, value) => {
@@ -310,7 +323,7 @@ export function BtnModalContact({
         AddressLine2: '',
         City: '',
         StateProvince: '',
-        Country: '',
+        Country: 'Indonesia',
         ZipPostalCode: '',
       })
     }
@@ -407,22 +420,6 @@ export function BtnModalContact({
     setFormDataContact(contact);
   };
 
-     useEffect(() => {
-        fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
-          .then((res) => res.json())
-          .then(setProvinces)
-          .catch(console.error);
-      }, []);
-    
-      useEffect(() => {
-        const selectedProvince = provinces.find((p) => p.name === formDataContact.StateProvince);
-        if (selectedProvince) {
-          fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`)
-            .then((res) => res.json())
-            .then(setCities)
-            .catch(console.error);
-        }
-      }, [formDataContact.StateProvince]);
 
 
   return (
@@ -564,27 +561,49 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <SelectBar 
-              id="City" 
-              value={formDataContact.City || ""} 
-              className="p-1 text-sm border-b-black" 
-              onChange={handlerInputContactChange} 
-              options={cities} 
-              placeholder="Select a City"
-            />
+            {isIndonesia ? (
+              <SelectBar 
+                id="City" 
+                value={formDataContact.City || ""} 
+                className="p-1 text-sm border-b-black" 
+                onChange={handlerInputContactChange} 
+                options={cities} 
+                placeholder="Select a City"
+              />
+            ) : (
+              <Input
+                id="City"
+                value={formDataContact.City || ""}
+                type="text"
+                className="p-1 border-b-black"
+                onChange={handlerInputContactChange}
+                placeholder="Enter a City"
+              />
+            )}
 
             
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <SelectBar 
-              id="StateProvince" 
-              value={formDataContact.StateProvince || ""} 
-              className="p-1 text-sm border-b-black" 
-              onChange={handlerInputContactChange} 
-              options={provinces}
-              placeholder="Select a Province"
-            />
+            {isIndonesia ? (
+              <SelectBar 
+                id="StateProvince" 
+                value={formDataContact.StateProvince || ""} 
+                className="p-1 text-sm border-b-black" 
+                onChange={handlerInputContactChange} 
+                options={provinces}
+                placeholder="Select a Province"
+              />
+            ) : (
+              <Input
+                id="StateProvince"
+                value={formDataContact.StateProvince || ""}
+                type="text"
+                className="p-1 border-b-black"
+                onChange={handlerInputContactChange}
+                placeholder="Enter a State/Province"
+              />
+            )}
               {/* Hidden Input for SiteAccountID */}
             <Input type="hidden" id="SiteAccountID" value={formDataContact.SiteAccountID || ""} onChange={handlerInputContactChange} />
           </div>
@@ -1556,6 +1575,9 @@ export function ContactEdit({ contactID, onUpdate }) {
   const [picPhone, setPicPhone] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+
   const fetchContact = async () => {
     if (!contactID) return;
     try {
@@ -1575,7 +1597,7 @@ export function ContactEdit({ contactID, onUpdate }) {
       setAddressLine2(data?.AddressLine2 || "");
       setCity(data?.City || "");
       setStateProvince(data?.StateProvince || "");
-      setCountry(data?.Country || "");
+      setCountry(data?.Country || "Indonesia");
       setZipPostalCode(data?.ZipPostalCode || "");
       setPicName(data?.PIC_Name || "");
       setPicEmail(data?.PIC_Email || "");
@@ -1584,12 +1606,39 @@ export function ContactEdit({ contactID, onUpdate }) {
       toast.error("Error fetching contact information:", error);
     }
   };
+  const isIndonesia =
+      (country || "").toLowerCase() === "indonesia";
 
   useEffect(() => {
     if (contactID && isOpen) {
       fetchContact();
     }
   }, [contactID, isOpen]);
+  useEffect(() => {
+      fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+        .then((res) => res.json())
+        .then(setProvinces)
+        .catch(console.error);
+    }, []);
+    useEffect(() => {
+      if (!isIndonesia) {
+        setCities([]);
+        return;
+      }
+      const selectedProvince = provinces.find(
+        (p) => p.name === stateProvince
+      );
+      if (selectedProvince) {
+        fetch(
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`
+        )
+          .then((res) => res.json())
+          .then(setCities)
+          .catch(console.error);
+      } else {
+        setCities([]);
+      }
+    }, [stateProvince, isIndonesia, provinces]);
 
   const handleUpdate = async () => {
     if (!firstName || !lastName || !email || !phone || !city || !country) {
@@ -1717,17 +1766,27 @@ export function ContactEdit({ contactID, onUpdate }) {
               <Label className="text-sm font-medium">Address Line 2</Label>
               <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
             </div>
-            <div>
-              <Label className="text-sm font-medium">City <Label className="text-red-600">*</Label></Label>
-              <Input value={city} onChange={(e) => setCity(e.target.value)} />
-            </div>
-            <div>
-              <Label className="text-sm font-medium">State / Province <Label className="text-red-600">*</Label></Label>
-              <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
-            </div>
-            <div>
+        <div>
               <Label className="text-sm font-medium">Country <Label className="text-red-600">*</Label></Label>
               <Input value={country} onChange={(e) => setCountry(e.target.value)} />
+            </div>
+          <div>
+              <Label className="text-sm font-medium">State / Province <Label className="text-red-600">*</Label></Label>
+              {/* TODO FOR PERID :
+              DESAIN NIH BIAR GA TERLALU ILANG GARISNYA */}
+              {isIndonesia ? (
+                <SelectBar className="p-1 border-b-black" value={stateProvince} options={provinces} onChange={(e) => setStateProvince(e.target.value)} />
+              ):(
+                <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
+              )}
+            </div>
+            <div>
+              <Label className="text-sm font-medium">City <Label className="text-red-600">*</Label></Label>
+              {isIndonesia ? (
+                <SelectBar className="p-1 border-b-black" value={city} options={cities} onChange={(e) => setCity(e.target.value)} />
+              ):(
+              <Input value={city} onChange={(e) => setCity(e.target.value)} />
+              )}
             </div>
             <div>
               <Label className="text-sm font-medium">Zip / Postal Code <Label className="text-red-600">*</Label></Label>

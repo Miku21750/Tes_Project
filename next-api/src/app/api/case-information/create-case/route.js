@@ -136,27 +136,31 @@ export async function POST(request) {
         }
 
         const orConditions = [];
-        if (company.Email) {
-          orConditions.push({ Email: { contains: company.Email } });
-        }
-        if (company.PrimaryPhone) {
-          orConditions.push({ PrimaryPhone: { contains: company.PrimaryPhone } });
-        }
-        if (company.WhatsappNo) {
-          orConditions.push({ WhatsappNo: { contains: company.WhatsappNo } });
-        }
+        /**
+         * REF: (FERID) 
+         * DISABLE THIS FOR A WHILE
+         */
+        // if (company.Email) {
+        //   orConditions.push({ Email: { contains: company.Email } });
+        // }
+        // if (company.PrimaryPhone) {
+        //   orConditions.push({ PrimaryPhone: { contains: company.PrimaryPhone } });
+        // }
+        // if (company.WhatsappNo) {
+        //   orConditions.push({ WhatsappNo: { contains: company.WhatsappNo } });
+        // }
 
-        if (orConditions.length > 0) {
-          const duplicate = await tx.site_account.count({
-            where: { OR: orConditions },
-          });
-          if (duplicate > 0) {
-            throw new HttpError(
-              409,
-              "A Company with this email or phone already exists."
-            );
-          }
-        }
+        // if (orConditions.length > 0) {
+        //   const duplicate = await tx.site_account.count({
+        //     where: { OR: orConditions },
+        //   });
+        //   if (duplicate > 0) {
+        //     throw new HttpError(
+        //       409,
+        //       "A Company with this email or phone already exists."
+        //     );
+        //   }
+        // }
 
         const createdCompany = await tx.site_account.create({
           data: {
@@ -183,27 +187,31 @@ export async function POST(request) {
         }
 
         const orConditions = [];
-        if (contact.Email) {
-          orConditions.push({ Email: { contains: contact.Email } });
-        }
-        if (contact.Phone) {
-          orConditions.push({ Phone: { contains: contact.Phone } });
-        }
-        if (contact.Mobile) {
-          orConditions.push({ Mobile: { contains: contact.Mobile } });
-        }
+        /**
+         * REF: (FERID) 
+         * DISABLE THIS FOR A WHILE
+         */
+        // if (contact.Email) {
+        //   orConditions.push({ Email: { contains: contact.Email } });
+        // }
+        // if (contact.Phone) {
+        //   orConditions.push({ Phone: { contains: contact.Phone } });
+        // }
+        // if (contact.Mobile) {
+        //   orConditions.push({ Mobile: { contains: contact.Mobile } });
+        // }
 
-        if (orConditions.length > 0) {
-          const duplicate = await tx.contact_information.count({
-            where: { OR: orConditions },
-          });
-          if (duplicate > 0) {
-            throw new HttpError(
-              409,
-              "A Contact with this email or phone already exists."
-            );
-          }
-        }
+        // if (orConditions.length > 0) {
+        //   const duplicate = await tx.contact_information.count({
+        //     where: { OR: orConditions },
+        //   });
+        //   if (duplicate > 0) {
+        //     throw new HttpError(
+        //       409,
+        //       "A Contact with this email or phone already exists."
+        //     );
+        //   }
+        // }
 
         const createdContact = await tx.contact_information.create({
           data: {
@@ -394,6 +402,7 @@ export async function POST(request) {
         CreatedBy: createdBy,
         ProblemDescription: caseData.ProblemDescription ?? "",
         CaseProductNote: caseData.CaseNoteProduct ?? null,
+        ReferenceCase: caseData.ReferenceCase ?? null
       };
 
       const createdCase = await tx.caseinformation.create({

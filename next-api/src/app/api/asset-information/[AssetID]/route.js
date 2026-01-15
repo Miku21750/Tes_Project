@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import prisma from "../../../../../prisma/client";
-import redis, { deleteByPattern } from "../../../../../lib/redis";
+import redis, { deleteByPattern, redisKey } from "../../../../../lib/redis";
 
 export async function GET(request, { params }) {
     const { AssetID } = await params
@@ -14,7 +14,7 @@ export async function GET(request, { params }) {
         }, { status: 400 });
     }
 
-    const cacheKey = `asset:detail:${assetID}`;
+    const cacheKey = redisKey(`asset:detail:${assetID}`);
     const cached = await redis.get(cacheKey);
     if (cached) {
         return NextResponse.json(JSON.parse(cached), { status: 200 });

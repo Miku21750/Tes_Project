@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
-import redis, { deleteByPattern } from "../../../../../lib/redis";
+import redis, { deleteByPattern, redisKey } from "../../../../../lib/redis";
 
 // GET Part by PartNumber
 export async function GET(request, { params }) {
@@ -14,7 +14,7 @@ export async function GET(request, { params }) {
         );
     }
 
-    const cacheKey = `servicecatalog-parts:detail:${partNumber}`;
+    const cacheKey = redisKey(`servicecatalog-parts:detail:${partNumber}`);
     const cached = await redis.get(cacheKey);
     if (cached) {
         return NextResponse.json(JSON.parse(cached), { status: 200 });
