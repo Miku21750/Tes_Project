@@ -44,7 +44,7 @@ export default function Approvel() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
-          const valueFilterCase = fetchCase.data.data.filter(c =>  c?.CaseStatus === "NEW_POPDoc")
+          const valueFilterCase = fetchCase.data.data.filter(c =>  c?.CaseStatus === "NEW_POPDoc" || c?.CaseStatus === "NEW_Warranty")
          setCaseData(valueFilterCase)            
         } catch (err) {
             toast.error("Fething data: ",err);

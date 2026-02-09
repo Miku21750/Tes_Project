@@ -36,6 +36,7 @@ export function DataTable({
   cellName,
   sorting,
   setSorting,
+  handleRefresh,
   contact,
 }) {
   const [columnFilters, setColumnFilters] = React.useState([])
@@ -75,12 +76,11 @@ const filterChange = contact ? tokenGlobalFilter : "includesString"
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
-
   return (
     <div className={className}>
       {title ? <div className="mb-3">{title}</div> : null}
 
-      {toolbar ? toolbar(table) : <DataTableToolbar table={table} />}
+      {toolbar ? toolbar(table) : <DataTableToolbar table={table} loading={loading} handleRefresh={handleRefresh}/>}
 
       {error ? <p className="mt-3 text-sm text-red-500">{error}</p> : null}
 

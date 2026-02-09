@@ -43,7 +43,7 @@ function caseColums() {
         
             return (
               <Link to={href} className="block w-full py-1">
-                <span className="text-sky-500 underline underline-offset-2 hover:opacity-80">
+                <span className="text-sky-500 hover:opacity-80">
                   {caseId}
                 </span>
               </Link>
@@ -148,7 +148,7 @@ function caseColums() {
                     Cancel: "bg-amber-300/80 ",
                 }[rawStatus] ?? "bg-emerald-300/80"
                 return  (
-                    <div className={`h-full w-full flex justify-center items-center ${color}`}>
+                    <div className={`h-5 flex justify-center items-center rounded ${color}`}>
                         {STATUS_ENUM_TO_LABEL[rawStatus] ?? rawStatus}
                     </div>
                 )
@@ -181,6 +181,11 @@ export function CaseTable() {
             id: "CreatedOn", 
             desc: true
         }])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
     const fetchCase = React.useCallback(async () => {
         const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
         const savedTeamId = localStorage.getItem("activeTeamId");
@@ -219,7 +224,7 @@ export function CaseTable() {
 
     React.useEffect(() => {
         fetchCase()
-    }, [fetchCase])
+    }, [fetchCase, refresh])
 
     const columns = React.useMemo(
             () => caseColums(),
@@ -236,9 +241,10 @@ export function CaseTable() {
                 loading={loading}
                 sorting={Sorting}
                 setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case..." loading={loading} handleRefresh={handleRefresh}>
                         <DataTableFacetedFilter
                             title="All Product Name"
                             column={table.getColumn("SerialNumber")}

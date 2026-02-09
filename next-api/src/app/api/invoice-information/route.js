@@ -93,6 +93,7 @@ export async function GET(request) {
       where: { CaseID: caseId },
       select: {
         CaseID: true,
+        invoicetable: true,
         workorder: {
           select: {
             materialorder: {
@@ -116,9 +117,10 @@ export async function GET(request) {
 
     const lineItemIds = collectLineItemIds(caseRecord);
 
-    if (lineItemIds.length === 0) {
-      return NextResponse.json({ success: true, data: null });
-    }
+
+    // if (lineItemIds.length === 0) {
+    //   return NextResponse.json({ success: true, data: null });
+    // }
 
     const quotation = await prisma.quotationtable.findFirst({
       where: {
@@ -135,13 +137,12 @@ export async function GET(request) {
         },
       },
     });
-
-    if (!quotation) {
+    
+    if (!quotation && !caseRecord) {
       return NextResponse.json({ success: true, data: null });
     }
 
-    const invoiceRecord = quotation.invoicetable?.[0] ?? null;
-
+    const invoiceRecord = (quotation?.invoicetable?.[0] || caseRecord?.invoicetable?.[0]) ?? null;
     return NextResponse.json({
       success: true,
       data: mapInvoicePayload(invoiceRecord, quotation),
@@ -179,12 +180,12 @@ export async function POST(request) {
       caseId
     } = body;
 
-    if (!quotationNo) {
-      return NextResponse.json(
-        { success: false, message: "QuotationNo wajib diisi." },
-        { status: 400 }
-      );
-    }
+    // if (!quotationNo) {
+    //   return NextResponse.json(
+    //     { success: false, message: "QuotationNo wajib diisi." },
+    //     { status: 400 }
+    //   );
+    // }
 
     const createdById = Number.parseInt(createdBy, 10);
     if (!Number.isInteger(createdById)) {
@@ -201,21 +202,21 @@ export async function POST(request) {
       where: { QuotationNo: quotationNo },
     });
 
-    if (!quotation) {
-      return NextResponse.json(
-        { success: false, message: "Quotation tidak ditemukan." },
-        { status: 404 }
-      );
-    }
+    // if (!quotation) {
+    //   return NextResponse.json(
+    //     { success: false, message: "Quotation tidak ditemukan." },
+    //     { status: 404 }
+    //   );
+    // }
 
     const result = await prisma.$transaction(async (tx) =>{
       const quotation = await tx.quotationtable.findUnique({
         where: {QuotationNo: quotationNo}
       })
-      if(!quotation) throw new Error("Quotation tidak ditemukan");
+      // if(!quotation) throw new Error("Quotation tidak ditemukan");
       
       const existingInvoice = await tx.invoicetable.findFirst({
-        where: { QuotationNo: quotationNo },
+        where: {CaseID :caseId },
       });
   
       if (existingInvoice) {
@@ -280,7 +281,8 @@ export async function POST(request) {
       const invoice = await tx.invoicetable.create({
         data: {
           InvoiceNo: invoiceNo,
-          QuotationNo: quotationNo,
+          CaseID: caseId,
+          QuotationNo: quotationNo !== "" ? quotationNo : null,
           AmountReceive: receiveAmount.decimal,
           AmountDiff: diffAmount.decimal,
           AmountDiffReason: reason,
@@ -293,9 +295,8 @@ export async function POST(request) {
           SendERF: Boolean(toBooleanFlag(sendErf)),
           CreatedBy: createdById,
         },
-        include: { quotation: true },
+        include: { quotation: true, caseinformation: true },
       });
-      
       const user = await tx.user.findUnique({
         where:{
           IDUser: createdById
@@ -357,13 +358,7 @@ export async function POST(request) {
         });
 
         return invoice
-      
     })
-
-
-
-
-
 
 
     return NextResponse.json(

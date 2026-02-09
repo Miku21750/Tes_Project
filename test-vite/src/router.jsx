@@ -348,7 +348,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Company_table",
         element: (
-          <MasterGateKeeping allow={["admin", "fd"]}>
+          <MasterGateKeeping allow={["admin", "fd", "spv"]}>
             <CompanyTable/>
           </MasterGateKeeping>
         ),
@@ -356,7 +356,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Assets_table",
         element: (
-          <MasterGateKeeping allow={["admin", "fd"]}>
+          <MasterGateKeeping allow={["admin", "fd", "spv"]}>
             <AssetTable/>
           </MasterGateKeeping>
         ),
@@ -364,7 +364,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Contact_table",
         element: (
-          <MasterGateKeeping allow={["admin", "fd"]}>
+          <MasterGateKeeping allow={["admin", "fd", "spv"]}>
             <ContactTable />
           </MasterGateKeeping>
         ),
@@ -380,7 +380,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Product_table",
         element: (
-          <MasterGateKeeping allow={["admin"]}>
+          <MasterGateKeeping allow={["admin", "spv"]}>
             <ProductTable/>
           </MasterGateKeeping>
         ),
@@ -404,7 +404,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Mo_table",
         element: (
-          <MasterGateKeeping allow={["admin"]}>
+          <MasterGateKeeping allow={["admin", "spv"]}>
             <MaterialOrderTable/>
           </MasterGateKeeping>
         ),
@@ -412,7 +412,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Wo_table",
         element: (
-          <MasterGateKeeping allow={["admin"]}>
+          <MasterGateKeeping allow={["admin", "spv"]}>
             <WorkOrderTable/>
           </MasterGateKeeping>
         ),
@@ -484,7 +484,7 @@ export const router = createBrowserRouter([
       {
         path: "master/Part_table",
         element: (
-          <MasterGateKeeping allow={["admin"]}>
+          <MasterGateKeeping allow={["admin", "spv"]}>
             <PartTable/>
           </MasterGateKeeping>
         ),

@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, RefreshCw } from "lucide-react"
 
 function useDebounced(value, delay = 400) {
   const [debounced, setDebounced] = React.useState(value)
@@ -28,10 +28,11 @@ export function DataTableToolbar({
   table,
   searchPlaceholder = "Search…",
   children,
+  loading,
+  handleRefresh,
 } ) {
   const [raw, setRaw] = React.useState("");
   const debounced = useDebounced(raw, 450);
-
   React.useEffect(() => {
     table.setGlobalFilter(debounced);
     table.setPageIndex(0);
@@ -97,6 +98,10 @@ export function DataTableToolbar({
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+
+    <Button className={'w-fit'} onClick={() => handleRefresh()} disabled={loading}> 
+     Refresh <RefreshCw className={ loading && 'animate-spin'} />
+    </Button>
         </div>
       </div>
     </div>

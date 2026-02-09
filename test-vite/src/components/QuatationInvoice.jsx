@@ -534,11 +534,11 @@ export const QuotationInvoice = ({
           </Text>
           <View style={[styles.tableCell, styles.partsColUnitPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
             <Text>Rp.</Text>
-            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee})}
+            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee || "0"})}
           </View>
           <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
             <Text>Rp.</Text>
-            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee})}
+            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee || "0"})}
           </View>
         </View>
 
@@ -553,7 +553,7 @@ export const QuotationInvoice = ({
           </Text>
           <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
             <Text>Rp.</Text>
-            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal})}
+            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal || "0"})}
           </View>
         </View>
 
@@ -582,7 +582,7 @@ export const QuotationInvoice = ({
           </Text>
           <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
             <Text>Rp.</Text>
-            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal})}
+            {FormatRupiah({value: caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal || "0"})}
           </View>
         </View>
 

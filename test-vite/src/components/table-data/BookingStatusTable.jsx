@@ -69,7 +69,12 @@ export function BookingStatusTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
 
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
     const fetchBookingStatus = React.useCallback(async () => {
         setLoading(true)
         setError(null)
@@ -86,7 +91,7 @@ export function BookingStatusTable() {
 
     React.useEffect(() => {
         fetchBookingStatus()
-    }, [fetchBookingStatus])
+    }, [fetchBookingStatus, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -102,10 +107,13 @@ export function BookingStatusTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 Booking Status Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search booking status...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search booking status..." loading={loading} handleRefresh={handleRefresh}>
                       <BookingDetailsAdd/>
                     </DataTableToolbar>
                 )}

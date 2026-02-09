@@ -88,6 +88,12 @@ export function RepairClassCodeTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchRepairClassCode = React.useCallback(async () => {
         setLoading(true)
@@ -105,7 +111,7 @@ export function RepairClassCodeTable() {
 
     React.useEffect(() => {
         fetchRepairClassCode()
-    }, [fetchRepairClassCode])
+    }, [fetchRepairClassCode, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -121,10 +127,13 @@ export function RepairClassCodeTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 Repair Class Code Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search repair class code...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search repair class code..." loading={loading} handleRefresh={handleRefresh}>
                         <DataTableFacetedFilter
                             title={"All Code"}
                             column={table.getColumn("Code")}

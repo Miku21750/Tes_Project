@@ -40,6 +40,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --chart-open: oklch(0.7 0.1524 133.84);
   --chart-close: oklch(0.7 0.1722 30.07);
+  --chart-cancel: oklch(0 0.1722 0);
   --chart-inactive: oklch(0.7 0.1302 224.89);
 
   

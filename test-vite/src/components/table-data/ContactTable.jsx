@@ -136,6 +136,12 @@ export function ContactTable() {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState(null)
   const [sorting, setSorting] = React.useState([])
+  const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
+
   const fetchContacts = React.useCallback(async () => {
 
     setLoading(true)
@@ -154,7 +160,7 @@ export function ContactTable() {
 
   React.useEffect(() => {
     fetchContacts()
-  }, [fetchContacts])
+  }, [fetchContacts, refresh])
 
   const columns = React.useMemo(
     () =>
@@ -178,9 +184,10 @@ function check() {
         loading={loading}
         sorting={sorting}
         setSorting={setSorting}
+        handleRefresh={handleRefresh}
         error={error}
         toolbar={(table) => (
-          <DataTableToolbar table={table} searchPlaceholder="🔍 Search contacts...">
+          <DataTableToolbar table={table} searchPlaceholder="🔍 Search contacts..." loading={loading} handleRefresh={handleRefresh}>
             {/* Faceted filters (no more manual useMemo options) */}
             <DataTableFacetedFilter
               title="🏢 Company"

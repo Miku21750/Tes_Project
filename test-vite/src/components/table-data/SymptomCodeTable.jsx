@@ -73,7 +73,12 @@ export function SymptomCodeTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
 
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
     const fetchSymptomCode = React.useCallback(async () => {
         setLoading(true)
         setError(null)
@@ -90,7 +95,7 @@ export function SymptomCodeTable() {
 
     React.useEffect(() => {
         fetchSymptomCode()
-    }, [fetchSymptomCode])
+    }, [fetchSymptomCode, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -106,10 +111,13 @@ export function SymptomCodeTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 Symptom Code Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search symptomcode...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search symptomcode..." loading={loading} handleRefresh={handleRefresh}>
                        <DataTableFacetedFilter
                         title={"All Top Category"}
                         column={table.getColumn("TopCategory")}

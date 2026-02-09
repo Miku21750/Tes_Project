@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import prisma from "../../../../../prisma/client";
 import { generateID } from "@/utils/generateID";
 import { notifySocket } from "../../../../../lib/SocketClient";
@@ -135,7 +134,7 @@ export async function POST(request) {
           throw new HttpError(400, "Company payload is incomplete.");
         }
 
-        const orConditions = [];
+        // const orConditions = [];
         /**
          * REF: (FERID) 
          * DISABLE THIS FOR A WHILE
@@ -186,7 +185,7 @@ export async function POST(request) {
           throw new HttpError(400, "Contact payload is incomplete.");
         }
 
-        const orConditions = [];
+        // const orConditions = [];
         /**
          * REF: (FERID) 
          * DISABLE THIS FOR A WHILE
@@ -236,7 +235,6 @@ export async function POST(request) {
         contactId = createdContact.ContactID;
       } else if (contactId) {
         const dataToUpdate = {};
-
         if (usePIC && contactPIC) {
           if (contactPIC.PIC_Name) dataToUpdate.PIC_Name = contactPIC.PIC_Name;
           if (contactPIC.PIC_Email) dataToUpdate.PIC_Email = contactPIC.PIC_Email;
@@ -348,7 +346,6 @@ export async function POST(request) {
       } else {
         throw new HttpError(400, "Asset information is required.");
       }
-
       // --- get Resource Data
       let resourceDataCode
       if(savedResourceId){
@@ -380,7 +377,6 @@ export async function POST(request) {
       }
 
       const ownerAssign = caseData.Owner ? parseInt(caseData.Owner, 10) : createdBy;
-
       
       const caseId = await generateID(resourceDataCode, "caseinformation", "CaseID", tx);
 

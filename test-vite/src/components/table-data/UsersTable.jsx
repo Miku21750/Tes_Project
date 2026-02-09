@@ -80,7 +80,7 @@ function usersColums(opts) {
             cell: ({ getValue }) => {
                 const rowSignature = getValue()
                 return rowSignature ? (
-                    <img src={`data:image/png;base64,${rowSignature}`} alt="Signature" className="w-10 h-10"/>
+                    <img src={rowSignature} alt="Signature" className="w-10 h-10"/>
                 ) : (
                     "No Signature"
                 ) 
@@ -134,6 +134,12 @@ export function UsersTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchUsers = React.useCallback(async () => {
         setLoading(true)
@@ -151,7 +157,7 @@ export function UsersTable() {
 
     React.useEffect(() => {
         fetchUsers()
-    }, [fetchUsers])
+    }, [fetchUsers, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -167,10 +173,13 @@ export function UsersTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 User Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search user...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search user..." loading={loading} handleRefresh={handleRefresh}>
                         <DataTableFacetedFilter
                             title={"All Role"}
                             column={table.getColumn("Role")}
