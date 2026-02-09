@@ -106,13 +106,6 @@ function WorkOrderColums(opts) {
              cell: ({ getValue }) => formatDate(getValue())
         },
         {
-            accessorKey: "RequestedDateTimeCustomer",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title={"Requested Date Time Customer"}/>
-            ),
-             cell: ({ getValue }) => formatDate(getValue())
-        },
-        {
             accessorKey: "GuaranteedFixTimeCustomer",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Guaranteed Fix Time Customer"}/>
@@ -173,6 +166,11 @@ export function WorkOrderTable() {
             desc:true
         }
     ])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchWorkOrder = React.useCallback(async () => {
         setLoading(true)
@@ -190,7 +188,7 @@ export function WorkOrderTable() {
 
     React.useEffect(() => {
         fetchWorkOrder()
-    }, [fetchWorkOrder])
+    }, [fetchWorkOrder, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -208,10 +206,11 @@ export function WorkOrderTable() {
                 columns={columns}
                 sorting={sorting}
                 setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search work order...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search work order..." loading={loading} handleRefresh={handleRefresh}>
                        <DataTableFacetedFilter
                         title={"All System Status"}
                         column={table.getColumn("SystemStatus")}

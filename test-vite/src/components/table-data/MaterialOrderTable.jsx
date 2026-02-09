@@ -124,6 +124,11 @@ export function MaterialOrderTable() {
             desc:true
         }
     ])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchMaterialOrder = React.useCallback(async () => {
         setLoading(true)
@@ -141,7 +146,7 @@ export function MaterialOrderTable() {
 
     React.useEffect(() => {
         fetchMaterialOrder()
-    }, [fetchMaterialOrder])
+    }, [fetchMaterialOrder, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -159,10 +164,11 @@ export function MaterialOrderTable() {
                 columns={columns}
                 sorting={sorting}
                 setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search material order...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search material order..." loading={loading} handleRefresh={handleRefresh}>
                        <DataTableFacetedFilter
                         title={"All Order Status"}
                         column={table.getColumn("OrderStatus")}

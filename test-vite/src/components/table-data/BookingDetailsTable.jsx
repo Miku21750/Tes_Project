@@ -148,6 +148,12 @@ export function BookingDetailsTable() {
     const [user, setUser] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchAll = React.useCallback(async () => {
         setLoading(true)
@@ -169,7 +175,7 @@ export function BookingDetailsTable() {
 
     React.useEffect(() => {
         fetchAll()
-    }, [fetchAll])
+    }, [fetchAll, refresh])
 
     const userMap = React.useMemo(() => {
         return Object.fromEntries(
@@ -192,10 +198,13 @@ export function BookingDetailsTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 Booking Details Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search booking details...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search booking details..." loading={loading} handleRefresh={handleRefresh}> 
                        <DataTableFacetedFilter
                         title={"All Changed By"}
                         column={table.getColumn("IDUser")}

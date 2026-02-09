@@ -11,8 +11,6 @@ const prisma = globalForPrisma.prisma || new PrismaClient({
     : ["query", "error", "info", "warn"],
 }, {timeout: 50000});
 
-
-
 if (process.env.NODE_ENV !== "production") {
   prisma.$on("query", (e) => {
     console.log("Query:", e.query);

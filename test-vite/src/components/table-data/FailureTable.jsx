@@ -67,6 +67,12 @@ export function FailureTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchFailure = React.useCallback(async () => {
         setLoading(true)
@@ -84,7 +90,7 @@ export function FailureTable() {
 
     React.useEffect(() => {
         fetchFailure()
-    }, [fetchFailure])
+    }, [fetchFailure, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -100,10 +106,13 @@ export function FailureTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 NMU Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search nmu...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search nmu..." loading={loading} handleRefresh={handleRefresh}>
                         <FailureAdd/>
                     </DataTableToolbar>
                 )}

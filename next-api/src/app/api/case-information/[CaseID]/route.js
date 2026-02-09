@@ -93,6 +93,7 @@ export async function GET(request, { params }) {
             caseresolution: true,
             accessory: true,
             otcCodeTable: true,
+            invoicetable: true,
             createdByUser: {
                 include: {
                     resource: true,

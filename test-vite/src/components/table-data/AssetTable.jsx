@@ -10,8 +10,11 @@ import { DataTablePagination } from "./config/data-table-pagination"
 import { DataTableFacetedFilter } from "./config/data-table-faceted-filter"
 import { DataTable } from "./config/data-table"
 import { Button } from "../ui/button"
-import { AssetEdit, AssetDelete } from "../model/sc-modal"
+import { AssetDelete } from "../model/sc-modal"
 import { formatDate } from "@/lib/utils"
+import { AssetEdit } from "../model/AssetEdit"
+import { ConfirmDialog } from "../model/config/ConfirmDialog"
+import { Trash } from "lucide-react"
 
 function assetColums(opts) {
     return [
@@ -53,14 +56,19 @@ function assetColums(opts) {
             ),
         },
         {
-            accessorKey: "site_account.Company",
+            id: "siteAccount",
+            accessorFn: (row) => row.site_account?.Company ?? "",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Site Account"}/>
             ),
         },
         {
             id: "Contact",
-            accessorKey: "contact_information.FirstName",
+           accessorFn: (row) => {
+           const first = row.contact_information?.FirstName ?? ""
+           const last  = row.contact_information?.LastName ?? ""
+           return `${first} ${last}`.trim()
+          },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Contact"}/>
             ),
@@ -92,7 +100,8 @@ function assetColums(opts) {
             return (
                 <div className="flex justify-center gap-2">
                     {opts.onEdit(id)}
-                    {opts.onDelete(id)}
+                    {/* {opts.onDelete(id)} */}
+                    {opts.onAskDelete(id)}
                 </div>
             )
             },
@@ -104,7 +113,15 @@ export function AssetTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+    const [isDeleting, setIsDeleting] = React.useState(false)
+    const [selectedId, setSeletectedId] = React.useState()
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
 
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
     const fetchAsset = React.useCallback(async () => {
         setLoading(true)
         setError(null)
@@ -131,15 +148,84 @@ export function AssetTable() {
         }
     }, [])
 
+
     React.useEffect(() => {
         fetchAsset()
-    }, [fetchAsset])
+    }, [fetchAsset, refresh])
 
+  const handleDeleteAsset = React.useCallback(async () => {
+    if (!selectedId) return
+    setIsDeleting(true)
+    try {
+      const response = await ApiCustomer.delete(`/api/asset-information/${selectedId}`)
+      if (response.status === 409 || response.data?.success === false) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Tidak Bisa Dihapus!",
+          text: response.data?.message || "Data ini memiliki keterkaitan dan tidak dapat dihapus.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        })
+        return
+      }
+
+      await Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Data berhasil dihapus.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      })
+
+      setIsDialogOpen(false)
+      setSeletectedId(null)
+      await fetchAsset() 
+    } catch (error) {
+      const message = error?.response?.data?.message
+      if (error?.response?.status === 409) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Tidak Bisa Dihapus!",
+          text: message || "Data ini memiliki keterkaitan dan tidak dapat dihapus.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        })
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus!",
+          text: "Terjadi kesalahan saat menghapus data. Silakan coba lagi.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        })
+      }
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [selectedId, fetchAsset])
     const columns = React.useMemo(
         () => 
             assetColums({
                 onEdit: (id) => <AssetEdit assetId={id} onUpdate={fetchAsset}/>,
-                onDelete: (id) => <AssetDelete assetId={id}/>
+                // onDelete: (id) => <AssetDelete assetId={id}/>,
+                onAskDelete: (id) =>
+                   <Button 
+                     variant="outline" 
+                     className="text-red-500 hover:text-red-700" 
+                     onClick={() => {
+                       setIsDialogOpen(true) 
+                       setSeletectedId(id)
+                     }} >
+                     <Trash />
+                   </Button>
             }),
         [fetchAsset]
     )
@@ -149,10 +235,13 @@ export function AssetTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📦 Asset Information</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search asset...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search asset..." loading={loading} handleRefresh={handleRefresh}>
                         <DataTableFacetedFilter
                             title="All Serial Number"
                             column={table.getColumn("SerialNumber")}
@@ -168,6 +257,19 @@ export function AssetTable() {
                     </DataTableToolbar>
                 )}
             />
+
+              <ConfirmDialog
+                  open={isDialogOpen}
+                  onOpenChange={(open) => {
+                    setIsDialogOpen(open)
+                    if (!open) setSeletectedId(null)
+                  }}
+                  title="Are you absolutely sure?"
+                  description="This action cannot be undone. This will permanently delete your account."
+                  confirmLabel="Delete Asset"
+                  confirming={isDeleting} 
+                  onConfirm={handleDeleteAsset}
+              />
         </div>
     )
 }

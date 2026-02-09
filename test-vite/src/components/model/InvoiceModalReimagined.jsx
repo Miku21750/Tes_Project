@@ -73,9 +73,7 @@ const buildInitialForm = (invoice, quotation) => {
 const InvoiceDialog = () => {
   const { user } = useAuth();
   const open = useServiceCaseStore((s) => s.invoiceDialogOpen);
-  const setInvoiceDialogOpen = useServiceCaseStore(
-    (s) => s.setInvoiceDialogOpen
-  );
+  const setInvoiceDialogOpen = useServiceCaseStore((s) => s.setInvoiceDialogOpen);
   const invoiceData = useServiceCaseStore((s) => s.invoiceData);
   const invoiceLoading = useServiceCaseStore((s) => s.invoiceLoading);
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
@@ -86,9 +84,7 @@ const InvoiceDialog = () => {
   const invoice = invoiceData?.invoice;
 
   const [step, setStep] = useState("form");
-  const [form, setForm] = useState(() =>
-    buildInitialForm(invoice, quotation)
-  );
+  const [form, setForm] = useState(() => buildInitialForm(invoice, quotation));
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -102,7 +98,6 @@ const InvoiceDialog = () => {
   // fetch invoice data whenever dialog is opened
   useEffect(() => {
     if (!open || !caseDetails?.CaseID) return;
-    // fetchInvoiceData();
   }, [open, caseDetails?.CaseID, fetchInvoiceData]);
 
   useEffect(() => {
@@ -143,9 +138,9 @@ const InvoiceDialog = () => {
   const validateForm = () => {
     const nextErrors = {};
 
-    if (!quotation?.quotationNo) {
-      nextErrors.quotationNo = "Quotation belum tersedia.";
-    }
+    // if (!quotation?.quotationNo) {
+    //   nextErrors.quotationNo = "Quotation belum tersedia.";
+    // }
 
     if (form.amountReceive === "" || Number.isNaN(Number(form.amountReceive))) {
       nextErrors.amountReceive = "Amount receive wajib diisi dengan angka.";
@@ -171,7 +166,7 @@ const InvoiceDialog = () => {
 
   const handleConfirm = async () => {
     if (!caseDetails?.CaseID || !user?.id) return;
-    if (!quotation?.quotationNo) return;
+    // if (!quotation?.quotationNo) return;
     if (submitting) return;
 
     const payload = {
@@ -234,14 +229,14 @@ const InvoiceDialog = () => {
     </div>
   );
 
-  const renderEmptyQuotation = () => (
-    <div className="flex min-h-[200px] flex-col items-center justify-center text-center text-sm text-muted-foreground">
-      <p>Belum ada quotation untuk case ini.</p>
-      <p className="text-xs">
-        Buat quotation terlebih dahulu sebelum membuat invoice.
-      </p>
-    </div>
-  );
+  // const renderEmptyQuotation = () => (
+  //   <div className="flex min-h-[200px] flex-col items-center justify-center text-center text-sm text-muted-foreground">
+  //     <p>Belum ada quotation untuk case ini.</p>
+  //     <p className="text-xs">
+  //       Buat quotation terlebih dahulu sebelum membuat invoice.
+  //     </p>
+  //   </div>
+  // );
 
   const renderForm = () => (
     <div className="grid gap-6 md:grid-cols-2 items-start">
@@ -254,7 +249,7 @@ const InvoiceDialog = () => {
           <CaseField label="Quotation No" lock>
             <Input value={quotation?.quotationNo || "-"} readOnly />
           </CaseField>
-          <CaseField label="Subtotal" lock>
+          <CaseField label="Quotation amount" lock>
             <Input
               value={formatAccountingRupiah(quotation?.subtotal)}
               readOnly
@@ -312,6 +307,7 @@ const InvoiceDialog = () => {
                 "Qris",
                 "Credit Card",
                 "Transfer",
+                "Free",
               ]}
             />
           </CaseField>
@@ -327,10 +323,10 @@ const InvoiceDialog = () => {
           </CaseField>
 
           <CaseField label="Amount Difference" lock>
-            <Input value={formatAccountingRupiah(form.amountDiff)} readOnly />
+            <Input value={formatAccountingRupiah(Math.abs(form.amountDiff))} readOnly />
           </CaseField>
 
-          {Number(form.amountDiff) !== 0 && (
+          {(Number(form.amountDiff) !== 0 || form.paymentType === 'Free') && (
             <CaseField label="Alasan Amount Difference">
               <div className="space-y-1">
                 <SearchCommandBlock
@@ -415,30 +411,34 @@ const InvoiceDialog = () => {
         Pastikan data berikut sudah benar sebelum disimpan.
       </p>
       <div className="space-y-2 rounded-md border bg-muted/50 p-4 text-sm">
-        <p>
-          <strong>Quotation No:</strong> {quotation?.quotationNo || "-"}
-        </p>
-        <p>
-          <strong>Quotation Total:</strong>{" "}
-          {formatAccountingRupiah(quotation.grandTotal)}
-        </p>
-        <p>
-          <strong>DP Total:</strong>{" "}
-          {formatAccountingRupiah(totalDpAmount)}
-        </p>
-        <p>
-          <strong>Grand Total:</strong>{" "}
-          {formatAccountingRupiah(grandTotalNumber)}
-        </p>
+        {quotation && (
+          <>
+            <p>
+              <strong>Quotation No:</strong> {quotation?.quotationNo || "-"}
+            </p>
+            <p>
+              <strong>Quotation Total:</strong>{" "}
+              {formatAccountingRupiah(quotation.grandTotal)}
+            </p>
+            <p>
+              <strong>DP Total:</strong>{" "}
+              {formatAccountingRupiah(totalDpAmount)}
+            </p>
+            <p>
+              <strong>Grand Total:</strong>{" "}
+              {formatAccountingRupiah(grandTotalNumber)}
+            </p>
+          </>
+        )}
         <p>
           <strong>Amount Receive:</strong>{" "}
           {formatAccountingRupiah(form.amountReceive)}
         </p>
         <p>
           <strong>Amount Difference:</strong>{" "}
-          {formatAccountingRupiah(form.amountDiff)}
+          {formatAccountingRupiah(Math.abs(form.amountDiff))}
         </p>
-        {Number(form.amountDiff || 0) !== 0 && (
+        {(Number(form.amountDiff || 0) !== 0 || form.paymentType === "Free") && (
           <p>
             <strong>Alasan Selisih:</strong> {form.amountDiffReason || "-"}
           </p>
@@ -492,14 +492,14 @@ const InvoiceDialog = () => {
         <div className="overflow-y-auto ">
           {invoiceLoading
             ? renderLoading()
-            : !quotation
-            ? renderEmptyQuotation()
+            // : !quotation
+            // ? renderEmptyQuotation()
             : step === "form"
             ? renderForm()
             : renderConfirmation()}
         </div>
 
-        {!invoiceLoading && quotation && (
+        {!invoiceLoading && (
           <DialogFooter className="mt-6">
             {step === "form" ? (
               <>

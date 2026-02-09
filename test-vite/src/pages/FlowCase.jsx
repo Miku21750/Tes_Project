@@ -54,9 +54,6 @@ export const FlowCaseData = (user) => {
   const isToggleUser = user.user?.role === "admin" || user.user?.role === "fd";
   const [filterClose, setFilterClose] = useState(true)
   const [filterFinish, setFilterFinish] = useState(true)
-
-  
-
   const [adminViewDoneOnly, setAdminViewDoneOnly] = useState(false);
 
   const fetchData = async () => {
@@ -324,13 +321,13 @@ export const FlowCaseData = (user) => {
   const navigate = useNavigate();
   return (
     <>
-      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% min-h-0"} id='your-case'>
+      <SidebarProvider defaultOpen className={"h-full dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% min-h-0"} id='your-case'>
         <SidebarInset className={"dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
           <div className="flex flex-col w-full ">
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
                 {isToggleUser &&
-                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md" id='case-toggle'>
+                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%" id='case-toggle'>
                   <Switch
                     checked={filterFinish === false}
                     onCheckedChange={(checked) => {
@@ -339,7 +336,7 @@ export const FlowCaseData = (user) => {
                       }
                       setFilterFinish(checked ? false : true);
                     }}
-                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
+                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500 dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"
                     id="Finish"
                   /> 
                   <Label htmlFor="Finish" className={"font-[700]"} >
@@ -353,7 +350,7 @@ export const FlowCaseData = (user) => {
                       }
                       setFilterClose(checked ? false : true);
                     }}
-                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
+                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500 dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"
                     id="Close"
                   />
                   <Label htmlFor="Close" className={"font-[700]"}>

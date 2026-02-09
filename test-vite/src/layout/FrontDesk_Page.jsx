@@ -9,13 +9,14 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
 import { useSocket } from '@/hooks/useSocket';
-import { buildBusinessDayCaseTypeSeries, buildWeeklyCaseTypeSeries, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
 import { STATUS_ENUM_TO_LABEL } from '@/hooks/useCaseStatus';
+import { buildBusinessDayCaseTypeSeries } from '@/components/chart-data/utils-config';
 
 export default function FrontDesk_Page() {
   const { user } = useAuth();
@@ -31,7 +32,6 @@ export default function FrontDesk_Page() {
   });
   const [weeklyChartData, setWeeklyChartData] = useState([]);
   const [notfilog, setNotfilog] = useState([])
-
   const radialchartdata = [
     { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
     { name: "InActive", value: inactivecasevaluedata || 0, fill: "#FACC15" },
@@ -172,7 +172,7 @@ const checkdata =  getMetricKeys(weeklyChartData);
         {/*     <ChartRadialText radialchartdata={radialchartdata} /> */}
         {/*   </CardContent> */}
         {/* </Card> */}
-<ChartTooltipAdvanced datachart={weeklyChartData}/>
+        <ChartTooltipAdvanced datachart={weeklyChartData}/>
       </div>
 
       {/* Right Column - Notifications */}

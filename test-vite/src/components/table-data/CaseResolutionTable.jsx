@@ -94,6 +94,12 @@ export function CaseResolutionTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
 
     const fetchCaseResolution = React.useCallback(async () => {
         setLoading(true)
@@ -111,7 +117,7 @@ export function CaseResolutionTable() {
 
     React.useEffect(() => {
         fetchCaseResolution()
-    }, [fetchCaseResolution])
+    }, [fetchCaseResolution, refresh])
 
     const columns = React.useMemo(
         () => 
@@ -127,10 +133,13 @@ export function CaseResolutionTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📊 Case Resolution Management</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case resolution...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case resolution..." loading={loading} handleRefresh={handleRefresh}>
                         <CrsAdd/>
                     </DataTableToolbar>
                 )}

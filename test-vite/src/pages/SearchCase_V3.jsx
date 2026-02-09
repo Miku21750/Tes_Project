@@ -680,7 +680,6 @@ export default function NewCaseForm() {
       setProductNo(p.ProductNumber);
       setProductName(p.ProductName);
       setProductLine(p.ProductLine || "");
-      // setHWPCCode(p.HWPC || "");
       setVendor(p.vendor || "");
       if (p.product_type) {
         setProductTower(p.product_type.ProductTower || "");
@@ -750,7 +749,7 @@ export default function NewCaseForm() {
       const res = await ApiCustomer.get(`/api/case-information`, {
         params: {
           AssetID: assetID,
-          excludeStatuses: ['Close', 'FinishRepair'], // atau ambil semua status, tergantung kebutuhan
+          excludeStatuses: ['FinishRepair','Void'], // atau ambil semua status, tergantung kebutuhan
         },
       });
 
@@ -764,7 +763,6 @@ export default function NewCaseForm() {
         const createdDate = new Date(c.caseinformation.CreatedOn); 
         return createdDate >= past90Days && createdDate <= now;
       }).length;
-
       return count;
     } catch (e) {
       console.error("Failed to fetch rerepair count", e);
@@ -777,7 +775,7 @@ export default function NewCaseForm() {
       if (!selectedAsset) return;
       try {
         const res = await ApiCustomer.get(`/api/case-information`, {
-          params: { excludeStatuses: ['Close', 'FinishRepair'] },
+          params: { excludeStatuses: ['FinishRepair', 'Void'] },
         });
         const list = res.data?.data ?? [];
 
@@ -1102,9 +1100,7 @@ export default function NewCaseForm() {
       const assetSN = selectedAsset?.SerialNumber;
       const normalizedEowDate = eowDate ? new Date(eowDate).toISOString() : null;
       const existingCompanyId = selectedCompany?.SiteAccountID ?? null;
-      const finalProductNumber =
-        selectedProduct?.ProductNumber || productNo || null;
-
+      const finalProductNumber = selectedProduct?.ProductNumber || productNo || null;
       const needsNewCompany = isNewContact && showCompanySection && !selectedCompany;
       const companyPayload = needsNewCompany
         ? {
@@ -1128,7 +1124,6 @@ export default function NewCaseForm() {
             ProductName: productName,
             ProductLine: productLine,
             ProductTypeID: productTypeId ? parseInt(productTypeId, 10) : null,
-            // HWPC: HWPCCode,
             vendor,
           }
         : null;
@@ -1153,8 +1148,7 @@ export default function NewCaseForm() {
           }
         : null;
 
-      const contactPicPayload =
-        !isNewContact && usePIC
+      const contactPicPayload = !isNewContact && usePIC
           ? {
               PIC_Name: contactPICName,
               PIC_Email: contactPICEmail,
@@ -1198,8 +1192,7 @@ export default function NewCaseForm() {
         isNewAsset,
         needWarrantyApproval,
         usePIC,
-        assignCompanyToExistingContact:
-          !isNewContact &&
+        assignCompanyToExistingContact:!isNewContact &&
           Boolean((companyPayload || existingCompanyId) && selectedContact) &&
           selectedContact?.SiteAccountID == null,
         attachContactToExistingAsset:
@@ -1290,6 +1283,8 @@ export default function NewCaseForm() {
       } catch (error) {
         toast.warning("Case Note failed,",error)
       }
+
+      
       
       //if rerepair, add note
       if(mustRerepair){
@@ -1372,7 +1367,10 @@ export default function NewCaseForm() {
                         "w-full text-left px-3 py-2 hover:bg-accent/40",
                         selectedAsset?.AssetID === a.AssetID && "bg-accent/70"
                       )}
-                      onClick={() => setSelectedAsset(a)}
+                      onClick={() => {
+                        setSelectedAsset(a)
+                        setSerialQuery(a.SerialNumber)
+                      }}
                     >
                       <div className="font-medium">{a.SerialNumber}</div>
                       <div className="text-xs text-muted-foreground">
@@ -1527,6 +1525,7 @@ export default function NewCaseForm() {
                     }
                   } else {
                     setRoleAssign([])
+                    setCaseAssign(null)
                   }
                 }}
               >
@@ -1658,7 +1657,7 @@ export default function NewCaseForm() {
                 {showCompanySection && (
                 <div className="grid grid-cols-3 gap-2 items-center ">
                   <Label className="col-span-1">Nama Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"dark:text-white col-span-2 ring-1 rounded-sm ring-gray-400 dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  <Input className={"dark:text-white col-span-2 ring-1 rounded-sm ring-gray-400 dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                 </div>
                 )}
                 <div className="grid grid-cols-3 gap-2 items-center">
@@ -1913,7 +1912,11 @@ export default function NewCaseForm() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Serial No.<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                <Input value={serialQuery} onChange={(e) => {
+                  setSelectedAsset(null)
+                  setSerialQuery(e.target.value)
+                }
+                } className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 <Button variant="outline" asChild className={'w-full dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                   <a
                     href="https://support.hp.com/id-en/check-warranty"
@@ -1967,7 +1970,6 @@ export default function NewCaseForm() {
                           setProductNo(p.ProductNumber);
                           setProductName(p.ProductName);
                           setProductLine(p.ProductLine || "");
-                          // setHWPCCode(p.HWPC || "");
                           setVendor(p.vendor || "");
                           setProductTypeId(p.ProductTypeID);
                         }}
@@ -2005,12 +2007,6 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                {/* <div>
-                  <div>
-                  <Label>HWPC Code<Label className="text-red-600">*</Label></Label>
-                  <Input value={HWPCCode} onChange={(e) => setHWPCCode(e.target.value)} />
-                </div>
-                </div> */}
                 {productTower && productGroup && (
                   <div className="flex flex-col gap-2">
                     <Label>Product Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
