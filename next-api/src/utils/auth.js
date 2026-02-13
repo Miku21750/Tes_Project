@@ -17,8 +17,6 @@ export function createAccessToken(user) {
     role: user.Role,
     name: user.Name,
     avatar: user.ProfilePhoto || "",
-    iss: JWT_ISSUER,
-    aud: JWT_AUDIENCE,
     jti: crypto.randomUUID()
   };
 
@@ -62,7 +60,7 @@ export function applyRefreshCookie(response, value, { maxAge = REFRESH_TOKEN_TTL
   response.cookies.set(REFRESH_COOKIE_NAME, value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/api/auth",
     maxAge
   });
