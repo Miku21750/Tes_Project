@@ -189,6 +189,7 @@ export function PartTable() {
     const [error, setError] = React.useState(null)
     const [sorting, setSorting] = React.useState([])
     const [refresh, setRefresh] = React.useState(false) 
+    const [search, setSearch] = React.useState("")
 
     function handleRefresh(){
       setRefresh(prev => !prev)
@@ -198,7 +199,10 @@ export function PartTable() {
         setLoading(true)
         setError(null)
         try {
-        const res = await ApiCustomer.get(`/api/service-log/parts-catalog`)
+        const params = new URLSearchParams()
+        if (search) params.set("q", search)
+        params.set("limit", "100")
+        const res = await ApiCustomer.get(`/api/service-log/parts-catalog?${params.toString()}`)
         setData(res.data.data)
         } catch (error) {
             toast.error("Failed to fetch Part data")
@@ -206,7 +210,7 @@ export function PartTable() {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [search])
 
     React.useEffect(() => {
         fetchPart()
@@ -232,7 +236,14 @@ export function PartTable() {
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search part..." loading={loading} handleRefresh={handleRefresh}>
+                    <DataTableToolbar
+                        table={table}
+                        searchPlaceholder="🔍 Search part..."
+                        loading={loading}
+                        handleRefresh={handleRefresh}
+                        onSearchChange={setSearch}
+                        searchValue={search}
+                    >
                         <DataTableFacetedFilter
                             title={"All Category"}
                             column={table.getColumn("Keyword")}
