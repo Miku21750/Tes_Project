@@ -1762,8 +1762,7 @@ export function ContactEdit({ contactID, onUpdate }) {
             </div>
           <div>
               <Label className="text-sm font-medium">State / Province <Label className="text-red-600">*</Label></Label>
-              {/* TODO FOR PERID :
-              DESAIN NIH BIAR GA TERLALU ILANG GARISNYA */}
+              {/* TODO FOR PERID : DESAIN NIH BIAR GA TERLALU ILANG GARISNYA */}
               {isIndonesia ? (
                 <SelectBar className="p-1 border-b-black" value={stateProvince} options={provinces} onChange={(e) => setStateProvince(e.target.value)} />
               ):(
@@ -1838,7 +1837,7 @@ export function ContactDelete ({ contactID }) {
   );
 };
 
-  export function ProductAdd() {
+export function ProductAdd() {
     // Form Product
     const [formDataProduct, setFormDataProduct] = useState({
       ProductNumber: '',
@@ -1971,7 +1970,7 @@ export function ContactDelete ({ contactID }) {
         </DialogContent>
       </Dialog>
     );
-  };
+};
 
 export function ProductEdit({ ProductNumber, onUpdate }) {
   const [open, setOpen] = useState(false);
@@ -2040,8 +2039,6 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         ProductTypeID,
         HWPC,
       });
-
-
       Swal.fire({
         icon: "success",
         title: "Updated",
@@ -5073,8 +5070,7 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
     return {
       Name: formData.Name,
       ServiceCenterName: toNull(formData.ServiceCenterName),
-      ResourceCode:
-        formData.ResourceCode !== "" && formData.ResourceCode !== null
+      ResourceCode: formData.ResourceCode !== "" && formData.ResourceCode !== null
           ? Number(formData.ResourceCode)
           : null,
       ResourceLogo: toNull(formData.ResourceLogo),
