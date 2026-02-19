@@ -75,6 +75,7 @@ interface ServiceCaseState {
   openDialogQuotation: boolean;
   invoiceDialogOpen: boolean;
   signature: string | null;
+  isVoidWarranty: boolean,
 
   // is dirty checkers
   isDirty: boolean;
@@ -97,7 +98,7 @@ setQuickLogOpen: (open: boolean) => void;
   setEntitlementFieldSilent: (field: string, value: any) => void;
   setProductFormField: (field: string, value: any) => void;
   setCaseNoteField: (field: string, value: any) => void;
-  
+  setIsVoidWarranty: (data: any) => void;
   
   setSelectedSymptom: (value: any) => void;
 
@@ -273,6 +274,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   isDirty: false,
   saveIntent: null,
 quickLogOpen: false,
+  isVoidWarranty: false,
 setQuickLogOpen: (open) => set({ quickLogOpen: open }),
 
   setDirty: (dirty) => set({ isDirty: dirty }),
@@ -451,7 +453,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
   setOpenDialogQuotation: (open) => set({ openDialogQuotation: open }),
   setInvoiceDialogOpen: (open) => set({ invoiceDialogOpen: open }),
   setOwnerUserData: (data) => set({ ownerUserData: data }),
-
+ setIsVoidWarranty: (perdi) => set({ isVoidWarranty: perdi }),
   // ------------- fetchers -----------------
   fetchCustomerData: async () => {
     const { caseDetails } = get();
