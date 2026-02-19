@@ -1676,7 +1676,7 @@ useEffect(() => {
 
                   <CaseField
                     label="Case Status"
-                    lock={!canEdit}
+                    lock={!canEdit && !canEditFd}
                   >
                     <SearchCommandBlock
                       id="case-status"

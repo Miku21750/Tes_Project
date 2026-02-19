@@ -1017,9 +1017,9 @@ enum CaseStatus {
   AssignLeader
   AssignPS
   AssignCM
-  PartOrder
+  PartOrder // PART REQUEST LOGISTIC
   PartRequest
-  PartRequestLog
+  PartRequestLog // PART ORDER LOGISTIC
   PartAvailable
   RepairProgress
   FinishRepair
