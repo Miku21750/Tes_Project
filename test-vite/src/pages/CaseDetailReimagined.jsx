@@ -1424,7 +1424,7 @@ useEffect(() => {
       {(caseDetails.CaseStatus === "Close" || caseDetails.CaseStatus === "Cancel") && (
         <div className="p-4 mt-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This Case is <strong>read-only</strong> because it is
-          <strong> Closed OR Canceled</strong>.
+          <strong>{caseDetails.CaseStatus === "Close" ? " Closed" : caseDetails.CaseStatus === "Cancel" ? " Cancelled" : ""}</strong>
         </div>
       )}
 

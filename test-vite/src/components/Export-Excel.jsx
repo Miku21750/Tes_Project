@@ -6,6 +6,7 @@ import ApiCustomer from "@/api";
 import * as XLSX from "xlsx";
 import { Button } from "./ui/button";
 import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
+import { Download } from "lucide-react";
 
 export const ExportExcel = ({ caseData, resource, isAdmin }) => {
   const [cases, setCases] = useState([]);
@@ -133,9 +134,10 @@ export const ExportExcel = ({ caseData, resource, isAdmin }) => {
   return (
     <div>
       <Button
+        variant={"outline"}
         onClick={exportToExcel}
-        className={"bg-blue-500 text-white hover:bg-blue-400 dark:bg-sky-600 dark:hover:bg-sky-300"} 
       >
+        <Download className="h-4 w-4"/>
         Export to Excel
       </Button>
     </div>

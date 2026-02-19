@@ -48,7 +48,7 @@ export const STATUS_ENUM_TO_LABEL: Record<string, string> = {
   NEW_POPDoc: "New Needed POP Document",
   NEW_Warranty: "New Warranty (Warranty Proses)",
   PartRequest: "Part Request",
-  PartRequestLog: "Part Request Logistic",
+  PartRequestLog: "Part Order Logistic",
   PartOrder: "Part Order",
   PartAvailable: "Part Available",
   RepairProgress: "Repair Progress",
