@@ -49,7 +49,7 @@ export const STATUS_ENUM_TO_LABEL: Record<string, string> = {
   NEW_Warranty: "New Warranty (Warranty Proses)",
   PartRequest: "Part Request",
   PartRequestLog: "Part Order Logistic",
-  PartOrder: "Part Order",
+  PartOrder: "Part Request Logistic",
   PartAvailable: "Part Available",
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
