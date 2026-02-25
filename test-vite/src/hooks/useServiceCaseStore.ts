@@ -173,6 +173,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     CaseID_Manual: "",
     CaseID_Manual_Date: null,
     ReferenceCase: "",
+    OTCCode: "",
     CaseProductNote: "",
     StorageLocationStore: "",
     VoidReason:"",
@@ -349,6 +350,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
         CaseID_Manual: caseDetails.CaseID_Manual,
         CaseID_Manual_Date: caseDetails.CaseID_Manual_Date,
         ReferenceCase: caseDetails.ReferenceCase,
+        OTCCode: caseDetails.OTCCode,
         CaseProductNote: caseDetails.CaseProductNote,
         StorageLocationStore: caseDetails.StorageLocationStore,
         VoidReason: caseDetails.VoidReason,
@@ -769,6 +771,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
         CaseID_Manual: caseForm.CaseID_Manual,
         CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
         ReferenceCase: caseForm.ReferenceCase,
+        OTCCode: caseForm.OTCCode,
         StorageLocationStore: caseForm.StorageLocationStore,
         VoidReason: caseForm.VoidReason,
       });
@@ -1059,6 +1062,9 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
                 }
                 if (caseForm.ReferenceCase?.trim()) {
                   caseUpdates.ReferenceCase = caseForm.ReferenceCase;
+                }
+                if (caseForm.OTCCode?.trim()) {
+                  caseUpdates.OTCCode = caseForm.OTCCode;
                 }
                 if (caseForm.StorageLocationStore?.trim()) {
                   caseUpdates.StorageLocationStore =

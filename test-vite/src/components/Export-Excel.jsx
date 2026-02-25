@@ -65,7 +65,7 @@ export const ExportExcel = ({ caseData, resource, isAdmin }) => {
           ProductNumber: c.caseinformation.asset_information?.ProductNumber || "N/A",
           ProductName: c.caseinformation.asset_information?.product_information?.ProductName || "N/A",
           SerialNumber: c.caseinformation.asset_information?.SerialNumber || "N/A",
-          WarrantyStatus: c.caseinformation.asset_information?.WarrantyOTCCode?.Description || "N/A",
+          WarrantyStatus:  c.caseinformation.OTCCode ? c.caseinformation.otcCodeTable?.Description : c.caseinformation.asset_information?.WarrantyOTCCode?.Description || "N/A",
           Company_Code : "HPSC KK",
           Company_Name: "PT. JAVA ABADI GEMILANG",
           CE_Name: c.caseinformation.workorder?.[0]?.owner?.Name || "N/A",

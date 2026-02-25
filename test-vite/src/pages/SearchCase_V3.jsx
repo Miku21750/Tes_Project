@@ -2075,7 +2075,7 @@ export default function NewCaseForm() {
                 <Label>EOW Date</Label>
                 <Input type="date" variant={"default"} value={eowDate} onChange={(e) => setEowDate(e.target.value)} className={"mt-2 ring-1 ring-gray-400 dark:text-white"} />
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label>Is Void Warranty?</Label>
                 <Checkbox 
                   id="isVoidWarranty"

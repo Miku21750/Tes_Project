@@ -427,7 +427,6 @@ export async function POST(request) {
     });
 
     
-    await redis.del(redisKey(`await redis.del(redisKey(`case:detail:${caseId}`));:${caseId}`));
 
     return NextResponse.json(
       {

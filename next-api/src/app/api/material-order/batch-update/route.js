@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 import { handleActionLogNotifications } from "../../../../../lib/actionLogDispatcher";
-import { STATUS_ENUM_TO_LABEL } from "../../service-log/create-order/route";
+import { STATUS_ENUM_TO_LABEL } from "@/utils/EnumToLabel";
 
 const CASE_STATUS_BY_ORDER_STATUS = {
   Ordered: "PartOrder",
