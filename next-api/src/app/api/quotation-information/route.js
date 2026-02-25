@@ -426,7 +426,7 @@ export async function POST(request) {
       });
     });
 
-    
+    await redis.del(redisKey(`case:detail:${caseId}`));
 
     return NextResponse.json(
       {
