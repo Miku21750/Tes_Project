@@ -30,6 +30,7 @@ export function DataTableToolbar({
   children,
   loading,
   handleRefresh,
+  noGlobalSearch = false,
 } ) {
   const [raw, setRaw] = React.useState("");
   const debounced = useDebounced(raw, 450);
@@ -44,6 +45,7 @@ export function DataTableToolbar({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex w-full flex-col gap-2  ">
+      {!noGlobalSearch &&
         <Input
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
@@ -51,6 +53,7 @@ export function DataTableToolbar({
           className="sm:w-[320px]"
           variant={"outline"}
         />
+      }
         <div className="flex flex-wrap items-center gap-2">
           {children}
 
