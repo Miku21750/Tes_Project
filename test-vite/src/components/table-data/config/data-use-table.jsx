@@ -94,51 +94,68 @@ export function useServerPageTable({
 
   const pageCount = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-  React.useEffect(() => {
-    if (!url) return;
-    const controller = new AbortController();
-    let alive = true;
+const fetchPage = React.useCallback(async (override = {}) => {
+  if (!url) return;
 
-    if (!staleWhileRevalidate) setData([]);
-    setLoading(true);
-    setError(null);
+  const controller = new AbortController();
+  let alive = true;
 
-    (async () => {
-      try {
-        const { data: json } = await ApiCustomer.get(url, {
-          params: {
-            skip: pageIndex * pageSize,
-            take: pageSize,
-            ...sortToParams(debouncedSorting),
-            ...filtersToParams(debouncedFilters),
-            ...extraParams,
-          },
-          signal: controller.signal,
-        });
+  if (!staleWhileRevalidate) setData([]);
+  setLoading(true);
+  setError(null);
 
-        if (!alive) return;
-        const rows  = json.data?.data  ?? json.data  ?? [];
-        const count = json.data?.total ?? json.total ?? 0;
-        setData(rows);
-        setTotal(count);
-      } catch (e) {
-        if (!alive) return;
-        if (axios.isCancel?.(e) || e.name === "CanceledError") return;
-        setError(e.response?.data?.message ?? e.message ?? "Fetch failed");
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
+  try {
+    const { data: json } = await ApiCustomer.get(url, {
+      params: {
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        ...sortToParams(debouncedSorting),
+        ...filtersToParams(debouncedFilters),
+        ...extraParams,
+        ...override, // allows manual overrides
+      },
+      signal: controller.signal,
+    });
 
-    return () => { alive = false; controller.abort(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, pageIndex, pageSize, debouncedFilters, debouncedSorting]);
+    if (!alive) return;
+
+    const rows  = json.data?.data  ?? json.data  ?? [];
+    const count = json.data?.total ?? json.total ?? 0;
+
+    setData(rows);
+    setTotal(count);
+  } catch (e) {
+    if (!alive) return;
+    if (axios.isCancel?.(e) || e.name === "CanceledError") return;
+    setError(e.response?.data?.message ?? e.message ?? "Fetch failed");
+  } finally {
+    if (alive) setLoading(false);
+  }
+
+  return () => {
+    alive = false;
+    controller.abort();
+  };
+}, [
+  url,
+  pageIndex,
+  pageSize,
+  debouncedFilters,
+  debouncedSorting,
+]);
+   React.useEffect(() => {
+     fetchPage();
+   }, [fetchPage]);
+   
+     const refresh = React.useCallback(() => {
+     fetchPage();
+   }, []);
 
   return {
     data, total, pageCount, loading, error,
     pageIndex, setPageIndex,
     pageSize,  setPageSize,   // FIX B: expose setPageSize
-    sorting,   setSorting,
+    sorting,   setSorting,  refresh,
     columnFilters, setColumnFilters,
   };
 }
@@ -155,33 +172,38 @@ export function useServerPageTable({
 
 export function useServerVirtual({
   url,
-  windowSize      = 100,
-  defaultSorting  = [],
-  defaultFilters  = [],
+  windowSize = 100,
+  defaultSorting = [],
+  defaultFilters = [],
   filtersToParams = (f) => Object.fromEntries(f.map((x) => [x.id, x.value])),
-  sortToParams    = (s) => s[0] ? { sortBy: s[0].id, sortDir: s[0].desc ? "desc" : "asc" } : {},
-  extraParams     = {},
-  sentinelOffset  = 30,
+  sortToParams = (s) =>
+    s[0] ? { sortBy: s[0].id, sortDir: s[0].desc ? "desc" : "asc" } : {},
+  extraParams = {},
+  sentinelOffset = 30,
 } = {}) {
-  const [sorting,       setSorting]       = React.useState(defaultSorting);
+  const [sorting, setSorting] = React.useState(defaultSorting);
   const [columnFilters, setColumnFilters] = React.useState(defaultFilters);
   const debouncedFilters = useDebouncedValue(columnFilters, 300);
 
-  const [data,      setData]      = React.useState([]);
-  const [total,     setTotal]     = React.useState(0);
-  const [loading,   setLoading]   = React.useState(false);
-  const [error,     setError]     = React.useState(null);
+  const [data, setData] = React.useState([]);
+  const [total, setTotal] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
   const [allLoaded, setAllLoaded] = React.useState(false);
 
-  const fetchedRef    = React.useRef(0);
+  const fetchedRef = React.useRef(0);
   const isFetchingRef = React.useRef(false);
-  const totalRef      = React.useRef(0);
+  const totalRef = React.useRef(0);
 
   // Stable ref copies so fetchMore closure never goes stale
-  const sortingRef   = React.useRef(sorting);
-  const filtersRef   = React.useRef(debouncedFilters);
-  React.useEffect(() => { sortingRef.current = sorting;          }, [sorting]);
-  React.useEffect(() => { filtersRef.current = debouncedFilters; }, [debouncedFilters]);
+  const sortingRef = React.useRef(sorting);
+  const filtersRef = React.useRef(debouncedFilters);
+  React.useEffect(() => {
+    sortingRef.current = sorting;
+  }, [sorting]);
+  React.useEffect(() => {
+    filtersRef.current = debouncedFilters;
+  }, [debouncedFilters]);
 
   // ── Reset + initial load ──────────────────────────────────────────────────
   React.useEffect(() => {
@@ -189,8 +211,8 @@ export function useServerVirtual({
     const controller = new AbortController();
     let alive = true;
 
-    fetchedRef.current    = 0;
-    totalRef.current      = 0;
+    fetchedRef.current = 0;
+    totalRef.current = 0;
     isFetchingRef.current = true;
 
     setData([]);
@@ -213,11 +235,11 @@ export function useServerVirtual({
         });
 
         if (!alive) return;
-        const rows  = json.data?.data  ?? json.data  ?? [];
+        const rows = json.data?.data ?? json.data ?? [];
         const count = json.data?.total ?? json.total ?? 0;
         setData(rows);
         setTotal(count);
-        totalRef.current   = count;
+        totalRef.current = count;
         fetchedRef.current = rows.length;
         if (rows.length >= count) setAllLoaded(true);
       } catch (e) {
@@ -225,12 +247,19 @@ export function useServerVirtual({
         if (axios.isCancel?.(e) || e.name === "CanceledError") return;
         setError(e.response?.data?.message ?? e.message ?? "Fetch failed");
       } finally {
-        if (alive) { setLoading(false); isFetchingRef.current = false; }
+        if (alive) {
+          setLoading(false);
+          isFetchingRef.current = false;
+        }
       }
     })();
 
-    return () => { alive = false; controller.abort(); isFetchingRef.current = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      alive = false;
+      controller.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, debouncedFilters, sorting]);
 
   // ── fetchMore — stable, reads everything via refs ─────────────────────────
@@ -252,7 +281,7 @@ export function useServerVirtual({
         },
       });
 
-      const rows  = json.data?.data  ?? json.data  ?? [];
+      const rows = json.data?.data ?? json.data ?? [];
       const count = json.data?.total ?? json.total ?? 0;
 
       setData((prev) => {
@@ -270,14 +299,20 @@ export function useServerVirtual({
       setLoading(false);
       isFetchingRef.current = false;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, windowSize]);
 
   return {
-    data, total, loading, error, allLoaded,
-    sorting,       setSorting,
-    columnFilters, setColumnFilters,
-    fetchMore,       // DataTable builds the IntersectionObserver and calls this
-    sentinelOffset,  // how many rows from the end to place the sentinel row
+    data,
+    total,
+    loading,
+    error,
+    allLoaded,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    fetchMore, // DataTable builds the IntersectionObserver and calls this
+    sentinelOffset, // how many rows from the end to place the sentinel row
   };
 }

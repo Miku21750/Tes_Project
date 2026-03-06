@@ -111,14 +111,386 @@ function partSortToParams(s) {
   };
 }
 
-export function ServiceCatalogModel({ 
-  open, 
-  setOpen, 
+function StepWarranty({
+  asset,
+  warrantyOffer,
+  selectedWarrantyServices,
+  setSelectedWarrantyServices,
+  onNext,
+  onCancel,
+}) {
+  return (
+    <div className="flex flex-col h-full p-3">
+      <div className="grid grid-cols-4 gap-4">
+        {/* <Input value={asset?.ProductNumber || "-"} readOnly /> */}
+        {/* <Input value={asset?.SerialNumber || "-"} readOnly /> */}
+
+        <CaseField label="Product Number" lock>
+          <Input value={asset?.ProductNumber || "-"} readOnly />
+        </CaseField>
+        <CaseField label="Product Name" lock>
+          <Input
+            value={asset?.product_information?.ProductName || "-"}
+            readOnly
+          />
+        </CaseField>
+        <CaseField label="Serial Number" lock>
+          <Input value={asset?.SerialNumber || "-"} readOnly />
+        </CaseField>
+        <CaseField label="Warranty Status" lock>
+          <Input
+            value={`${asset?.Warranty_Status ?? ""} - ${asset?.WarrantyOTCCode?.Description ?? ""}`}
+          />
+        </CaseField>
+      </div>
+
+      <div className="flex-1 overflow-auto mt-4">
+        <ServiceCatalogWarrantyTable
+          data={warrantyOffer}
+          selectedWarrantyServices={selectedWarrantyServices}
+          setSelectedWarrantyServices={setSelectedWarrantyServices}
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 mt-4">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button disabled={!selectedWarrantyServices} onClick={onNext}>
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function StepParts({
+  hook,
+  selectedPartCatalog,
+  setSelectedPartCatalog,
+  onNext,
+  onPrev,
+}) {
+  return (
+    <div className="flex flex-col h-full p-3">
+      <div className="flex-1 overflow-hidden">
+        <PartCatalogPaginated
+          hook={hook}
+          selectedPartCatalog={selectedPartCatalog}
+          setSelectedPartCatalog={setSelectedPartCatalog}
+        />
+      </div>
+
+      <div className="flex justify-end mt-4 gap-4">
+        <Button variant="outline" onClick={onPrev}>
+          Previous
+        </Button>
+        <Button onClick={onNext}>Next</Button>
+      </div>
+    </div>
+  );
+}
+
+function StepConfirm({
+  asset,
+  selectedPartCatalog,
+  selectedWarrantyServices,
+  onSubmit,
+  onPrev,
+  showUEFINumberHeader,
+  subTotalConfirmServices,
+  selected,
+  setSelected,
+  assignApo,
+  setAssignApo,
+  filteredUserAssign,
+  isOutWarranty,
+  addNewpart,
+  effectiveWarrantyService,
+}) {
+  return (
+    <div className="flex flex-col h-120 p-3">
+      <div className="flex flex-col lg:flex-row justify-evenly gap-0 p-0 my-2">
+        <div className="grid grid-cols-2 p-2  gap-2">
+          <CaseField label="Product Number" lock>
+            <Input value={asset?.ProductNumber || "-"} readOnly />
+          </CaseField>
+          <CaseField label="Product Name" lock>
+            <Input
+              value={asset?.product_information?.ProductName || "-"}
+              readOnly
+            />
+          </CaseField>
+          <CaseField label="Serial Number" lock>
+            <Input value={asset?.SerialNumber || "-"} readOnly />
+          </CaseField>
+          <CaseField label="Warranty Status" lock>
+            <Input
+              value={`${asset?.Warranty_Status ?? ""} - ${asset?.WarrantyOTCCode?.Description ?? ""}`}
+            />
+          </CaseField>
+        </div>
+        <div className="grid grid-cols-2 p-2  gap-2">
+          <CaseField label="Service OfferID" lock>
+            <Input
+              value={effectiveWarrantyService?.Service_offerID ?? "-"}
+              readOnly
+            />
+          </CaseField>
+          <CaseField label="Description" lock>
+            <Input
+              value={effectiveWarrantyService?.Service_description}
+              readOnly
+            />
+          </CaseField>
+        </div>
+      </div>
+      <Table
+        className="text-[11px] leading-tight"
+        potrait={"mt-3 rounded-xl border-2 max-h-105 2xl:max-h-195"}
+      >
+        <TableHeader className={"sticky top-0 z-9"}>
+          <TableRow className={"bg-blue-400"}>
+            <TableHead className={"font-bold text-black"}>Select</TableHead>
+            <TableHead className={"font-bold text-black"}>Part #</TableHead>
+            <TableHead className={"font-bold text-black"}>
+              Description
+            </TableHead>
+            <TableHead className={"font-bold text-black"}>Unit Price</TableHead>
+            {/* <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead> */}
+            <TableHead className={"font-bold text-black"}>Qty</TableHead>
+            <TableHead className={"font-bold text-black"}>
+              CT KEY RETURN
+            </TableHead>
+            <TableHead className={"font-bold text-black"}>UEFI CODE</TableHead>
+            {showUEFINumberHeader && (
+              <TableHead className={"font-bold text-black"}>
+                UEFI Number
+              </TableHead>
+            )}
+            <TableHead colSpan={2} className={"font-bold text-black"}>
+              Price
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {selectedPartCatalog.map((part, index) => {
+            const isChecked = selectedPartCatalog.some(
+              (item) => item.PartNumber === part.PartNumber,
+            );
+            return (
+              <TableRow key={index}>
+                <TableCell>
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={(checked) =>
+                      handlerPartCatalog(part, checked)
+                    }
+                  />
+                </TableCell>
+                <TableCell>{part.PartNumber}</TableCell>
+                <TableCell>{part.PartDescription}</TableCell>
+                <TableCell>{part.Shipping_Fee}</TableCell>
+                <TableCell>{part.qty} </TableCell>
+                <TableCell>
+                  <Input
+                    placeholder="Enter Return CT Key"
+                    className="bg-white"
+                    value={part.RemovedPartNumber || ""}
+                    onChange={(e) =>
+                      handleRemovedPartNumberChange(
+                        part.PartNumber,
+                        e.target.value,
+                      )
+                    }
+                  />
+                </TableCell>
+                <TableCell>
+                  <Select
+                    value={part.UEFICode || ""}
+                    onValueChange={(val) =>
+                      handleUEFICodeChange(part.PartNumber, val)
+                    }
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Select code" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DHU">DHU</SelectItem>
+                      <SelectItem value="FID">FID</SelectItem>
+                      <SelectItem value="MPS">MPS</SelectItem>
+                      <SelectItem value="PND">PND</SelectItem>
+                      <SelectItem value="PPR">PPR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                {part.UEFICode === "FID" ? (
+                  <TableCell>
+                    <Input
+                      placeholder="Enter UEFI No"
+                      value={part.UEFI_NO || ""}
+                      onChange={(e) =>
+                        handleUEFINoChange(part.PartNumber, e.target.value)
+                      }
+                      className="w-32"
+                    />
+                  </TableCell>
+                ) : null}
+                <TableCell>
+                  {asset?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"
+                    ? part.Total
+                    : 0}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+          <TableRow>
+            <TableCell colSpan={4}></TableCell>
+            <TableCell colSpan={2}>Sub Total</TableCell>
+            <TableCell>{subTotalConfirmServices}</TableCell>
+          </TableRow>
+          <TableRow className={"bg-blue-400"}>
+            <TableCell colSpan={4}></TableCell>
+            <TableCell colSpan={3}>Total</TableCell>
+            <TableCell>--</TableCell>
+            <TableCell>--</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+
+      <div className="flex justify-end mt-4 gap-4">
+        <div className="inline-flex items-center gap-2">
+          <Label htmlFor="incident" className={"font-bold whitespace-nowrap"}>
+            Incident Type :
+          </Label>
+          <Select
+            value={selected}
+            onValueChange={setSelected}
+            defaultValue="DepotRepair"
+          >
+            <SelectTrigger className="w-fit">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="CE Assist-APJ-Computing">
+                  CE Assist-APJ-Computing
+                </SelectItem>
+                <SelectItem value="CE Assist-APJ-Printing">
+                  CE Assist-APJ-Printing
+                </SelectItem>
+                <SelectItem value="Cust Sat-Issue-APJ-Computing">
+                  Cust Sat Issue-APJ-Computing
+                </SelectItem>
+                <SelectItem value="Cust Sat-Issue-APJ-Printing">
+                  Cust Sat Issue-APJ-Printing
+                </SelectItem>
+                <SelectItem value="IMACD-APJ-Computing">
+                  IMACD-APJ-Computing
+                </SelectItem>
+                <SelectItem value="IMACD-APJ-Printing">
+                  IMACD-APJ-Printing
+                </SelectItem>
+                <SelectItem value="Installation Only-APJ-Computing">
+                  Installation Only-APJ-Computing
+                </SelectItem>
+                <SelectItem value="Installation Only-APJ-Printing">
+                  Installation Only-APJ-Printing
+                </SelectItem>
+                <SelectItem value="PC Problem-APJ-Computing">
+                  PC Problem-APJ-Computing
+                </SelectItem>
+                <SelectItem value="Print Problem-APJ-Printing">
+                  Print Problem-APJ-Printing
+                </SelectItem>
+                <SelectItem value="Print Quality-APJ-Printing">
+                  Print Quality-APJ-Printing
+                </SelectItem>
+                <SelectItem value="Prev Maint-APJ-Computing">
+                  Prev Maint-APJ-Computing
+                </SelectItem>
+                <SelectItem value="Prev Maint-APJ-Printing">
+                  Prev Maint-APJ-Printing
+                </SelectItem>
+                <SelectItem value="DepotRepair">Depot Repair</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {selectedPartCatalog.length > 0 && (
+          <div className={"flex gap-2"}>
+            <Label
+              htmlFor="Assign_APO"
+              className={"font-bold whitespace-nowrap"}
+            >
+              SELECT {isOutWarranty ? "CM" : "APO"} :{" "}
+            </Label>
+            <SearchCommandBlock
+              value={assignApo}
+              onChange={(selectedID) => {
+                if (!selectedID) {
+                  setAssignApo(null);
+                  return;
+                }
+                const selectedUser = filteredUserAssign.find(
+                  (user) => user.IDUser === selectedID,
+                );
+                if (selectedUser) {
+                  setAssignApo(selectedUser.IDUser);
+                }
+              }}
+              placeholder="--Select--"
+              options={filteredUserAssign.map((user) => ({
+                label: user.Name,
+                value: user.IDUser,
+              }))}
+              renderLabel={(opt) => opt.label}
+              getValue={(opt) => opt.value}
+              className={"border-2 ring-1 ring-gray-200 bg-slate-100"}
+            />
+          </div>
+        )}
+        <Button className="" onClick={addNewpart}>
+          Add Part
+        </Button>
+        <Button variant="outline" onClick={onPrev}>
+          Previous
+        </Button>
+        <Button onClick={onSubmit}>Create Order</Button>
+      </div>
+    </div>
+  );
+}
+
+function StepIndicator({ active, label }) {
+  return (
+    <div
+      className={`px-3 py-1 rounded-full text-sm font-medium transition
+      ${active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}
+    >
+      {label}
+    </div>
+  );
+}
+
+function HeaderTittle({ currentStep }) {
+  return (
+    <div className="flex items-center justify-center gap-3 border-b p-1">
+      <StepIndicator active={currentStep === 1} label="Warranty" />
+      <StepIndicator active={currentStep === 2} label="Parts" />
+      <StepIndicator active={currentStep === 3} label="Confirm" />
+    </div>
+  );
+}
+export function ServiceCatalogModel({
+  open,
+  setOpen,
   caseDetails,
   serviceCatalogType,
-  WOID = undefined
+  WOID = undefined,
 }) {
-  const {user} = useAuth();
+  const { user } = useAuth();
   useEffect(() => {
     // Resetting modal state when serviceCatalogType changes
     setCurrentStep(1);
@@ -131,37 +503,44 @@ export function ServiceCatalogModel({
     setPartNumberSearch("");
     setKeywordSearch("");
     setDescriptionSearch("");
-
   }, [serviceCatalogType]);
-  
+
+  const STEPS = {
+    WARRANTY: 1,
+    PARTS: 2,
+    CONFIRM: 3,
+  };
   const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   // If creating MO from WO, start directly at parts step
   useEffect(() => {
-    if ((WOID || serviceCatalogType === 'wo-add-mo') && open) {
+    if ((WOID || serviceCatalogType === "wo-add-mo") && open) {
       setCurrentStep(2);
     }
   }, [WOID, serviceCatalogType, open]);
-  const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
+  const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState(
+    [],
+  );
   const [modalPart, setModalPart] = useState(false);
   const [roleAssign, setRoleAssign] = useState([]);
   const [assignApo, setAssignApo] = useState(null);
 
-  
   //product information
   const fetchDataAssets = async () => {
     try {
       const assetId = caseDetails?.AssetID;
       if (!assetId) return null;
-      const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
-   
-      return response.data.data
-    }catch(e){
-      toast.error("error fetching Asset: ", e)
+      const response = await ApiCustomer.get(
+        `/api/asset-information/${caseDetails.AssetID}`,
+      );
+
+      return response.data.data;
+    } catch (e) {
+      toast.error("error fetching Asset: ", e);
     }
-  }
+  };
 
   const fetchUserAssign = async (role) => {
     try {
@@ -172,26 +551,27 @@ export function ServiceCatalogModel({
     }
   };
 
-
   //waranty
   //warranty state
-  const [warrantyOffer, setWarrantyOffer] = useState([])
+  const [warrantyOffer, setWarrantyOffer] = useState([]);
   //fetching data function
   const fetchDataServiceOffer = async () => {
     setLoading(true);
     setError(null);
-    try{
-      const response = await ApiCustomer.get(`/api/service-log/warranty-services`)
-      
+    try {
+      const response = await ApiCustomer.get(
+        `/api/service-log/warranty-services`,
+      );
+
       return response.data.data;
-    }catch(e){
-      setError("Failed to load Warranty Service")
-      toast.error("error fetching Service Offer: ", e)
-    }finally{
-      setLoading(false)
+    } catch (e) {
+      setError("Failed to load Warranty Service");
+      toast.error("error fetching Service Offer: ", e);
+    } finally {
+      setLoading(false);
     }
-  }
-  
+  };
+
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
       if (data) setWarrantyOffer(data);
@@ -201,15 +581,15 @@ export function ServiceCatalogModel({
     });
     fetchDataPartCatalog();
     fetchUserAssign("");
-  }, [caseDetails])
-  
+  }, [caseDetails]);
+
   useEffect(() => {
     const fetchWarrantyFromWO = async () => {
       if (!WOID) return;
 
       try {
         const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
-        
+
         const woData = res.data.data;
 
         if (woData?.serviceCatalog?.warranty_services) {
@@ -223,36 +603,35 @@ export function ServiceCatalogModel({
     fetchWarrantyFromWO();
   }, [WOID]);
 
+  const [selected, setSelected] = useState("DepotRepair");
 
-  const [selected, setSelected] = useState("DepotRepair"); 
-  
-  const [selectedWarrantyServices, setSelectedWarrantyServices] = useState(null);
+  const [selectedWarrantyServices, setSelectedWarrantyServices] =
+    useState(null);
   const [woWarrantyService, setWoWarrantyService] = useState(null);
 
-    const handlerWarrantyService = (service) => {
-      setSelectedWarrantyServices(service);
-    };
+  const handlerWarrantyService = (service) => {
+    setSelectedWarrantyServices(service);
+  };
 
-  useEffect(() => {
-  }, [selectedWarrantyServices]);
-  
+  useEffect(() => {}, [selectedWarrantyServices]);
+
   //part state
-  const [partCatalog, setPartCatalog] = useState([])
-  const [loadingPart, setLoadingPart] = useState(false)
+  const [partCatalog, setPartCatalog] = useState([]);
+  const [loadingPart, setLoadingPart] = useState(false);
   //fetch data part catalog
   const fetchDataPartCatalog = async () => {
     setLoadingPart(true);
-    try{
-      const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
-      setPartCatalog(response.data.data)
+    try {
+      const response = await ApiCustomer.get(`/api/service-log/parts-catalog`);
+      setPartCatalog(response.data.data);
       setLoadingPart(false);
-      return response.data.data
-    }catch(e){
-      toast.error("Err :",e)
+      return response.data.data;
+    } catch (e) {
+      toast.error("Err :", e);
     } finally {
-      setLoadingPart(false)
+      setLoadingPart(false);
     }
-  }
+  };
 
   const handlePartAdded = async (createdPart) => {
     // 1) refresh catalog from backend (optional but recommended)
@@ -262,7 +641,7 @@ export function ServiceCatalogModel({
     if (createdPart?.PartNumber) {
       setSelectedPartCatalog((prev) => {
         const alreadyExists = prev.some(
-          (p) => p.PartNumber === createdPart.PartNumber
+          (p) => p.PartNumber === createdPart.PartNumber,
         );
         if (alreadyExists) return prev;
 
@@ -280,57 +659,55 @@ export function ServiceCatalogModel({
     }
   };
 
-
   //search part handler
   const [partNumberSearch, setPartNumberSearch] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
   const [descriptionSearch, setDescriptionSearch] = useState("");
 
   const hook = useServerPageTable({
-    url:             "/api/service-log/parts-catalog",
-    pageSize:        20,
-    defaultSorting:  [{ id: "PartNumber", desc: false }],
+    url: "/api/service-log/parts-catalog",
+    pageSize: 20,
+    defaultSorting: [{ id: "PartNumber", desc: false }],
     filtersToParams: (f) => ({ mode: "paginated", ...partFiltersToParams(f) }),
-    sortToParams:    partSortToParams,
+    sortToParams: partSortToParams,
   });
   //handler part
-  const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
+  const [selectedPartCatalog, setSelectedPartCatalog] = useState([]);
   const handlerPartCatalog = (part, checked) => {
-    if(checked){
+    if (checked) {
       setSelectedPartCatalog((prev) => [
         ...prev,
         {
           ...part,
           qty: 1,
           Total: part.Price,
-        }
-      ])
-    }else{
-      setSelectedPartCatalog((prev) => 
-        prev.filter((item) => item.PartNumber !== part.PartNumber)
-      )
+        },
+      ]);
+    } else {
+      setSelectedPartCatalog((prev) =>
+        prev.filter((item) => item.PartNumber !== part.PartNumber),
+      );
     }
-  }
+  };
   useEffect(() => {
     handlerPriceConfirmServices();
   }, [selectedPartCatalog]);
-  
-  const warrantyCondition =
-    assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition;
 
-  const isOutWarranty =
-    assetForWorkOrderCreation?.Warranty_Status === "01T";
-    
-  const filteredWarrantyOffers = warrantyOffer.filter(
-    (service) =>
-      isOutWarranty
-        ? service.WarrantyCondition === "OutWarranty"
-        : service.WarrantyCondition === "InWarranty"
+  const warrantyCondition =
+    assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode
+      ?.WarrantyCondition;
+
+  const isOutWarranty = assetForWorkOrderCreation?.Warranty_Status === "01T";
+
+  const filteredWarrantyOffers = warrantyOffer.filter((service) =>
+    isOutWarranty
+      ? service.WarrantyCondition === "OutWarranty"
+      : service.WarrantyCondition === "InWarranty",
   );
-  const filteredUserAssign = roleAssign.filter(
-    (user) => isOutWarranty ? user.Role === "cm" : user.Role === "apo"
-  )
-  
+  const filteredUserAssign = roleAssign.filter((user) =>
+    isOutWarranty ? user.Role === "cm" : user.Role === "apo",
+  );
+
   //hanlder confirm
   //handler qty price parts
   const handleQtyChangePartsCatalog = (partNumber, qty) => {
@@ -342,113 +719,128 @@ export function ServiceCatalogModel({
           return {
             ...item,
             qty: parsedQty,
-            Total: (parsedQty * price).toFixed(2)
+            Total: (parsedQty * price).toFixed(2),
           };
         }
         return item;
-      })
+      }),
     );
   };
 
   const handleRemovedPartNumberChange = (partNumber, value) => {
     setSelectedPartCatalog((prev) =>
-      prev.map((item) => (
-        item.PartNumber === partNumber ? { ...item, RemovedPartNumber: value } : item
-      ))
+      prev.map((item) =>
+        item.PartNumber === partNumber
+          ? { ...item, RemovedPartNumber: value }
+          : item,
+      ),
     );
   };
 
   const handleUEFICodeChange = (partNumber, value) => {
     setSelectedPartCatalog((prev) =>
       prev.map((p) =>
-        p.PartNumber === partNumber ? { ...p, UEFICode: value, UEFI_NO: "" } : p
-      )
+        p.PartNumber === partNumber
+          ? { ...p, UEFICode: value, UEFI_NO: "" }
+          : p,
+      ),
     );
   };
 
   const handleUEFINoChange = (partNumber, value) => {
     setSelectedPartCatalog((prev) =>
       prev.map((p) =>
-        p.PartNumber === partNumber ? { ...p, UEFI_NO: value } : p
-      )
+        p.PartNumber === partNumber ? { ...p, UEFI_NO: value } : p,
+      ),
     );
   };
 
-  const showUEFINumberHeader = selectedPartCatalog.some(p => p.UEFICode === "FID");
+  const showUEFINumberHeader = selectedPartCatalog.some(
+    (p) => p.UEFICode === "FID",
+  );
 
   //handle add part in confirm services
   const [tempSelectedParts, setTempSelectedParts] = useState([]);
-  
 
   //handler Total Subtotal Confirm Services
-  const [subTotalConfirmServices, setSubTotalConfirmServices] = useState(0)
-  const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0)
-  const [totalConfirmServices, setTotalConfirmServices] = useState(0)
-  const effectiveWarrantyService = selectedWarrantyServices ?? woWarrantyService;
-  const handlerPriceConfirmServices = () =>{
-    let serviceTotal = selectedWarrantyServices ? (parseFloat(selectedWarrantyServices.Price) || 0) : 0;
+  const [subTotalConfirmServices, setSubTotalConfirmServices] = useState(0);
+  const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0);
+  const [totalConfirmServices, setTotalConfirmServices] = useState(0);
+  const effectiveWarrantyService =
+    selectedWarrantyServices ?? woWarrantyService;
+  const handlerPriceConfirmServices = () => {
+    let serviceTotal = selectedWarrantyServices
+      ? parseFloat(selectedWarrantyServices.Price) || 0
+      : 0;
 
-  
     let partsTotal = selectedPartCatalog.reduce((acc, part) => {
       return acc + (parseFloat(part.Total) || 0);
     }, 0);
-  
-    if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
+
+    if (
+      assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition ===
+      "OutWarranty"
+    ) {
       const subTotal = serviceTotal + partsTotal;
       setSubTotalConfirmServices(subTotal.toFixed(2));
-    }else{
+    } else {
       setSubTotalConfirmServices(0);
     }
+  };
 
-  }
-  
   //createorder
   const createOrder = async () => {
     const hasPart = selectedPartCatalog.length > 0;
     if (hasPart && !assignApo) {
-       toast.warning("APO IS NOT ASSIGN YET", {
+      toast.warning("APO IS NOT ASSIGN YET", {
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
-        position: 'top-center'
-      })
-      return
+        position: "top-center",
+      });
+      return;
     } else {
       // cek apakah ada part yang belum diisi UEFI Code
       const partWithoutUEFICode = selectedPartCatalog.find(
-        (p) => !p.UEFICode || p.UEFICode.trim() === ""
+        (p) => !p.UEFICode || p.UEFICode.trim() === "",
       );
 
       const partWithoutCT = selectedPartCatalog.find(
-        (p) => !p.RemovedPartNumber || p.RemovedPartNumber.trim() === ""
+        (p) => !p.RemovedPartNumber || p.RemovedPartNumber.trim() === "",
       );
 
-      if(partWithoutCT) {
-        toast.warning(`CT BAD belum diisi untuk part ${partWithoutCT.PartNumber}`, {
-          description: "PLEASE FILL TE CT BAD BEFORE CREATING ORDER",
-          position: 'top-center'
-        });
+      if (partWithoutCT) {
+        toast.warning(
+          `CT BAD belum diisi untuk part ${partWithoutCT.PartNumber}`,
+          {
+            description: "PLEASE FILL TE CT BAD BEFORE CREATING ORDER",
+            position: "top-center",
+          },
+        );
         return;
       }
       if (partWithoutUEFICode) {
-        toast.warning(`UEFI Code belum diisi untuk part ${partWithoutUEFICode.PartNumber}`, {
-          description: "PLEASE CHOOSE THE UEFI CODE BEFORE CREATING ORDER",
-          position: 'top-center'
-        });
+        toast.warning(
+          `UEFI Code belum diisi untuk part ${partWithoutUEFICode.PartNumber}`,
+          {
+            description: "PLEASE CHOOSE THE UEFI CODE BEFORE CREATING ORDER",
+            position: "top-center",
+          },
+        );
         return;
       }
-      
+
       try {
         Swal.fire({
           title: "Creating Order...",
           allowOutsideClick: false,
           allowEscapeKey: false,
-          didOpen: () => Swal.showLoading()
+          didOpen: () => Swal.showLoading(),
         });
         const data = {
-          user: getUserFromToken()
-        }
+          user: getUserFromToken(),
+        };
 
         // If WOID present or special mode, create only MO for existing WO
-        const isCreateMOOnly = !!WOID || serviceCatalogType === 'wo-add-mo';
+        const isCreateMOOnly = !!WOID || serviceCatalogType === "wo-add-mo";
         const res = isCreateMOOnly
           ? await (async () => {
               const createdMOIDs = [];
@@ -464,9 +856,9 @@ export function ServiceCatalogModel({
               return { data: { many: true, MOIDs: createdMOIDs } };
             })()
           : await ApiCustomer.post("/api/service-log/create-order", {
-            /**
-             * ASK : IF ORDER IS OUT WARRANTY, ARE THE WO / MO CREATED AUTOMATE TOO, BUT CLOSED IF CANCELLED, OR NEED APPROVE FIRST BY CM?
-             */
+              /**
+               * ASK : IF ORDER IS OUT WARRANTY, ARE THE WO / MO CREATED AUTOMATE TOO, BUT CLOSED IF CANCELLED, OR NEED APPROVE FIRST BY CM?
+               */
               AssetID: assetForWorkOrderCreation.AssetID,
               CaseID: caseDetails.CaseID,
               selectedWarrantyServices,
@@ -475,38 +867,45 @@ export function ServiceCatalogModel({
               OwnerID: data.user.id,
               assignApo: assignApo,
             });
-        Swal.close(); 
+        Swal.close();
         // Close loading after success
         await Swal.fire({
           title: "Success!",
-          text:  "Order added successfully!",
-          icon:  "success",
+          text: "Order added successfully!",
+          icon: "success",
           timer: 1500,
           showConfirmButton: false,
           allowEscapeKey: false,
-        }).then(()=>{
+        }).then(() => {
           setOpen(false);
-          const WOIDRes = res.data.WOID
-          const MOID = res.data.MOID
+          const WOIDRes = res.data.WOID;
+          const MOID = res.data.MOID;
           if (isCreateMOOnly) {
-            if (res.data?.many && Array.isArray(res.data.MOIDs) && res.data.MOIDs.length) {
+            if (
+              res.data?.many &&
+              Array.isArray(res.data.MOIDs) &&
+              res.data.MOIDs.length
+            ) {
               // could open the last MO, keep silent here per prior behavior
             } else if (MOID) {
-              window.open(`/app/material-order/${MOID}`, '_blank');
+              window.open(`/app/material-order/${MOID}`, "_blank");
             }
           } else {
             // handle multi-MO creation from create-order
-            const manyCreate = res.data?.many && Array.isArray(res.data.MOIDs) && res.data.MOIDs.length;
+            const manyCreate =
+              res.data?.many &&
+              Array.isArray(res.data.MOIDs) &&
+              res.data.MOIDs.length;
             switch (serviceCatalogType) {
               case "CSR":
                 if (manyCreate) {
                   // Open the last created MO or keep on WO page as desired
                 } else if (MOID) {
-                  window.open(`/app/material-order/${MOID}`, '_blank');
+                  window.open(`/app/material-order/${MOID}`, "_blank");
                 }
                 break;
               case "serviceorder":
-                window.open(`/app/work/${WOIDRes}`, '_blank');  
+                window.open(`/app/work/${WOIDRes}`, "_blank");
                 break;
               default:
                 break;
@@ -524,484 +923,109 @@ export function ServiceCatalogModel({
           allowEscapeKey: false,
         });
       }
-    };
-  }  
-  
-  function renderStepContent() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const PAGE_SIZE = 5;
-    const filteredPartCatalog = partCatalog.filter(part => {
-      return (
-        part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
-        part.Keyword?.toLowerCase().includes(keywordSearch.toLowerCase()) &&
-        part.PartDescription?.toLowerCase().includes(descriptionSearch.toLowerCase())
-      );
-    });
-  const MAX_PAGES_SHOWN = 3;
-
-    const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
-    
-  const getPaginationPages = () => {
-    if (totalPages <= MAX_PAGES_SHOWN) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    if (currentPage <= 2) {
-      return [1, 2, 3];
-    }
-    if (currentPage >= totalPages - 1) {
-      return [totalPages - 2, totalPages - 1, totalPages];
-    }
-    return [currentPage - 1, currentPage, currentPage + 1];
   };
-  const paginationPages = getPaginationPages();
-    const currentPageData = useMemo(() => {
-      const start = (currentPage - 1) * PAGE_SIZE;
-      return filteredPartCatalog.slice(start, start + PAGE_SIZE);
-    }, [filteredPartCatalog, currentPage]);
-
-    const handlePageChange = (page) => {
-      if (page >= 1 && page <= totalPages) {
-        setCurrentPage(page);
-      }
-    };
-
-    // Skip warranty step when creating MO from WO
-    const effectiveStep = ((WOID || serviceCatalogType === 'wo-add-mo') && currentStep === 1) ? 2 : currentStep;
-    switch (effectiveStep) {
-      case 1:
-        return (
-          <DialogContent  className="
-            w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-            max-h-[90vh] 
-            flex flex-col justify-center
-            gap-0 p-0 bg-white
-            [&>button]:hidden
-            dark:bg-black
-          " >
-            <DialogHeader>
-              <div className="flex items-end justify-end ">
-                {/* <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button> */}
-                <DialogClose asChild>
-                <Button type="button" variant="outline" className={'hover:bg-gray-200 active:bg-gray-700 border-none'}>
-                  <XIcon/>
-                </Button>
-                </DialogClose>
-              </div>
-              {/* <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription> */}
-              <DialogTitle className={'text-blue-600 text-2xl  mx-auto'}>Service Catalog</DialogTitle>
-              <DialogDescription className={" mx-auto"}>Select From List of Service Options</DialogDescription>
-            </DialogHeader>
-          <div className="grid overflow-y-auto">
-            <div className="flex justify-between  ">
-              {/* <DialogTitle>Step 1: Select From List of Service Options</DialogTitle> */}
-              <div className="grid grid-cols-2 p-2  gap-2  ">
-                <CaseField label="Product Number" lock>
-                  <Input
-                  value={assetForWorkOrderCreation?.ProductNumber || "-"}    
-                  readOnly              
-                  />
-                </CaseField>
-                <CaseField label="Product Name" lock>
-                  <Input
-                  value={assetForWorkOrderCreation?.product_information?.ProductName || "-"}     
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Serial Number" lock>
-                  <Input
-                  value={assetForWorkOrderCreation?.SerialNumber || "-"}
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Warranty Status" lock>
-                  <Input
-                    value={`${assetForWorkOrderCreation?.Warranty_Status ?? ""} - ${assetForWorkOrderCreation?.WarrantyOTCCode?.Description ?? ""}`}
-                  />
-                </CaseField>
-              </div>
-            </div>
-            <ServiceCatalogWarrantyTable selectedWarrantyServices={selectedWarrantyServices} setSelectedWarrantyServices={setSelectedWarrantyServices} data={filteredWarrantyOffers}/>
-          </div>
-            <DialogFooter className={'p-2'}>
-             <Button  className="" onClick={() => setOpen(false)}>Cancel</Button>
-             <Button 
-              onClick={() => setCurrentStep(2)} 
-              disabled={!selectedWarrantyServices}
-              className={!selectedWarrantyServices ? "opacity-50 cursor-not-allowed" : ""}
-             >
-              Next
-             </Button>
-             </DialogFooter>
-            </DialogContent>
-        );
-  
-      case 2:  
-        return (
-          <DialogContent
-            className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-    flex flex-col justify-center
-    gap-0 p-0 bg-white
-    [&>button]:hidden"
-          >
-            <DialogHeader>
-              <div className="flex items-end justify-end">
-                <DialogClose asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={
-                      "hover:bg-gray-200 active:bg-gray-700  border-none"
-                    }
-                  >
-                    <XIcon />
-                  </Button>
-                </DialogClose>
-              </div>
-              <div className={"flex items-center flex-col"}>
-                <DialogTitle className={"text-blue-600 text-2xl"}>
-                  Service Catalog
-                </DialogTitle>
-                <DialogDescription>
-                  Select parts required for the repair.
-                </DialogDescription>
-              </div>
-            </DialogHeader>
-            <div className=" flex justify-between">
-              {/* Kolom kiri  */}
-
-              <div className="grid grid-cols-4 p-2  gap-2">
-                <CaseField label="Service OfferID" lock>
-                  <Input
-                  value={effectiveWarrantyService?.Service_offerID ?? '-'}    
-                  readOnly              
-                  />
-                </CaseField>
-                <CaseField label="Description" lock>
-                  <Input
-                  value={effectiveWarrantyService.Service_description}     
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Unit Price" lock>
-                  <Input
-                  value={effectiveWarrantyService.CTat_RTime}
-                  readOnly             
-                  />
-                </CaseField>
-                {/* <CaseField label="Shipping Fee" lock> */}
-                {/*   <Input */}
-                {/*     value={effectiveWarrantyService.Shipping_Fee} */}
-                {/*   /> */}
-                {/* </CaseField> */}
-                {/* <CaseField label="Qty" lock> */}
-                {/*   <Input */}
-                {/*     value={1} */}
-                {/*   /> */}
-                {/* </CaseField> */}
-                <CaseField label="Price" lock>
-                  <Input
-                    value={assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? effectiveWarrantyService.Price : 0}
-                  />
-                </CaseField>
-              </div>
-              {/* Kolom kanan  */}
-              {/* <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
-                <p>Product Number</p>
-                <p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
-                <p>Product Name</p>
-                <p>
-                  :{" "}
-                  {assetForWorkOrderCreation?.product_information
-                    ?.ProductName || "-"}
-                </p>
-                <p>Serial Number</p>
-                <p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p>
-                <p>
-                  : {assetForWorkOrderCreation?.Warranty_Status} -{" "}
-                  {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}
-                </p>
-                <p>Currency</p>
-                <p>:</p>
-              </div> */}
-            </div>
 
 
-                 <PartCatalogPaginated setSelectedPartCatalog={setSelectedPartCatalog} selectedPartCatalog={selectedPartCatalog} hook={hook} />
-            <DialogFooter className={"p-2"}>
-              <Button className="" onClick={() => setCurrentStep(1)}>
-                Previous
-              </Button>
-              <Button className="" onClick={() => setCurrentStep(3)}>
-                Next
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        );
-  
-      case 3:
-        return (
-          <DialogContent className="w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-            max-h-[90vh] overflow-y-auto
-            flex flex-col justify-center
-            gap-0 p-0 bg-white
-            [&>button]:hidden ">
-            <DialogHeader>
-              <div className="flex items-end justify-end">
-                {/* <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button> */}
-                <DialogClose asChild>
-                  <Button type="button" variant="outline" className={'hover:bg-gray-200 active:bg-gray-700 border-none'}>
-                  <XIcon/>
-                  </Button>
-                </DialogClose>
-              </div>
-              <div className="space-y-2 p-0 mx-auto text-center">
-              <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
-              <DialogDescription>Confirmation For Selected Warranty Type And Parts.</DialogDescription>
-              </div>
-
-            </DialogHeader>
-          <div className="overflow-x-auto">
-            <div className="flex flex-col lg:flex-row justify-evenly gap-0 p-0 my-2">
-              <div className="grid grid-cols-2 p-2  gap-2">
-                <CaseField label="Product Number" lock>
-                  <Input
-                  value={assetForWorkOrderCreation?.ProductNumber || "-"}    
-                  readOnly              
-                  />
-                </CaseField>
-                <CaseField label="Product Name" lock>
-                  <Input
-                  value={assetForWorkOrderCreation?.product_information?.ProductName || "-"}     
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Serial Number" lock>
-                  <Input
-                  value={assetForWorkOrderCreation?.SerialNumber || "-"}
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Warranty Status" lock>
-                  <Input
-                    value={`${assetForWorkOrderCreation?.Warranty_Status ?? ""} - ${assetForWorkOrderCreation?.WarrantyOTCCode?.Description ?? ""}`}
-                  />
-                </CaseField>
-              </div>
-              <div className="grid grid-cols-2 p-2  gap-2">
-                <CaseField label="Service OfferID" lock>
-                  <Input
-                  value={effectiveWarrantyService?.Service_offerID ?? '-'}    
-                  readOnly              
-                  />
-                </CaseField>
-                <CaseField label="Description" lock>
-                  <Input
-                  value={effectiveWarrantyService.Service_description}     
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Unit Price" lock>
-                  <Input
-                  value={effectiveWarrantyService.CTat_RTime}
-                  readOnly             
-                  />
-                </CaseField>
-                <CaseField label="Shipping Fee" lock>
-                  <Input
-                    value={effectiveWarrantyService.Shipping_Fee}
-                  />
-                </CaseField>
-                {/* <CaseField label="Qty" lock> */}
-                {/*   <Input */}
-                {/*     value={1} */}
-                {/*   /> */}
-                {/* </CaseField> */}
-                <CaseField label="Price" lock>
-                  <Input
-                    value={assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? effectiveWarrantyService.Price : 0}
-                  />
-                </CaseField>
-              </div>
-            </div>
-            <div className="overflow-auto max-h-[30dvh]">
-              <Table>
-                <TableHeader>
-                  <TableRow className={'bg-blue-400'}>
-                    <TableHead className={'font-bold text-black'}>Select</TableHead>
-                    <TableHead className={'font-bold text-black'}>Part #</TableHead>
-                    <TableHead className={'font-bold text-black'}>Description</TableHead>
-                    <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
-                    {/* <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead> */}
-                    <TableHead className={'font-bold text-black'}>Qty</TableHead>
-                    <TableHead className={'font-bold text-black'}>CT KEY RETURN</TableHead>
-                    <TableHead className={'font-bold text-black'}>UEFI CODE</TableHead>
-                    {showUEFINumberHeader  && (
-                      <TableHead className={'font-bold text-black'}>UEFI Number</TableHead>
-                    )}
-                    <TableHead  colSpan={2} className={'font-bold text-black'}>Price</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedPartCatalog.map((part, index) => {
-                    const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
-                    return (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <Checkbox
-                            checked={isChecked}
-                            onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
-                          />
-                        </TableCell>
-                        <TableCell>{part.PartNumber}</TableCell>
-                        <TableCell>{part.PartDescription}</TableCell>
-                        <TableCell>{part.Shipping_Fee}</TableCell>
-                        <TableCell>{part.qty} </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder="Enter Return CT Key"
-                            className="bg-white"
-                            value={part.RemovedPartNumber || ''}
-                            onChange={(e) => handleRemovedPartNumberChange(part.PartNumber, e.target.value)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={part.UEFICode || ""}
-                            onValueChange={(val) => handleUEFICodeChange(part.PartNumber, val)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue placeholder="Select code" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="DHU">DHU</SelectItem>
-                              <SelectItem value="FID">FID</SelectItem>
-                              <SelectItem value="MPS">MPS</SelectItem>
-                              <SelectItem value="PND">PND</SelectItem>
-                              <SelectItem value="PPR">PPR</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                          {part.UEFICode === "FID" ? (
-                            <TableCell>
-                              <Input
-                                placeholder="Enter UEFI No"
-                                value={part.UEFI_NO || ""}
-                                onChange={(e) =>
-                                  handleUEFINoChange(part.PartNumber, e.target.value)
-                                }
-                                className="w-32"
-                              />
-                            </TableCell>
-                          ): (
-                            null
-                          )}
-                        <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? part.Total : 0}</TableCell>
-                      </TableRow>
-                    )
-                  })}
-                  <TableRow>
-                    <TableCell colSpan={4}></TableCell>
-                    <TableCell colSpan={2}>Sub Total</TableCell>
-                    <TableCell>{subTotalConfirmServices}</TableCell>
-                  </TableRow>
-                  <TableRow className={'bg-blue-400'}>
-                    <TableCell colSpan={4}></TableCell>
-                    <TableCell colSpan={3}>Total</TableCell>
-                    <TableCell>--</TableCell>
-                    <TableCell>--</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              
-            </div>
-          </div>
-  
-            <DialogFooter className={'inline-flex  p-2  '}>
-
-              <div className="inline-flex items-center gap-2">
-                 <Label htmlFor="incident" className={'font-bold whitespace-nowrap'}>Incident Type :</Label>
-                 <Select value={selected} onValueChange={setSelected} defaultValue="DepotRepair">
-                   <SelectTrigger className="w-fit">
-                     <SelectValue />
-                   </SelectTrigger>
-                   <SelectContent>
-                     <SelectGroup>
-                       <SelectItem value="CE Assist-APJ-Computing">CE Assist-APJ-Computing</SelectItem>
-                       <SelectItem value="CE Assist-APJ-Printing">CE Assist-APJ-Printing</SelectItem>
-                       <SelectItem value="Cust Sat-Issue-APJ-Computing">Cust Sat Issue-APJ-Computing</SelectItem>
-                       <SelectItem value="Cust Sat-Issue-APJ-Printing">Cust Sat Issue-APJ-Printing</SelectItem>
-                       <SelectItem value="IMACD-APJ-Computing">IMACD-APJ-Computing</SelectItem>
-                       <SelectItem value="IMACD-APJ-Printing">IMACD-APJ-Printing</SelectItem>
-                       <SelectItem value="Installation Only-APJ-Computing">Installation Only-APJ-Computing</SelectItem>
-                       <SelectItem value="Installation Only-APJ-Printing">Installation Only-APJ-Printing</SelectItem>
-                       <SelectItem value="PC Problem-APJ-Computing">PC Problem-APJ-Computing</SelectItem>
-                       <SelectItem value="Print Problem-APJ-Printing">Print Problem-APJ-Printing</SelectItem>
-                       <SelectItem value="Print Quality-APJ-Printing">Print Quality-APJ-Printing</SelectItem>
-                       <SelectItem value="Prev Maint-APJ-Computing">Prev Maint-APJ-Computing</SelectItem>
-                       <SelectItem value="Prev Maint-APJ-Printing">Prev Maint-APJ-Printing</SelectItem>
-                       <SelectItem value="DepotRepair">Depot Repair</SelectItem>
-                     </SelectGroup>
-                   </SelectContent>
-                 </Select>
-              </div>
-
-              {selectedPartCatalog.length > 0 && (
-              <div className={"flex gap-2"}>
-                <Label htmlFor="Assign_APO" className={'font-bold whitespace-nowrap'}>SELECT {isOutWarranty ? "CM" : "APO"} : </Label>
-                <SearchCommandBlock
-                  value={assignApo}
-                  onChange={(selectedID) =>{
-                    if(!selectedID) {
-                      setAssignApo(null);
-                      return;
-                    }
-                    const selectedUser = filteredUserAssign.find(
-                      (user) => user.IDUser === selectedID
-                    );
-                    if (selectedUser) {
-                      setAssignApo(selectedUser.IDUser);
-                    }
-                  }}
-                  placeholder="--Select--"
-                  options={filteredUserAssign.map((user) =>({
-                    label: user.Name,
-                    value: user.IDUser,
-                  }))}
-                  renderLabel={(opt) => opt.label}
-                  getValue={(opt) => opt.value}
-                  className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
-                />
-              </div>
-              )}
-              <Button variant={"destructive"}  className="" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button  className="" onClick={() => setCurrentStep(2)}>Previous</Button>
-              <Button  className="" onClick={() => setModalPart(true)}>Add Part</Button>
-              <Button  className="" onClick={createOrder}>Create Order</Button>
-            </DialogFooter>
-          </DialogContent>
-        );
-
-      default:
-        return null;
-    }
-  }
-  
   return (
     <>
-    <Dialog open={open} onOpenChange={setOpen} >
-      {renderStepContent()}
-    <CreateNewPartModal 
-      open2={modalPart} 
-      setOpen2={setModalPart}
-      partCatalog={partCatalog}
-      selectedPartCatalog={selectedPartCatalog}
-      setSelectedPartCatalog={setSelectedPartCatalog}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+            flex flex-col justify-center
+            gap-0 p-0 bg-white
+            [&>button]:hidden"
+        >
+          <DialogHeader>
+            <div className="flex items-end justify-end">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={
+                    "hover:bg-gray-200 active:bg-gray-700  border-none"
+                  }
+                >
+                  <XIcon />
+                </Button>
+              </DialogClose>
+            </div>
+            <div className={"flex items-center flex-col"}>
+              <DialogTitle className={"text-blue-600 text-2xl"}>
+                Service Catalog
+              </DialogTitle>
+              <DialogDescription>
+                Select parts required for the repair.
+              </DialogDescription>
+              <HeaderTittle currentStep={currentStep} />
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <div
+              className={
+                currentStep === STEPS.WARRANTY ? "block h-full" : "hidden"
+              }
+            >
+              <StepWarranty
+                asset={assetForWorkOrderCreation}
+                warrantyOffer={filteredWarrantyOffers}
+                selectedWarrantyServices={selectedWarrantyServices}
+                setSelectedWarrantyServices={setSelectedWarrantyServices}
+                onNext={() => setCurrentStep(STEPS.PARTS)}
+                onCancel={() => setOpen(false)}
+              />
+            </div>
 
-      onPartAdded={handlePartAdded}
-      
-    />
-    </Dialog>
-  </>
+            <div
+              className={
+                currentStep === STEPS.PARTS ? "block h-full" : "hidden"
+              }
+            >
+              <StepParts
+                hook={hook}
+                selectedPartCatalog={selectedPartCatalog}
+                setSelectedPartCatalog={setSelectedPartCatalog}
+                onNext={() => setCurrentStep(STEPS.CONFIRM)}
+                onPrev={() => setCurrentStep(STEPS.WARRANTY)}
+              />
+            </div>
+
+            <div
+              className={
+                currentStep === STEPS.CONFIRM ? "block h-full" : "hidden"
+              }
+            >
+              <StepConfirm
+                asset={assetForWorkOrderCreation}
+                selectedWarrantyServices={effectiveWarrantyService}
+                selectedPartCatalog={selectedPartCatalog}
+                onPrev={() => setCurrentStep(STEPS.PARTS)}
+                onSubmit={createOrder}
+                showUEFINumberHeader={showUEFINumberHeader}
+                subTotalConfirmServices={subTotalConfirmServices}
+                selected={selected}
+                setSelected={setSelected}
+                assignApo={assignApo}
+                setAssignApo={setAssignApo}
+                filteredUserAssign={filteredUserAssign}
+                isOutWarranty={isOutWarranty}
+                addNewpart={() => setModalPart(true)}
+                effectiveWarrantyService={effectiveWarrantyService}
+              />
+            </div>
+          </div>
+        </DialogContent>
+
+        <CreateNewPartModal
+          hook={hook}
+          open2={modalPart}
+          setOpen2={setModalPart}
+          partCatalog={partCatalog}
+          selectedPartCatalog={selectedPartCatalog}
+          setSelectedPartCatalog={setSelectedPartCatalog}
+          onPartAdded={handlePartAdded}
+        />
+      </Dialog>
+    </>
   );
 }
