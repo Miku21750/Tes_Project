@@ -50,8 +50,8 @@ export const TabsServiceCaseDetails = () => {
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
   if (!caseDetails) {
     return (
-      <div className="p-4 text-sm text-gray-500">
-        Some thing went wrong please reload
+      <div className="p-4 text-lg text-gray-500 mx-auto">
+        Some thing went wrong please reload the page !!
       </div>
     );
   }
@@ -1024,7 +1024,7 @@ function fieldMO(caseDetails) {
           )} */}
             {(isTechRole && caseDetails?.CaseStatus !== "Close") && (
               <div className="shrink-0">
-                <BtnModalsServiceCatalog
+                <ServiceCatalogModel
                   open={openWorkOrder}
                   setOpen={(open) => setOpenWorkOrder(open)}
                   caseDetails={caseDetails}
@@ -1110,6 +1110,7 @@ import { DatePickertoDateOrNull, formatDateForInput } from "../lib/utils";
 import { EMPTY_DRAFT, EMPTY_NOTES, useCaseNotesStore } from "@/hooks/useCaseNoteStore";
 import { BASE_STATUS_KEYS, extractRoleFromStatus, ROLE_STATUS_EXTRAS, STATUS_ENUM_TO_LABEL, STATUS_ENUM_TO_LABEL_WO, STATUS_LABELS } from "@/hooks/useCaseStatus";
 import { CaseNotetable } from "@/components/table-data/CaseNotetable";
+import { ServiceCatalogModel } from "@/components/model/ServiceCatalogModal";
 const suffixToRoleMap = {
   CE: "ce",
   APO: "apo",
