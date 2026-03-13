@@ -52,7 +52,7 @@ function caseColums() {
           },
         },
         {
-            accessorKey: "caseinformation.CaseID_Manual",
+            accessorKey: "CaseID_Manual",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Case ID Manual"}/>
             ),
@@ -191,13 +191,11 @@ export function CaseTable() {
             id: "CreatedOn", 
             desc: true
         }])
-
     function handleRefresh(){
       setRefresh(prev => !prev)
     }
-
     const fetchCase = React.useCallback(async () => {
-    const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
+    const isAgreeAllResource = user?.role === 'admin' || user?.role === 'cm' || user?.role === 'spv';
     const savedTeamId = localStorage.getItem("activeTeamId");
     const params = new URLSearchParams();
     const baseurl = `/api/case-information`;
@@ -221,7 +219,8 @@ export function CaseTable() {
 
         try {
         const res = await ApiCustomer.get(url);
-        setData(res.data.data)
+        const dataCase = res.data.data
+        setData(dataCase)
         } catch (error) {
             toast.error("Failed to fetch Case data")
             setError("Failed to fetch data")

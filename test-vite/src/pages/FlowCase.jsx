@@ -54,7 +54,6 @@ export const FlowCaseData = (user) => {
   });
   const isToggleUser = user.user?.role === "admin" || user.user?.role === "fd";
   const [filterClose, setFilterClose] = useState(true)
-  const [filterFinish, setFilterFinish] = useState(true)
   const [adminViewDoneOnly, setAdminViewDoneOnly] = useState(false);
 
   const fetchData = async () => {
@@ -62,17 +61,14 @@ export const FlowCaseData = (user) => {
     try {
       const response = await ApiCustomer.get('/api/case-information');
       const filtercases = response.data.data.filter(c => {
-      const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'Cancel';
-        
-      if (isToggleUser && !filterClose) {
-        return (c?.CaseStatus === "Close" || c.CaseStatus === "Cancel")
-      }
-      if (isToggleUser && !filterFinish) {
-        return c?.CaseStatus === "FinishRepair"
-      }
+        const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'Cancel' && c?.CaseStatus !== 'FinishRepair' && c?.CaseStatus !== 'Void';
+          
+        if (isToggleUser && !filterClose) {
+          return (c?.CaseStatus === "FinishRepair" || c?.CaseStatus === "Void" || c?.CaseStatus === "Close" || c.CaseStatus === "Cancel")
+        }
 
         return mainfilter;
-        });
+      });
 
       const sortedCases = filtercases.sort((a, b) => {
         const dateAraw = a.UpdateOn;
@@ -103,7 +99,7 @@ export const FlowCaseData = (user) => {
 
   useEffect(() => {
     fetchData();
-  }, [user.user, filterClose, filterFinish]);
+  }, [user.user, filterClose]);
 
   function parseCreatedOn(dateStr) {
     const [datePart, timePart] = dateStr.split(', ');
@@ -125,16 +121,12 @@ export const FlowCaseData = (user) => {
       return createdOn >= rangeFrom && createdOn <= rangeTo;
     }
   }
-
-
   // filter logic
-  const filteredCases = caseData
-    .filter(c => {
+  const filteredCases = caseData.filter(c => {
       const isCreatedBy = c?.caseinformation?.CreatedBy == user.user.id;
 
       const isOwner = c?.Owner == user.user.id;
-      const matchesStatus =
-        !filters.Status || c.CaseStatus === filters.Status || c.UpdatedActionLogs?.[0]?.dataNew === filters.Status;
+      const matchesStatus = !filters.Status || c.CaseStatus === filters.Status || c.UpdatedActionLogs?.[0]?.dataNew === filters.Status;
 
 
       const parseCreatedON = parseCreatedOn(c?.CreatedOn);
@@ -339,26 +331,12 @@ export const FlowCaseData = (user) => {
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
                 {isToggleUser &&
-                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%" id='case-toggle'>
-                  <Switch
-                    checked={filterFinish === false}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFilterClose(true); // Turn off filterFinish if filterClose is unchecked
-                      }
-                      setFilterFinish(checked ? false : true);
-                    }}
-                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500 dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"
-                    id="Finish"
-                  /> 
-                  <Label htmlFor="Finish" className={"font-[700]"} >
-                    Show Finished Case
-                  </Label>
+                <div className="flex gap-2 items-center bg-secondary px-3 py-2 rounded-md dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%" id='case-toggle'>
                   <Switch
                     checked={filterClose === false}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setFilterFinish(true); // Turn off filterFinish if filterClose is unchecked
+                        setFilterClose(true); // Turn off filterFinish if filterClose is unchecked
                       }
                       setFilterClose(checked ? false : true);
                     }}
@@ -366,7 +344,7 @@ export const FlowCaseData = (user) => {
                     id="Close"
                   />
                   <Label htmlFor="Close" className={"font-[700]"}>
-                    Show Closed Case
+                    Show Status Extras
                   </Label>
                 </div>
                 }
@@ -381,7 +359,7 @@ export const FlowCaseData = (user) => {
               {renderer ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <Card key={i} className="flex-col lg:flex-row p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
-                    <div>
+                    <div className='space-y-2'>
                     <Skeleton className="h-6 w-70 lg:w-122" />
                     <Skeleton className="h-6 w-70 lg:w-122" />
                     </div>

@@ -48,13 +48,13 @@ export function DataTableFacetedFilter({
   }, [faceted, getLabel])
 
   return (
-    <Popover >
+    <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={twMerge(` justify-between overflow-hidden ${className}`)}
+          className={twMerge(`justify-between overflow-hidden ${className}`)}
           disabled={disabled}
         >
          {current ? `${title}: ${current}` : title}
@@ -70,8 +70,7 @@ export function DataTableFacetedFilter({
                 <CommandItem
                   key={data}
                   value={data}
-                  onSelect={() => { column.setFilterValue(data)
-                  }}
+                  onSelect={() => { column.setFilterValue(data) }}
                 >
                   {data}
                   <Check

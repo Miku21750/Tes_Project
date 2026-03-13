@@ -443,9 +443,9 @@ const openSaveAll = () => {
           newWindow.document.body.appendChild(iframe);
           },
           roles: ["admin", "fd", "user", "spv", "cm"],
-          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
-        },
-         {
+          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' || caseDetails.OTCCode === '01T' ? false : true,
+    },
+    {
           icon: CoinsIcon,
           label: "DP",
            onClick: async () => {
@@ -497,9 +497,9 @@ const openSaveAll = () => {
              newWindow.document.body.appendChild(iframe);
           },
           roles: ["admin", "fd", "user", "spv", "cm"],
-          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
-        },
-         {
+          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' || caseDetails.OTCCode === '01T' ? false : true,
+    },
+    {
           icon: CoinsIcon,
           label: "Invoice",
            onClick: async () => {
@@ -551,9 +551,9 @@ const openSaveAll = () => {
              newWindow.document.body.appendChild(iframe);
           },
           roles: ["admin", "fd", "user", "spv", "cm"],
-          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
-        },
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv","apv"]},
+          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' || caseDetails.OTCCode === '01T' ? false : true,
+    },
+    { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv","apv"]},
   ];
 
 
@@ -1330,7 +1330,7 @@ useEffect(() => {
     [filteredStatusKeys]
   );
 
-  const RoleSelect = ["fd","ce","celead"]
+  const RoleSelect = ["fd","ce","celead","ps"]
 
   // ------ fetch assignable users by role when needed ------
   const fetchUserAssign = async (role) => {
@@ -1408,7 +1408,7 @@ useEffect(() => {
 
   // ---- compute hidden tab for OOW ----
   const hiddenOowTab = caseDetails.OTCCode ? caseDetails.OTCCode !== "01T" : caseDetails.asset_information?.WarrantyOTCCode?.OTCCode !== "01T";
-
+  
   const tabs = [
     { value: "case_info", label: "Case & Customer" },
     { value: "ci_asset", label: "Assets , WO and MO" },

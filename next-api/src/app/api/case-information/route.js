@@ -174,6 +174,7 @@ export async function GET(request) {
       WorkGroup: caseData.ownerUser?.Name, // Replace with the database owned
       CaseStatus: caseData.CaseStatus,
       CaseType: caseData.CaseType,
+      CaseID_Manual: caseData.CaseID_Manual,
       caseinformation: {
         ...caseData,
         ActionLog: undefined,
