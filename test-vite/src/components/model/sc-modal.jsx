@@ -11823,7 +11823,6 @@ export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate
   );
 }
 
-
 export function FindCase() {
   const [openInfo, setOpenInfo] = useState(false);
   const [findingCase, setFindingCase] = useState({ Caseid: "", Phoneno: "" });

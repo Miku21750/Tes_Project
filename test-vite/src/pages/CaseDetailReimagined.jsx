@@ -1045,9 +1045,9 @@ function fieldMO(caseDetails) {
           open={quickLogOpen}
           onOpenChange={setQuickLogOpen}
           caseId={caseDetails.CaseID}
-    createdBy={user?.id}
-    mode={quickLogMode}
-    onAfterSaveAll={continueSaveAllAfterNote}
+          createdBy={user?.id}
+          mode={quickLogMode}
+          onAfterSaveAll={continueSaveAllAfterNote}
         />
       </div>
     </div>
