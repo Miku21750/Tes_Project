@@ -64,7 +64,6 @@ import DatePicker from "@/components/date-picker";
  * @property {number|null} [ContactID]
  * @property {number|null} [SiteAccountID]
  */
-
 /**
  * @typedef {Object} ContactInfo
  * @property {number} ContactID
@@ -748,10 +747,6 @@ export default function NewCaseForm() {
   // Function to check rerepair count in the last 90 days
   const getReRepairCount = async (assetID) => {
     try {
-      /**
-       * TODO SLAMET :C
-       * 
-       */
       const res = await ApiCustomer.get(`/api/case-information`, {
         params: {
           AssetID: assetID,
@@ -897,9 +892,6 @@ export default function NewCaseForm() {
 
   /** @type {[any[], (val: any[]) => void]} */
   const [city, setCity] = useState([]);
-
-  const [selectedProvId, setSelectedProvId] = useState("");
-  const [selectedCityId, setSelectedCityId] = useState("");
 
   useEffect(() => {
     (async () => {
