@@ -86,7 +86,7 @@ export const GenerateTicket = () => {
     // Setting route need permission from mukti and rafa
     const onGenerateTicket = async () => {
         const payload = {
-            
+
         }
         try {
             if (isNewContact && selectedContact && selectedCompany) {
@@ -99,16 +99,17 @@ export const GenerateTicket = () => {
             console.error(error)
         }
     }
-
-    // console.log("Selected Contact : ", selectedContact)
-    // console.log("Selected Companny : ", selectedCompany)
-    // console.log("First Name : ",form?.contact?.FirstName)
-    // console.log("Company : ",form?.company?.Company)
-    // console.log("Fetch contact : ",contacts)
-    // console.log("Fetch Company : ",companys)
-    // console.log("Province : ",provContact)
-    // console.log("Province selected : ",form?.contact?.StateProvince)
-
+    
+        console.log("Selected Contact : ", selectedContact)
+        console.log("Selected Companny : ", selectedCompany)
+        console.log("First Name : ",form?.contact?.FirstName)
+        console.log("Company : ",form?.company?.Company)
+        console.log("Fetch contact : ",contacts)
+        console.log("Fetch Company : ",companys)
+        console.log("Province : ",provContact)
+        console.log("Province selected : ",form?.contact?.StateProvince)
+        console.log("npwp :",form?.company?.NPWP)
+    
     // UseEffect fetch province 
     useEffect(() => {
         (async () => {
@@ -137,7 +138,7 @@ export const GenerateTicket = () => {
                 }
             })();
         }
-    },[form?.contact?.StateProvince, provContact, cityContact])
+    },[form?.contact?.StateProvince, provContact])
     
     // useEffect selected
     useEffect(() => {
@@ -148,9 +149,33 @@ export const GenerateTicket = () => {
         }))
     },[selectedCompany,selectedContact, searchCustomer])
 
+    useEffect(() => {
+        if (!selectedContact) return
+        (async () => {
+            try {
+                if (selectedContact.SiteAccountID) {
+                    setShowCompany(true)
+                    const res = await ApiCustomer.get(`/api/site_account/${selectedContact.SiteAccountID}`)
+                    const fetchComp = res.data?.data
+                    if (fetchComp) setSelectedCompany(fetchComp)
+                } else {
+                    setSelectedCompany([])
+                    setForm(prevCompany => ({
+                        ...prevCompany,
+                        prevCompany,
+                        company: {Company: "" , NPWP: ""}
+                    }))
+                    setShowCompany(false)
+                }
+            } catch (error) {
+                console.error(error)
+            }
+        })()
+    },[selectedContact])
+
     return (
         <>
-            <Card className={"rounded-none bg-gray-300"}>
+            <Card className={"rounded-none bg-gray-300 "}>
                 <CardHeader className={"text-center"}>
                     <CardTitle>Generate Ticket Customer</CardTitle>
                     <CardDescription>Please search your data or create new your data customer to generate ticket</CardDescription>
@@ -197,11 +222,6 @@ export const GenerateTicket = () => {
                                                     className={classNames("flex flex-col h-20 whitespace-pre-wrap",selectedContact?.ContactID === c.ContactID && "bg-gray-300")}
                                                     onClick = {() => {
                                                         setSelectedContact(c)
-                                                        if (c.SiteAccountID) {
-                                                            setShowCompany(true)
-                                                        } else {
-                                                            setShowCompany(false)
-                                                        }
                                                     }}
                                                 >
                                                     <div className="font-medium">
@@ -229,7 +249,6 @@ export const GenerateTicket = () => {
                                                     className={classNames("flex flex-col h-20 whitespace-pre-wrap",selectedCompany?.SiteAccountID === s.SiteAccountID && "bg-gray-300")}
                                                     onClick={() => {
                                                         setSelectedCompany(s)
-                                                        setShowCompany(true)
                                                     }}
                                                 >
                                                     <div className="font-medium">{s.Company}</div>
