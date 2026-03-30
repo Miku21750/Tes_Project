@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Textarea } from "../components/ui/textarea"
 import ApiCustomer from "../api"
 import { debounce } from "lodash-es"
+import { Label } from "@/components/ui/label"
 
 export const GenerateTicket = () => {
     function classNames(...s) {
@@ -45,6 +46,8 @@ export const GenerateTicket = () => {
             NPWP:"",
         }
     })
+    const [selected, setSelected] = useState(null)
+    
     
     const onChangeContact = (section, field) => (value) => 
         setForm(prev => ({
@@ -55,6 +58,10 @@ export const GenerateTicket = () => {
             }
     }));
 
+    const onChangeSelected = (event) => {
+        setSelected(event.target.value)
+    }
+    
     const searchCustomer = useMemo(() => debounce(async (q) => {
         if (!q || q.length < 2) {
             setCompanys([])
@@ -109,6 +116,7 @@ export const GenerateTicket = () => {
         console.log("Province : ",provContact)
         console.log("Province selected : ",form?.contact?.StateProvince)
         console.log("npwp :",form?.company?.NPWP)
+        console.log("Selected : ",selected)
     
     // UseEffect fetch province 
     useEffect(() => {
@@ -175,9 +183,9 @@ export const GenerateTicket = () => {
 
     return (
         <>
-            <Card className={"rounded-none bg-gray-300 "}>
+            <Card className={"rounded-none bg-gray-300 max-h-full"}>
                 <CardHeader className={"text-center"}>
-                    <CardTitle>Generate Ticket Customer</CardTitle>
+                    <CardTitle>Welcome to HP Service Center Kota Kasablanka</CardTitle>
                     <CardDescription>Please search your data or create new your data customer to generate ticket</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -258,9 +266,9 @@ export const GenerateTicket = () => {
                                         </CardContent>
                                     </Card>
                                 </div>
-                            ): fetchNotFound ? (
-                                <span className="">❌ Data customer tidak ditemukan</span>
-                            ) : null}   
+                    ): fetchNotFound ? (
+                        <span className="">❌ Data customer tidak ditemukan</span>
+                    ) : null}   
 
                     <Card className={"mt-2"}>
                         <CardHeader>
@@ -350,6 +358,7 @@ export const GenerateTicket = () => {
                                         {form?.contact?.Country === "Indonesia" ? (
                                             <SearchCommandBlock
                                                 value={form?.contact?.City}
+                                                className={"ring-1"}
                                                 onChange={onChangeContact("contact","City")}
                                                 options={cityContact.map((c) => ({
                                                     label: c.name,
@@ -396,7 +405,42 @@ export const GenerateTicket = () => {
                                         <Button className={"bg-blue-500 text-white hover:bg-green-500"}>Submit</Button>
                                     </div>
                                 </>
-                            )}                                       
+                            )}                       
+                        </CardContent>
+                    </Card>
+
+                    <Card className={"mt-2"}>
+                        <CardHeader>
+                            <CardTitle>Pilih salah satu opsi</CardTitle>
+                        </CardHeader>
+                        <CardContent className={""}>
+                            <div className="flex flex-col">
+                                <Label className={"text-sm"}>
+                                     <Input className={"w-4"} type={"radio"} value={"Perbaikan"} checked={selected === "Perbaikan"} onChange={onChangeSelected}/> Perbaikan
+                                </Label>
+
+                                <Label className={"text-sm"}>
+                                     <Input className={"w-4"} type={"radio"} value={"PengambilanBarang"} checked={selected === "PengambilanBarang"} onChange={onChangeSelected}/> Pengambilan Barang
+                                </Label>
+                                {selected === "PengambilanBarang" && (
+                                    <>
+                                        <Input placeholder={"Your Case ID"} />
+                                    </>
+                                )}
+                               
+                                <Label className={"text-sm"}>
+                                     <Input className={"w-4"} type={"radio"} value={"OnlineBooking"} checked={selected === "OnlineBooking"} onChange={onChangeSelected}/> Online Booking
+                                </Label>
+                                {selected === "OnlineBooking" && (
+                                    <>
+                                        <Input  placeholder={"Your booking number..."}/>
+                                    </>
+                                )}
+                               
+                                <Label className={"text-sm"}>
+                                     <Input className={"w-4"} type={"radio"} value={"Premium"} checked={selected === "Premium"} onChange={onChangeSelected}/> Premium/Gaming
+                                </Label>
+                            </div>     
                         </CardContent>
                     </Card>
                 </CardContent>
