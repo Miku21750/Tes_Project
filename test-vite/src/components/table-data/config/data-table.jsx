@@ -9,6 +9,20 @@
  * │  VIRTUAL   — <DataTable ... virtual={...} />                            │
  * └─────────────────────────────────────────────────────────────────────────┘
  *
+ * VIRTUAL EMPTY-SPACE FIX:
+ *   Root cause: row height estimates drift from actual rendered heights over
+ *   time. The fix is to attach rowVirtualizer.measureElement on every virtual
+ *   row via a ref callback so TanStack self-corrects its size cache.
+ *   The paddingTop/Bottom spacer rows then extend the tbody to exactly
+ *   totalVirtSize, making the scroll track accurate with no bottom gap.
+ *   <Table> already owns the scrollable outer div — we just pass scrollRef
+ *   to it as before. No extra wrapper needed.
+ *
+ * SERVER GLOBAL SEARCH:
+ *   Props: globalSearch (string) + onGlobalSearchChange (fn).
+ *   When provided, DataTable passes them to the toolbar via a second arg
+ *   `serverProps` so DataTableToolbar routes the search input to the server
+ *   hook instead of table.setGlobalFilter().
  */
 
 import * as React from "react";
@@ -74,7 +88,6 @@ function PaginationBar({ table, serverPagination }) {
     else          table.setPageSize(n);
   };
 
-  // Build numbered pill list: always show first, last, current±2, with gap markers
   const pills = React.useMemo(() => {
     if (pageCount <= 0) return [];
     const show = new Set([0, pageCount - 1]);
@@ -93,7 +106,6 @@ function PaginationBar({ table, serverPagination }) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 px-1 py-2 text-sm text-muted-foreground">
-
       <div className="flex items-center gap-1.5 text-xs">
         <span className="hidden sm:inline">Rows per page</span>
         <Select value={String(pageSize)} onValueChange={handlePageSize}>
@@ -159,7 +171,7 @@ export function DataTable({
   title,
   toolbar,
   className,
-  potraitName,     // forwarded to <Table potrait=…> — controls max-height, border, etc.
+  potraitName,
   cellName,
   loading,
   error,
@@ -170,6 +182,10 @@ export function DataTable({
   columnFilters,
   setColumnFilters,
 
+  // Server global search props — from useServerPageTable / useServerVirtual
+  globalSearch,
+  onGlobalSearchChange,
+
   enableSingleSelect   = false,
   enableMultiSelect    = false,
   selectedRowId,
@@ -178,14 +194,10 @@ export function DataTable({
   onRowSelectionChange,
   getRowId,
 
-  // serverPagination: { pageIndex, pageCount, pageSize, total, onPageChange, onPageSizeChange }
   serverPagination,
   defaultPageSize    = 20,
   paginationDisabled = false,
 
-  // virtual: { total, allLoaded, fetchMore, sentinelOffset? }
-  // NOTE: sentinelRef is now built INSIDE DataTable (not passed from hook)
-  // so the observer can be properly rooted on the scroll container.
   virtual,
   virtualRowEstimate = 36,
   virtualOverscan    = 8,
@@ -200,16 +212,14 @@ export function DataTable({
   // ── Internal state ──────────────────────────────────────────────────────────
   const [internalSorting,   setInternalSorting]   = React.useState([]);
   const [internalFilters,   setInternalFilters]   = React.useState([]);
-  // FIX A: pageIndex must be tracked, not hardcoded to 0
   const [internalPageIndex, setInternalPageIndex] = React.useState(0);
   const [internalPageSize,  setInternalPageSize]  = React.useState(defaultPageSize);
 
-  const activeSorting    = sorting         ?? internalSorting;
-  const activeSetSorting = setSorting      ?? setInternalSorting;
-  const activeFilters    = columnFilters   ?? internalFilters;
+  const activeSorting    = sorting          ?? internalSorting;
+  const activeSetSorting = setSorting       ?? setInternalSorting;
+  const activeFilters    = columnFilters    ?? internalFilters;
   const activeSetFilters = setColumnFilters ?? setInternalFilters;
 
-  // Reset to page 0 when client-side filters/sorting change
   const prevClientKey = React.useRef("");
   React.useEffect(() => {
     if (!isClient) return;
@@ -229,8 +239,9 @@ export function DataTable({
   const selectionEnabled = enableSingleSelect || enableMultiSelect;
 
   // ── Scroll container ref ────────────────────────────────────────────────────
-  // FIX D: attached directly to <Table ref=…> (Table's outer div)
-  // FIX C: also used as `root` for IntersectionObserver
+  // <Table> renders its own scrollable outer div and forwards its ref there.
+  // Attaching scrollRef to <Table ref={scrollRef}> gives the virtualizer the
+  // correct scroll element — no extra wrapper div required.
   const scrollRef = React.useRef(null);
 
   // ── Virtualizer ─────────────────────────────────────────────────────────────
@@ -248,9 +259,9 @@ export function DataTable({
   const sentinelIndex  = isVirtual && data.length > sentinelOffset
     ? data.length - sentinelOffset : -1;
 
-  // FIX C: Build sentinel observer rooted on our own scroll container
+  // Sentinel observer for infinite-scroll trigger
   const observerRef = React.useRef(null);
-  const sentinelRowRef = React.useCallback(
+  const sentinelCallbackRef = React.useCallback(
     (el) => {
       observerRef.current?.disconnect();
       observerRef.current = null;
@@ -258,8 +269,8 @@ export function DataTable({
       const obs = new IntersectionObserver(
         (entries) => { if (entries[0]?.isIntersecting) virtual.fetchMore(); },
         {
-          root:       scrollRef.current, // ← relative to THIS scroll container
-          rootMargin: "0px 0px 300px 0px",
+          root:       scrollRef.current,
+          rootMargin: "0px 0px 400px 0px",
           threshold:  0,
         },
       );
@@ -283,7 +294,6 @@ export function DataTable({
       columnFilters: activeFilters,
       ...(enableSingleSelect ? { rowSelection: singleSel }          : {}),
       ...(enableMultiSelect  ? { rowSelection: rowSelection ?? {} } : {}),
-      // FIX A: use tracked internalPageIndex
       ...(isClient ? {
         pagination: { pageIndex: internalPageIndex, pageSize: internalPageSize },
       } : {}),
@@ -301,7 +311,6 @@ export function DataTable({
     onSortingChange:       activeSetSorting,
     onColumnFiltersChange: activeSetFilters,
 
-    // FIX A: handle both pageIndex AND pageSize in client mode
     onPaginationChange: isServerPage
       ? (updater) => {
           const prev = { pageIndex: serverPagination.pageIndex, pageSize: serverPagination.pageSize };
@@ -347,16 +356,31 @@ export function DataTable({
       ? table.getPaginationRowModel().rows
       : allRows;
 
-  const paddingTop    = virtualItems.length > 0 ? virtualItems[0].start                      : 0;
-  const paddingBottom = virtualItems.length > 0 ? totalVirtSize - virtualItems.at(-1).end    : 0;
+  // paddingTop  = scroll offset where the first rendered virtual row begins
+  // paddingBottom = remaining height below the last rendered virtual row
+  // These two spacer rows make the tbody as tall as totalVirtSize so the
+  // browser's scrollbar track is always accurate (no bottom white gap).
+  const paddingTop = virtualItems.length > 0
+    ? (virtualItems[0]?.start ?? 0)
+    : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? totalVirtSize - (virtualItems[virtualItems.length - 1]?.end ?? totalVirtSize)
+    : 0;
 
   const showPagination = !isVirtual && !paginationDisabled;
+
+  // Props forwarded to the toolbar render-prop as second argument
+  const serverProps = React.useMemo(() => ({
+    isServerMode: isServerPage || isVirtual,
+    globalSearch: globalSearch ?? "",
+    onGlobalSearchChange,
+  }), [isServerPage, isVirtual, globalSearch, onGlobalSearchChange]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {title  && <div>{title}</div>}
-      {toolbar && toolbar(table)}
+      {toolbar && toolbar(table, serverProps)}
       {error  && <p className="text-sm text-destructive">{error}</p>}
 
       {isVirtual && virtual.total > 0 && (
@@ -366,11 +390,6 @@ export function DataTable({
         </p>
       )}
 
-      {/*
-        FIX D: <Table> is a combined outer-div + inner-<table> custom component.
-        We attach scrollRef via ref= on Table (which forwards to its outer div).
-        No extra wrapper div needed or wanted.
-      */}
       <Table
         ref={isVirtual ? scrollRef : undefined}
         className="text-[11px] leading-tight"
@@ -401,8 +420,14 @@ export function DataTable({
 
           ) : isVirtual ? (
             <>
+              {/* Top spacer — positions first visible row at its correct scroll offset */}
               {paddingTop > 0 && (
-                <TableRow><TableCell style={{ height: paddingTop }} colSpan={columns.length} /></TableRow>
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    style={{ height: `${paddingTop}px`, padding: 0, border: "none" }}
+                  />
+                </TableRow>
               )}
 
               {virtualItems.map((vRow) => {
@@ -413,7 +438,16 @@ export function DataTable({
                 return (
                   <TableRow
                     key={row?.id ?? `v-${vRow.index}`}
-                    ref={isSentinel ? sentinelRowRef : undefined}
+                    data-index={vRow.index}
+                    ref={(el) => {
+                      // KEY FIX: rowVirtualizer.measureElement reads the row's
+                      // actual rendered height and updates its internal size cache.
+                      // This self-corrects any estimateSize drift and eliminates
+                      // the bottom empty-space bug when rows are taller than estimate.
+                      if (el) rowVirtualizer.measureElement(el);
+                      // Sentinel observer for fetch-more trigger
+                      if (isSentinel) sentinelCallbackRef(el);
+                    }}
                     tabIndex={selectionEnabled ? 0 : undefined}
                     aria-selected={isSelected || undefined}
                     onClick={selectionEnabled && row ? () => handleSelectRow(row) : undefined}
@@ -440,8 +474,14 @@ export function DataTable({
                 );
               })}
 
+              {/* Bottom spacer — fills remaining scroll track height accurately */}
               {paddingBottom > 0 && (
-                <TableRow><TableCell style={{ height: paddingBottom }} colSpan={columns.length} /></TableRow>
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    style={{ height: `${paddingBottom}px`, padding: 0, border: "none" }}
+                  />
+                </TableRow>
               )}
 
               {loading && data.length > 0 && (

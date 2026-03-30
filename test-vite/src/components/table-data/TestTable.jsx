@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * PartCatalogTable — server-paginated + server-virtual modes
+ * TEST TABLE for test — server-paginated + server-virtual modes
  *
  */
 
