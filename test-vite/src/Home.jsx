@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { FindCase } from './components/model/sc-modal'; // Assuming this is a modal trigger
-import { useNavigate } from 'react-router-dom'; // Corrected import for useNavigate
+import { Navigate, useNavigate } from 'react-router-dom'; // Corrected import for useNavigate
 
 export const Home = () => {
     const navigate = useNavigate();
@@ -67,6 +67,8 @@ export const Home = () => {
                                 
                             </CardFooter>
                         </Card>
+
+                        {/* Login Partner */}
                         <Card className="flex flex-col items-center justify-between p-6 bg-white/10 backdrop-blur-md rounded-lg shadow-lg text-center border border-emerald-500 hover:scale-105 transition-transform duration-300">
                             <CardHeader className="flex flex-col items-center gap-3 pb-4">
                                 <CardTitle className="text-2xl font-semibold text-emerald-100">
@@ -83,7 +85,7 @@ export const Home = () => {
                             <CardFooter>
                                 {token ? (
                                     <Button
-                                        className="text-lg md:text-xl px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
+                                        className="text-sm md:text-lg px-4  text-white bg-emerald-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
                                         onClick={() => navigate('/app')}
                                     >
                                         Dashboard

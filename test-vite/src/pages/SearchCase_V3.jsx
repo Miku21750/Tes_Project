@@ -33,6 +33,7 @@ import Swal from "sweetalert2";
 import { extractRoleFromStatus, STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
+import DatePicker from "@/components/date-picker";
 /**
  * @fileoverview Create Case page (SearchCase_V3)
  * A single-page flow to create a Case with auto-fill from Asset, Contact, Company, and Product.
@@ -63,7 +64,6 @@ import { useAuth } from "@/context/auth-context";
  * @property {number|null} [ContactID]
  * @property {number|null} [SiteAccountID]
  */
-
 /**
  * @typedef {Object} ContactInfo
  * @property {number} ContactID
@@ -125,6 +125,8 @@ import { useAuth } from "@/context/auth-context";
  * @property {number} ContactID
  * @property {number|null} SiteAccountID
  * @property {string} CaseSubject
+ * @property {string} CaseID_Manual
+ * @property {date} CaseID_Manual_Date
  * @property {string} CaseType
  * @property {boolean} KCI_Flag
  * @property {"Email"|"Phone"|"WalkIn"} IncomingChannel
@@ -305,7 +307,9 @@ export default function NewCaseForm() {
   const [receivedDate, setReceivedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
+  const [caseID_Manual_Date, setcaseID_Manual_Date] = useState();
   const [caseSubject, setCaseSubject] = useState("");
+  const [caseID_Manual, setcaseID_Manual] = useState("");
   const [referenceCase, setReferenceCase] = useState("");
   const [caseStatus, setCaseStatus] = useState("New");
   const [hideAssignTo, setHideAssignTo] = useState(false);
@@ -743,10 +747,6 @@ export default function NewCaseForm() {
   // Function to check rerepair count in the last 90 days
   const getReRepairCount = async (assetID) => {
     try {
-      /**
-       * TODO SLAMET :C
-       * 
-       */
       const res = await ApiCustomer.get(`/api/case-information`, {
         params: {
           AssetID: assetID,
@@ -892,9 +892,6 @@ export default function NewCaseForm() {
 
   /** @type {[any[], (val: any[]) => void]} */
   const [city, setCity] = useState([]);
-
-  const [selectedProvId, setSelectedProvId] = useState("");
-  const [selectedCityId, setSelectedCityId] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -1162,6 +1159,8 @@ export default function NewCaseForm() {
       /** @type {CaseCreatePayload} */
       const casePayload = {
         CaseSubject: caseSubject,
+        CaseID_Manual: caseID_Manual,
+        CaseID_Manual_Date: caseID_Manual_Date,
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
@@ -1502,7 +1501,15 @@ export default function NewCaseForm() {
             <div className="space-y-2">
               <Label>Received Date <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} className={"ring-1 ring-gray-400 dark:text-white  mt-2 rounded-md dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2 "}/>
-          
+
+              <Label>Case ID Manual</Label>
+              <Input value={caseID_Manual} onChange={(e) => setcaseID_Manual(e.target.value)} className={"ring-1 ring-gray-400 dark:text-white  mt-2 rounded-md dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2 "}/>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Case ID Manual Date</Label>
+              <Input type="datetime-local" value={caseID_Manual_Date}  onChange={(e) => setcaseID_Manual_Date(e.target.value)} className={"ring-1 ring-gray-400 dark:text-white  mt-2 rounded-md dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2 "}/>
+
               <Label>Reference Case</Label>
               <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} className={"ring-1 ring-gray-400 dark:text-white  mt-2 rounded-md dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
             </div>
@@ -1592,6 +1599,7 @@ export default function NewCaseForm() {
                 />
               </CaseField>
            </div> 
+
             <div className=" space-y-2 col-span-2 lg:col-span-1">
               <Label>Case Subject <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Textarea type="text" rows={3} value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} className={"ring-1 ring-gray-400  dark:bg-gray-500/10 dark:border-gray-400"}/>
