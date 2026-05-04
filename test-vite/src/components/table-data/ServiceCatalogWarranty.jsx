@@ -108,14 +108,14 @@ export function ServiceCatalogWarrantyTable(
         <div className="p-4 grid grid-cols-1 w-full rounded-2xl">
             <DataTable
                 data={data}
-                cellName={' p-1 lg:p-2'}
+                cellClassName={' p-1 lg:p-2'}
                 columns={columns}
                 sorting={sorting}
                 setSorting={setSorting}
                 handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
-                potraitName={"max-h-50 lg:max-h-60 2xl:max-h-140"}
+                containerClassName={"max-h-50 lg:max-h-60 2xl:max-h-140"}
                 paginationDisabled 
                 enableSingleSelect
                 getRowId={(row) => String(row.Service_offerID)}

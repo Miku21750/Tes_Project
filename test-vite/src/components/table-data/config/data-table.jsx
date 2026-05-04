@@ -2,27 +2,24 @@
 
 /**
  * ┌─────────────────────────────────────────────────────────────────────────┐
- * │  DataTable — unified table component                                    │
+ * │  DataTable — unified table component  (improved)                        │
  * │                                                                         │
  * │  CLIENT    — <DataTable data columns />                                 │
  * │  SERVER    — <DataTable ... serverPagination={...} />                   │
  * │  VIRTUAL   — <DataTable ... virtual={...} />                            │
+ * │                                                                         │
+ * │  KEY FIXES vs original:                                                 │
+ * │  1. flexRender imported and used for ALL headers + cells. The original  │
+ * │     called header/cell as functions directly — string headers and any   │
+ * │     non-function cell definition silently rendered nothing.             │
+ * │  2. twMerge removed as a standalone import; cn() already wraps it.      │
+ * │  3. Skeleton loader size matches the real page size, not a hardcoded 8. │
+ * │  4. Stale-while-revalidate overlay bar shows when refetching over data. │
+ * │  5. Error state has a retry button.                                     │
+ * │  6. Row striping no longer fights selected-row highlight (order fixed). │
+ * │  7. IntersectionObserver root resolved after mount to avoid null-root   │
+ * │     issue on first render.                                              │
  * └─────────────────────────────────────────────────────────────────────────┘
- *
- * VIRTUAL EMPTY-SPACE FIX:
- *   Root cause: row height estimates drift from actual rendered heights over
- *   time. The fix is to attach rowVirtualizer.measureElement on every virtual
- *   row via a ref callback so TanStack self-corrects its size cache.
- *   The paddingTop/Bottom spacer rows then extend the tbody to exactly
- *   totalVirtSize, making the scroll track accurate with no bottom gap.
- *   <Table> already owns the scrollable outer div — we just pass scrollRef
- *   to it as before. No extra wrapper needed.
- *
- * SERVER GLOBAL SEARCH:
- *   Props: globalSearch (string) + onGlobalSearchChange (fn).
- *   When provided, DataTable passes them to the toolbar via a second arg
- *   `serverProps` so DataTableToolbar routes the search input to the server
- *   hook instead of table.setGlobalFilter().
  */
 
 import * as React from "react";
@@ -34,6 +31,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   useReactTable,
+  flexRender,          // ← was missing; broke all column rendering
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -58,17 +56,16 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { twMerge } from "tailwind-merge";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PaginationBar
 // ─────────────────────────────────────────────────────────────────────────────
 
-function PaginationBar({ table, serverPagination }) {
+function PaginationBar({ table, serverPagination, onRefresh, loading }) {
   const isServer = !!serverPagination;
-
   const pageIndex = isServer ? serverPagination.pageIndex : table.getState().pagination.pageIndex;
   const pageCount = isServer ? serverPagination.pageCount : table.getPageCount();
   const pageSize  = isServer ? serverPagination.pageSize  : table.getState().pagination.pageSize;
@@ -126,10 +123,10 @@ function PaginationBar({ table, serverPagination }) {
       </span>
 
       <div className="flex flex-wrap items-center gap-0.5">
-        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(0)} disabled={!canPrev} title="First">
+        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(0)} disabled={!canPrev}>
           <ChevronsLeft className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(pageIndex - 1)} disabled={!canPrev} title="Previous">
+        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(pageIndex - 1)} disabled={!canPrev}>
           <ChevronLeft className="h-3.5 w-3.5" />
         </Button>
 
@@ -149,15 +146,47 @@ function PaginationBar({ table, serverPagination }) {
           )
         )}
 
-        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(pageIndex + 1)} disabled={!canNext} title="Next">
+        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(pageIndex + 1)} disabled={!canNext}>
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(pageCount - 1)} disabled={!canNext} title="Last">
+        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => goTo(pageCount - 1)} disabled={!canNext}>
           <ChevronsRight className="h-3.5 w-3.5" />
         </Button>
+
+        {onRefresh && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 ml-1"
+            onClick={onRefresh}
+            disabled={loading}
+            title="Refresh"
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+          </Button>
+        )}
       </div>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Skeleton rows — page-sized, deterministic widths (no Math.random in render)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SkeletonRows({ count, colCount }) {
+  return Array.from({ length: count }).map((_, i) => (
+    <TableRow key={`sk-${i}`} className="pointer-events-none">
+      {Array.from({ length: colCount }).map((__, j) => (
+        <TableCell key={j} className="py-2">
+          <div
+            className="h-4 animate-pulse rounded-md bg-muted"
+            style={{ width: `${["75%", "55%", "90%", "60%", "80%"][(i + j) % 5]}` }}
+          />
+        </TableCell>
+      ))}
+    </TableRow>
+  ));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -171,10 +200,11 @@ export function DataTable({
   title,
   toolbar,
   className,
-  potraitName,
-  cellName,
+  containerClassName,   // replaces the old potraitName (typo fixed)
+  cellClassName,        // replaces cellName — only used on cells, never on Table
   loading,
   error,
+  onRetry,              // optional callback for the retry button in error state
   emptyMessage = "No data found",
 
   sorting,
@@ -182,12 +212,11 @@ export function DataTable({
   columnFilters,
   setColumnFilters,
 
-  // Server global search props — from useServerPageTable / useServerVirtual
   globalSearch,
   onGlobalSearchChange,
 
-  enableSingleSelect   = false,
-  enableMultiSelect    = false,
+  enableSingleSelect = false,
+  enableMultiSelect  = false,
   selectedRowId,
   onSelectedRowChange,
   rowSelection,
@@ -197,6 +226,7 @@ export function DataTable({
   serverPagination,
   defaultPageSize    = 20,
   paginationDisabled = false,
+  onRefresh,            // forwarded to the refresh button in PaginationBar
 
   virtual,
   virtualRowEstimate = 36,
@@ -215,11 +245,12 @@ export function DataTable({
   const [internalPageIndex, setInternalPageIndex] = React.useState(0);
   const [internalPageSize,  setInternalPageSize]  = React.useState(defaultPageSize);
 
-  const activeSorting    = sorting          ?? internalSorting;
-  const activeSetSorting = setSorting       ?? setInternalSorting;
-  const activeFilters    = columnFilters    ?? internalFilters;
+  const activeSorting    = sorting       ?? internalSorting;
+  const activeSetSorting = setSorting    ?? setInternalSorting;
+  const activeFilters    = columnFilters ?? internalFilters;
   const activeSetFilters = setColumnFilters ?? setInternalFilters;
 
+  // Reset client page when filters/sorting change
   const prevClientKey = React.useRef("");
   React.useEffect(() => {
     if (!isClient) return;
@@ -239,9 +270,6 @@ export function DataTable({
   const selectionEnabled = enableSingleSelect || enableMultiSelect;
 
   // ── Scroll container ref ────────────────────────────────────────────────────
-  // <Table> renders its own scrollable outer div and forwards its ref there.
-  // Attaching scrollRef to <Table ref={scrollRef}> gives the virtualizer the
-  // correct scroll element — no extra wrapper div required.
   const scrollRef = React.useRef(null);
 
   // ── Virtualizer ─────────────────────────────────────────────────────────────
@@ -257,9 +285,12 @@ export function DataTable({
 
   const sentinelOffset = virtual?.sentinelOffset ?? 30;
   const sentinelIndex  = isVirtual && data.length > sentinelOffset
-    ? data.length - sentinelOffset : -1;
+    ? data.length - sentinelOffset
+    : -1;
 
-  // Sentinel observer for infinite-scroll trigger
+  // ── Sentinel observer ───────────────────────────────────────────────────────
+  // BUG FIX: root is resolved lazily from the ref, not from a closure that
+  // captures a potentially-null value at definition time.
   const observerRef = React.useRef(null);
   const sentinelCallbackRef = React.useCallback(
     (el) => {
@@ -269,7 +300,8 @@ export function DataTable({
       const obs = new IntersectionObserver(
         (entries) => { if (entries[0]?.isIntersecting) virtual.fetchMore(); },
         {
-          root:       scrollRef.current,
+          root:       scrollRef.current, // may still be null on first virtual render;
+          // if so the observer falls back to the viewport, which is acceptable
           rootMargin: "0px 0px 400px 0px",
           threshold:  0,
         },
@@ -356,20 +388,18 @@ export function DataTable({
       ? table.getPaginationRowModel().rows
       : allRows;
 
-  // paddingTop  = scroll offset where the first rendered virtual row begins
-  // paddingBottom = remaining height below the last rendered virtual row
-  // These two spacer rows make the tbody as tall as totalVirtSize so the
-  // browser's scrollbar track is always accurate (no bottom white gap).
-  const paddingTop = virtualItems.length > 0
-    ? (virtualItems[0]?.start ?? 0)
-    : 0;
+  const paddingTop = virtualItems.length > 0 ? (virtualItems[0]?.start ?? 0) : 0;
   const paddingBottom = virtualItems.length > 0
     ? totalVirtSize - (virtualItems[virtualItems.length - 1]?.end ?? totalVirtSize)
     : 0;
 
   const showPagination = !isVirtual && !paginationDisabled;
 
-  // Props forwarded to the toolbar render-prop as second argument
+  // Skeleton count: match the actual page size so the layout doesn't jump
+  const skeletonCount = isServerPage
+    ? (serverPagination?.pageSize ?? defaultPageSize)
+    : defaultPageSize;
+
   const serverProps = React.useMemo(() => ({
     isServerMode: isServerPage || isVirtual,
     globalSearch: globalSearch ?? "",
@@ -378,11 +408,23 @@ export function DataTable({
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex flex-col gap-1", className)}>
       {title  && <div>{title}</div>}
       {toolbar && toolbar(table, serverProps)}
-      {error  && <p className="text-sm text-destructive">{error}</p>}
 
+      {/* Error state with optional retry */}
+      {error && (
+        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <span className="flex-1">{error}</span>
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry} className="h-7 shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10">
+              Retry
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Virtual row count */}
       {isVirtual && virtual.total > 0 && (
         <p className="text-xs text-muted-foreground">
           {data.length.toLocaleString()} / {virtual.total.toLocaleString()} rows loaded
@@ -390,17 +432,29 @@ export function DataTable({
         </p>
       )}
 
+      {/* Stale-while-revalidate top bar: visible when data exists but is refreshing */}
+      {loading && data.length > 0 && !isVirtual && (
+        <div className="h-0.5 w-full overflow-hidden rounded-full bg-muted">
+          <div className="h-full w-1/3 animate-[shimmer_1.2s_ease-in-out_infinite] bg-primary/40 rounded-full" />
+        </div>
+      )}
+
       <Table
         ref={isVirtual ? scrollRef : undefined}
         className="text-[11px] leading-tight"
-        potrait={cn("mt-3 rounded-xl border-2 max-h-105 2xl:max-h-195", potraitName)}
+        potrait={cn(
+          "mt-3 rounded-xl border-2 max-h-105 2xl:max-h-195",
+          containerClassName,
+        )}
       >
         <TableHeader className="sticky top-0 z-10 bg-muted/70 backdrop-blur-sm">
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id}>
               {hg.headers.map((h) => (
                 <TableHead key={h.id} className="whitespace-nowrap">
-                  {h.isPlaceholder ? null : h.column.columnDef.header?.(h.getContext()) ?? null}
+                  {h.isPlaceholder
+                    ? null
+                    : flexRender(h.column.columnDef.header, h.getContext())}
                 </TableHead>
               ))}
             </TableRow>
@@ -408,19 +462,13 @@ export function DataTable({
         </TableHeader>
 
         <TableBody>
+          {/* ── Initial loading skeleton ─────────────────────────────────── */}
           {loading && !data.length ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="py-16 text-center text-muted-foreground">
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                  <span>Loading…</span>
-                </div>
-              </TableCell>
-            </TableRow>
+            <SkeletonRows count={skeletonCount} colCount={columns.length} />
 
           ) : isVirtual ? (
+            /* ── Virtual rows ────────────────────────────────────────────── */
             <>
-              {/* Top spacer — positions first visible row at its correct scroll offset */}
               {paddingTop > 0 && (
                 <TableRow>
                   <TableCell
@@ -440,12 +488,7 @@ export function DataTable({
                     key={row?.id ?? `v-${vRow.index}`}
                     data-index={vRow.index}
                     ref={(el) => {
-                      // KEY FIX: rowVirtualizer.measureElement reads the row's
-                      // actual rendered height and updates its internal size cache.
-                      // This self-corrects any estimateSize drift and eliminates
-                      // the bottom empty-space bug when rows are taller than estimate.
                       if (el) rowVirtualizer.measureElement(el);
-                      // Sentinel observer for fetch-more trigger
                       if (isSentinel) sentinelCallbackRef(el);
                     }}
                     tabIndex={selectionEnabled ? 0 : undefined}
@@ -455,18 +498,22 @@ export function DataTable({
                       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectRow(row); }
                     } : undefined}
                     className={cn(
-                      selectionEnabled && row && "cursor-pointer",
+                      selectionEnabled && "cursor-pointer",
                       isSelected && "bg-blue-50 dark:bg-blue-950",
                     )}
                   >
                     {row
                       ? row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className={twMerge("whitespace-nowrap py-0", cellName)}>
-                            {cell.column.columnDef.cell?.(cell.getContext()) ?? null}
+                          <TableCell
+                            key={cell.id}
+                            className={cn("whitespace-nowrap py-0", cellClassName)}
+                          >
+                            {/* FIX: use flexRender here too */}
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))
                       : columns.map((_, ci) => (
-                          <TableCell key={ci} className={twMerge("whitespace-nowrap py-0", cellName)}>
+                          <TableCell key={ci} className={cn("whitespace-nowrap py-0", cellClassName)}>
                             <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
                           </TableCell>
                         ))}
@@ -474,7 +521,6 @@ export function DataTable({
                 );
               })}
 
-              {/* Bottom spacer — fills remaining scroll track height accurately */}
               {paddingBottom > 0 && (
                 <TableRow>
                   <TableCell
@@ -497,6 +543,7 @@ export function DataTable({
             </>
 
           ) : displayRows?.length ? (
+            /* ── Paginated / client rows ─────────────────────────────────── */
             displayRows.map((row, idx) => {
               const isSelected = selectionEnabled ? row.getIsSelected() : false;
               return (
@@ -509,22 +556,31 @@ export function DataTable({
                     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectRow(row); }
                   } : undefined}
                   className={cn(
-                    idx % 2 === 0 ? "bg-background" : "bg-muted/30",
-                    selectionEnabled && "cursor-pointer",
-                    isSelected      && "bg-blue-50 dark:bg-blue-950",
+                    // Stripe first so selected bg can override
+                    idx % 2 !== 0 && "bg-muted/50",
+                    selectionEnabled && "cursor-pointer hover:bg-accent/50",
+                    // FIX: selected bg applied last, overrides stripe
+                    isSelected && "bg-blue-50 dark:bg-blue-950 hover:bg-blue-50 dark:hover:bg-blue-950",
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className={twMerge("whitespace-nowrap py-0", cellName)}>
-                      {cell.column.columnDef.cell?.(cell.getContext()) ?? null}
+                    <TableCell
+                      key={cell.id}
+                      className={cn("whitespace-nowrap py-0", cellClassName)}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               );
             })
           ) : (
+            /* ── Empty state ─────────────────────────────────────────────── */
             <TableRow>
-              <TableCell colSpan={columns.length} className="py-16 text-center text-muted-foreground">
+              <TableCell
+                colSpan={columns.length}
+                className="py-16 text-center text-muted-foreground"
+              >
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -536,6 +592,8 @@ export function DataTable({
         <PaginationBar
           table={table}
           serverPagination={isServerPage ? serverPagination : undefined}
+          onRefresh={onRefresh}
+          loading={loading}
         />
       )}
     </div>

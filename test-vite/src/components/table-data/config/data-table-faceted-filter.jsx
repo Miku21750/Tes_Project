@@ -47,13 +47,6 @@
  * │    />                                                                   │
  * └─────────────────────────────────────────────────────────────────────────┘
  *
- * Both modes write { id, value: [string] } into columnFilters.
- * filtersToParams reads f.value[0] — no changes needed there.
- *
- * Key distinction: in SERVER mode the autocomplete (fetchOptions) only
- * provides a list of values to pick from — it does NOT filter the table
- * client-side. Selecting a value sends it to the server via columnFilters →
- * filtersToParams → query param → WHERE clause. This is the correct pattern.
  */
 
 import * as React from "react";
@@ -90,6 +83,7 @@ export function DataTableFacetedFilter({
   // SERVER mode — async autocomplete for high-cardinality fields
   fetchOptions,
   placeholder,
+  portal,
 }) {
   const isClientMode  = mode === "client";
   const isServerMode  = mode === "server";
@@ -202,7 +196,7 @@ export function DataTableFacetedFilter({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[250px] p-0" align="start">
+      <PopoverContent className="w-[250px] p-0" align="start" usePortal={portal}>
         <Command shouldFilter={shouldFilter}>
           <div className="relative">
             <CommandInput

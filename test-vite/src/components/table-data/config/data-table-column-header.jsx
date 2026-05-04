@@ -10,12 +10,15 @@ export function DataTableColumnHeader({
   title,
   className,
   children,
+  ableToSort = true,
 }) {
   const sorted = column.getIsSorted() // false | "asc" | "desc"
 
   return (
     <div className="flex flex-col p-2">
-      <Button
+     {ableToSort ?
+      (
+        <Button
         type="button"
         variant="ghost"
         className={className}
@@ -30,6 +33,17 @@ export function DataTableColumnHeader({
           <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
         )}
       </Button>
+      )
+       :
+      (
+        <Button
+        type="button"
+        variant="ghost"
+        className={className}
+      >
+        {title}
+      </Button>
+      )}
       {children &&
       <span className="flex items-center mt-1">
        {children}

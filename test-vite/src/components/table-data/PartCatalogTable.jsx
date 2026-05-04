@@ -6,55 +6,16 @@ import { DataTableColumnHeader } from "./config/data-table-column-header"
 import { DataTableToolbar } from "./config/data-table-toolbar"
 import { Button }    from "@/components/ui/button";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { DataTableFacetedFilter } from "./config/data-table-faceted-filter"
 
 
 
 
 
-function ColFilter({ id, label, filterStateRef, column, className }) {
-  const value = filterStateRef.current.columnFilters.find((f) => f.id === id)?.value ?? "";
-
-  const sorted = column.getIsSorted() // false | "asc" | "desc"
-  const onChange = (e) => {
-    const v = e.target.value;
-    filterStateRef.current.setColumnFilters((prev) => {
-      const without = prev.filter((f) => f.id !== id);
-      return v ? [...without, { id, value: v }] : without;
-    });
-  };
-
-  return (
-    <div className="font-semibold text-foreground whitespace-pre-wrap">
-      <Button
-        type="button"
-        variant="ghost"
-        className={className}
-        onClick={() => column.toggleSorting(sorted === "asc")}
-      >
-        {label}
-        {sorted === "asc" ? (
-          <ArrowUp className="ml-2 h-4 w-4" />
-        ) : sorted === "desc" ? (
-          <ArrowDown className="ml-2 h-4 w-4" />
-        ) : (
-          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
-        )}
-      </Button>
-      {/* {label} */}
-      <Input
-        className="mt-1 bg-background font-normal h-7 text-xs"
-        value={value}
-        onChange={onChange}
-        onClick={(e) => e.stopPropagation()}
-        placeholder="Filter…"
-      />
-    </div>
-  );
-}
 
 // ── Column factory ────────────────────────────────────────────────────────────
 
-function buildColumns(filterStateRef) {
+function buildColumns() {
   return [
     {
       id: "select",
@@ -71,15 +32,15 @@ function buildColumns(filterStateRef) {
     },
     {
       accessorKey: "PartNumber",
-      header: ({ column }) => <ColFilter id="PartNumber" label="Part #" filterStateRef={filterStateRef} column={column}/>,
+      header: ({ column }) => <DataTableColumnHeader id="PartNumber" title="Part #"  column={column}/>,
     },
     {
       accessorKey: "Keyword",
-      header: ({ column }) => <ColFilter id="Keyword" label="Keyword" filterStateRef={filterStateRef} column={column}/>,
+      header: ({ column }) => <DataTableColumnHeader id="Keyword" title="Keyword"  column={column}/>,
     },
     {
       accessorKey: "PartDescription",
-      header: ({ column }) => <ColFilter id="PartDescription" label="Description" filterStateRef={filterStateRef} column={column}/>,
+      header: ({ column }) => <DataTableColumnHeader id="PartDescription" title="Description"  column={column}/>,
     },
   ];
 }
@@ -124,17 +85,15 @@ function usePartRowSelection(data, selectedParts, setSelectedParts) {
 
 // ── Paginated variant ─────────────────────────────────────────────────────────
 
-export function PartCatalogPaginated({ selectedPartCatalog, setSelectedPartCatalog, hook }) {
+export function PartCatalogPaginated({ selectedPartCatalog, setSelectedPartCatalog, hook, fetchFilter }) {
 
   const { rowSelection, onRowSelectionChange } = usePartRowSelection(
     hook.data, selectedPartCatalog, setSelectedPartCatalog,
   );
 
-  const filterStateRef = React.useRef({ columnFilters: hook.columnFilters, setColumnFilters: hook.setColumnFilters });
-  filterStateRef.current = { columnFilters: hook.columnFilters, setColumnFilters: hook.setColumnFilters };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const columns = React.useMemo(() => buildColumns(filterStateRef), []);
+  const columns = React.useMemo(() => buildColumns(), []);
 
   return (
     <DataTable
@@ -146,13 +105,15 @@ export function PartCatalogPaginated({ selectedPartCatalog, setSelectedPartCatal
       setSorting={hook.setSorting}
       columnFilters={hook.columnFilters}
       setColumnFilters={hook.setColumnFilters}
-      potraitName="max-h-80"
-      cellName="p-2"
+      containerClassName="max-h-55"
+      cellClassName="p-2"
       facetedFilter={false}
       enableMultiSelect
       getRowId={(row) => String(row.PartNumber)}
       rowSelection={rowSelection}
       onRowSelectionChange={onRowSelectionChange}
+      globalSearch={hook.globalSearch}
+      onGlobalSearchChange={hook.setGlobalSearch}
       serverPagination={{
         pageIndex:        hook.pageIndex,
         pageCount:        hook.pageCount,
@@ -161,8 +122,16 @@ export function PartCatalogPaginated({ selectedPartCatalog, setSelectedPartCatal
         onPageChange:     hook.setPageIndex,
         onPageSizeChange: hook.setPageSize, // FIX B: was () => {} no-op before
       }}
-      toolbar={(table) => (
-        <DataTableToolbar table={table} searchPlaceholder="🔍 Search erf cases..." loading={hook.loading} noGlobalSearch handleRefresh={hook.refresh}/>
+      toolbar={(table, serverProps) => (
+        <DataTableToolbar table={table} searchPlaceholder=" Search erf cases..." loading={hook.loading}  handleRefresh={hook.refresh} total={hook.total} {...serverProps}>
+           <DataTableFacetedFilter
+               mode="server"
+               title={"All Category"}
+               column={table.getColumn("Keyword")}
+               fetchOptions={fetchFilter.Category}
+               portal={false}
+           />
+        </DataTableToolbar>
       )}
     />
   );

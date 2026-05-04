@@ -16,6 +16,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 const parseBool = (val) => val === "true" || val === true;
+import redis, { deleteByPattern, redisKey } from "../../../../../lib/redis";
 
 // ── WHERE clause ─────────────────────────────────────────────────────────────
 
@@ -24,7 +25,7 @@ function buildWhere(searchParams) {
   const keyword  = searchParams.get("keyword")    ?? "";
   const partDesc = searchParams.get("partDesc")   ?? "";
   const search   = searchParams.get("search")     ?? "";
-
+console.log("Check the keyword value from the backend ",keyword)
   const AND = [];
 
   if (search) {
@@ -65,6 +66,39 @@ export async function GET(request) {
 
     const where   = buildWhere(searchParams);
     const orderBy = buildOrderBy(searchParams);
+
+    const sortedParams = new URLSearchParams([...searchParams.entries()].sort(([a], [b]) => a.localeCompare(b)));
+    const cacheKey = redisKey(`part:list:${sortedParams.toString()}`);
+    const cached = await redis.get(cacheKey);
+    
+    if (cached) {
+        return NextResponse.json(JSON.parse(cached), { status: 200 });
+    }
+
+    if (mode === "distinct") {
+        const field = searchParams.get("field");
+        const q = searchParams.get("q")?.trim() || "";
+        const limit = Math.min(50, parseInt(searchParams.get("limit") || "30", 10));
+
+        const DISTINCT_FIELDS = {
+            Keyword: () => prisma.servicecatalog_parts.findMany({
+                where: q ? { Keyword: { contains: q } } : {},
+                select: { Keyword: true },
+                distinct: ["Keyword"],
+                orderBy: { Keyword: "asc" },
+                take: limit,
+            }).then(r => r.map(x => x.Keyword).filter(Boolean)),
+
+        };
+
+        if (!DISTINCT_FIELDS[field]) {
+            return NextResponse.json({ success: false, message: `Unknown field: ${field}` }, { status: 400 });
+        }
+
+        const values = await DISTINCT_FIELDS[field]();
+        return NextResponse.json({ success: true, values }, { status: 200 });
+    }
+
     if (mode === "") {
       const data = await prisma.servicecatalog_parts.findMany({
         where,
@@ -116,7 +150,7 @@ export async function GET(request) {
         prisma.servicecatalog_parts.findMany({ where, orderBy, skip, take }),
       ]);
 
-      return NextResponse.json({
+      const response = {
         success:   true,
         status:    200,
         message:   "List Data Parts Catalog (paginated)",
@@ -124,6 +158,14 @@ export async function GET(request) {
         total,
         skip,
         take,
+      };
+
+      await redis.set(cacheKey, JSON.stringify(response), "EX", 120);
+
+      return NextResponse.json(
+        response,
+        {
+        status: 200,
       });
     }
 

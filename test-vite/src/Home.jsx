@@ -49,7 +49,7 @@ export const Home = () => {
                     {/* Feature Cards Section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         {/* Find Your Case Card */}
-                        <Card className="flex flex-col items-center justify-between p-6 bg-white/10 backdrop-blur-md rounded-lg shadow-lg text-center border border-emerald-500 hover:scale-105 transition-transform duration-300">
+                        <Card className="flex flex-col items-center justify-between p-6 bg-white/10 backdrop-blur-md rounded-lg shadow-lg text-center border border-emerald-500 hover:scale-105 transition-transform duration-300  animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
                             <CardHeader className="flex flex-col items-center gap-3 pb-4">
                                 <CardTitle className="text-2xl font-semibold text-emerald-100">
                                     Find Your Case
@@ -69,7 +69,7 @@ export const Home = () => {
                         </Card>
 
                         {/* Login Partner */}
-                        <Card className="flex flex-col items-center justify-between p-6 bg-white/10 backdrop-blur-md rounded-lg shadow-lg text-center border border-emerald-500 hover:scale-105 transition-transform duration-300">
+                        <Card className="flex flex-col items-center justify-between p-6 bg-white/10 backdrop-blur-md rounded-lg shadow-lg text-center border border-emerald-500 hover:scale-105 transition-transform duration-300 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out ">
                             <CardHeader className="flex flex-col items-center gap-3 pb-4">
                                 <CardTitle className="text-2xl font-semibold text-emerald-100">
                                     Login For Patner
@@ -85,14 +85,14 @@ export const Home = () => {
                             <CardFooter>
                                 {token ? (
                                     <Button
-                                        className="text-sm md:text-lg px-4  text-white bg-emerald-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
+                                        className="w-full px-4  text-white bg-green-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
                                         onClick={() => navigate('/app')}
                                     >
                                         Dashboard
                                     </Button>
                                 ) : (
                                     <Button
-                                        className="text-lg md:text-xl px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
+                                        className="w-full px-4 py-2 text-white bg-green-600 hover:bg-emerald-700 rounded-md shadow-md transition-colors duration-200"
                                         onClick={() => navigate('/lorem')}
                                     >
                                         Partner Login
@@ -137,6 +137,24 @@ export const Home = () => {
                                 </Button>
                             </CardContent>
                         </Card> */}
+
+                        {/* Tikecting  */}
+                         <Card className="flex flex-col items-center justify-between p-6 bg-white/10 backdrop-blur-md rounded-lg shadow-lg text-center border border-emerald-500 hover:scale-105 transition-transform duration-300 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out ">
+                            <CardHeader className="flex flex-col items-center gap-3 pb-4">
+                                <CardTitle className="text-2xl font-semibold text-emerald-100">
+                                    Create Service Ticket
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col items-center justify-center gap-4">
+                                <CardDescription className="text-md text-emerald-200 mb-4">
+                                 Generate Ticket For Booking Service in Service Center Or Onsite 
+                                </CardDescription>
+                                <Button className="w-full bg-green-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow" onClick={() => navigate('/generateticket')}>
+                                    Generate
+                                </Button>
+                            </CardContent>
+                        </Card> 
+ 
                     </div>
 
                     {/* Closing Statement */}

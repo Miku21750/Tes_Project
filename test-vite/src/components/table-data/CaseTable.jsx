@@ -14,6 +14,7 @@ import { Button }                 from "../ui/button";
 import { Link }                   from "react-router";
 import { ExportExcel }            from "../Export-Excel";
 import ApiCustomer                from "@/api";
+import DatePicker from "../date-picker";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Case Status options
@@ -229,6 +230,12 @@ function caseColumns() {
   ];
 }
 
+const toLocalISODate = (date) => {
+  if (!date) return undefined;
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().split("T")[0];
+};
+
 const getToday      = () => new Date().toISOString().split("T")[0];
 const getOneYearAgo = () => {
   const d = new Date();
@@ -242,17 +249,34 @@ const getOneYearAgo = () => {
 
 export function CaseTable() {
   const { user } = useAuth();
+
   const [startDate, setStartDate] = React.useState(getOneYearAgo);
   const [endDate,   setEndDate]   = React.useState(getToday);
+
+const [dateRange, setDateRange] = React.useState(() => {
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    
+    return {
+      from: oneYearAgo,
+      to: today,
+    };
+  });
 
   const isPrivileged = ["admin", "apo", "cm", "spv"].includes(user?.role);
   const savedTeamId  = typeof window !== "undefined" ? localStorage.getItem("activeTeamId") : null;
 
-  const extraParams = React.useMemo(() => ({
+  const extraParams = React.useMemo(() => {
+    const startDate = toLocalISODate(dateRange?.from);
+    const endDate = toLocalISODate(dateRange?.to);
+
+    return {
     ...(startDate && { startDate }),
     ...(endDate   && { endDate }),
     ...(!isPrivileged && savedTeamId && { resource: savedTeamId }),
-  }), [startDate, endDate, isPrivileged, savedTeamId]);
+    }
+  }, [dateRange, isPrivileged, savedTeamId]);
 
   const hook = useServerPageTable({
     url:               "/api/case-information",
@@ -275,12 +299,12 @@ export function CaseTable() {
   const canExport = ["admin", "fd", "celead", "spv"].includes(user?.role);
 
   return (
-    <div className="p-4 grid grid-cols-1 w-full rounded-2xl">
+    <div className="p-4 grid grid-cols-1 w-full  ">
       <DataTable
-        title={<h2 className="text-xl sm:text-2xl font-bold">View All The Case</h2>}
+        title={<h2 className="text-xl sm:text-2xl font-bold"> All The Case</h2>}
         data={hook.data}
         columns={columns}
-        cellName="h-9"
+        cellClassName="py-[7px]"
         loading={hook.loading}
         error={hook.error}
         sorting={hook.sorting}
@@ -300,21 +324,24 @@ export function CaseTable() {
         toolbar={(table, serverProps) => (
           <DataTableToolbar
             table={table}
-            searchPlaceholder="🔍 Search case..."
+            searchPlaceholder=" Search case..."
             loading={hook.loading}
             handleRefresh={hook.refresh}
+            excelExport={canExport && 
+              <ExportExcel exportParams={exportParams} disabled={hook.loading} />
+            }
+            total={hook.total}
             {...serverProps}
           >
-            {canExport && (
-              <ExportExcel exportParams={exportParams} disabled={hook.loading} />
-            )}
-
-            {/*
-              SERVER STATIC: CaseStatus has 40 known values — cmdk filters
-              them locally as the user types. Fast, no network calls.
-              mode="server" tells the filter not to use TanStack faceted values
-              (which are empty in server-paginated mode).
-            */}
+          <div className="flex items-center gap-2 overflow-x-auto w-full  pb-1">
+              <DatePicker 
+                  value={dateRange}
+                  // onChange={(val) => handleChange("RangeTime",val)}
+                  onChange={setDateRange}
+                  variant="Date"
+                  mode="range"
+                  className={"w-fit min-w-fit"}
+              />
             <DataTableFacetedFilter
               mode="server"
               title="Case Status"
@@ -322,12 +349,6 @@ export function CaseTable() {
               options={CASE_STATUS_OPTIONS}
             />
 
-            {/*
-              SERVER DYNAMIC: high-cardinality fields.
-              fetchOptions only provides autocomplete suggestions.
-              Selecting a value writes it into columnFilters → filtersToParams
-              sends it as a WHERE param to the server. Filtering is server-side.
-            */}
             <DataTableFacetedFilter
               mode="server"
               title="Serial No"
@@ -358,20 +379,22 @@ export function CaseTable() {
               column={table.getColumn("CreatedName")}
               fetchOptions={fetchCreatedBy}
             />
-
             {/* Date range — feeds into extraParams, not columnFilters */}
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">From</span>
-              <input type="date" value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="h-8 px-2 text-xs border rounded-md" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">To</span>
-              <input type="date" value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="h-8 px-2 text-xs border rounded-md" />
-            </div>
+            {/* <div className="flex flex-col gap-1"> */}
+            {/*   <span className="text-xs font-medium text-muted-foreground">From</span> */}
+            {/*   <input type="date" value={startDate} */}
+            {/*     onChange={(e) => setStartDate(e.target.value)} */}
+            {/*     className="h-8 px-2 text-xs border rounded-md" /> */}
+            {/* </div> */}
+            {/* <div className="flex flex-col gap-1"> */}
+            {/*   <span className="text-xs font-medium text-muted-foreground">To</span> */}
+            {/*   <input type="date" value={endDate} */}
+            {/*     onChange={(e) => setEndDate(e.target.value)} */}
+            {/*     className="h-8 px-2 text-xs border rounded-md" /> */}
+            {/* </div> */}
+
+          
+          </div>
           </DataTableToolbar>
         )}
       />

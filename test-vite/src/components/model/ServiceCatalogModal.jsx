@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,17 +91,40 @@ import { CreateNewPartModal } from "./CreateNewPartModal";
 import { useServerPageTable } from "../table-data/config/data-use-table";
 import { PartCatalogPaginated } from "../table-data/PartCatalogTable";
 
-// ── Shared filter params ──────────────────────────────────────────────────────
-
 function partFiltersToParams(filters) {
-  const p = {};
+  const p = { mode: "paginated" };
   for (const f of filters) {
-    if (f.id === "PartNumber")      p.partNumber = f.value;
-    if (f.id === "Keyword")         p.keyword    = f.value;
-    if (f.id === "PartDescription") p.partDesc   = f.value;
+    const v = Array.isArray(f.value) ? f.value[0] : f.value;
+    if (!v) continue;
+    switch (f.id) {
+      case "Keyword":           p.keyword = v; break;
+      default: break;
+    }
   }
   return p;
 }
+
+function makeFetch(field) {
+  return async (q) => {
+    const res = await ApiCustomer.get("/api/service-log/parts-catalog", {
+      params: { mode: "distinct", field, q: q ?? "", limit: 30 },
+    });
+    return (res.data.values ?? []).map((v) => ({ label: v, value: v }));
+  };
+}
+
+// const fetchCatagory = makeFetch("Keyword");
+// ── Shared filter params ──────────────────────────────────────────────────────
+
+// function partFiltersToParams(filters) {
+//   const p = {};
+//   for (const f of filters) {
+//     if (f.id === "PartNumber")      p.partNumber = f.value;
+//     if (f.id === "Keyword")         p.keyword    = f.value;
+//     if (f.id === "PartDescription") p.partDesc   = f.value;
+//   }
+//   return p;
+// }
 
 function partSortToParams(s) {
   return {
@@ -122,9 +144,6 @@ function StepWarranty({
   return (
     <div className="flex flex-col h-full p-3">
       <div className="grid grid-cols-4 gap-4">
-        {/* <Input value={asset?.ProductNumber || "-"} readOnly /> */}
-        {/* <Input value={asset?.SerialNumber || "-"} readOnly /> */}
-
         <CaseField label="Product Number" lock>
           <Input value={asset?.ProductNumber || "-"} readOnly />
         </CaseField>
@@ -178,6 +197,9 @@ function StepParts({
           hook={hook}
           selectedPartCatalog={selectedPartCatalog}
           setSelectedPartCatalog={setSelectedPartCatalog}
+          fetchFilter={{
+            Category : makeFetch("Keyword")
+          }}
         />
       </div>
 
@@ -207,6 +229,12 @@ function StepConfirm({
   isOutWarranty,
   addNewpart,
   effectiveWarrantyService,
+  // Added required missing props
+  onQtyChange,
+  onRemovedPartNumberChange,
+  onUEFICodeChange,
+  onUEFINoChange,
+  onRemovePart,
 }) {
   return (
     <div className="flex flex-col h-120 p-3">
@@ -257,7 +285,6 @@ function StepConfirm({
               Description
             </TableHead>
             <TableHead className={"font-bold text-black"}>Unit Price</TableHead>
-            {/* <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead> */}
             <TableHead className={"font-bold text-black"}>Qty</TableHead>
             <TableHead className={"font-bold text-black"}>
               CT KEY RETURN
@@ -284,7 +311,7 @@ function StepConfirm({
                   <Checkbox
                     checked={isChecked}
                     onCheckedChange={(checked) =>
-                      handlerPartCatalog(part, checked)
+                      onRemovePart(part, checked) // Updated to use prop
                     }
                   />
                 </TableCell>
@@ -298,7 +325,7 @@ function StepConfirm({
                     className="bg-white"
                     value={part.RemovedPartNumber || ""}
                     onChange={(e) =>
-                      handleRemovedPartNumberChange(
+                      onRemovedPartNumberChange( // Updated to use prop
                         part.PartNumber,
                         e.target.value,
                       )
@@ -309,7 +336,7 @@ function StepConfirm({
                   <Select
                     value={part.UEFICode || ""}
                     onValueChange={(val) =>
-                      handleUEFICodeChange(part.PartNumber, val)
+                      onUEFICodeChange(part.PartNumber, val) // Updated to use prop
                     }
                   >
                     <SelectTrigger className="w-32">
@@ -330,7 +357,7 @@ function StepConfirm({
                       placeholder="Enter UEFI No"
                       value={part.UEFI_NO || ""}
                       onChange={(e) =>
-                        handleUEFINoChange(part.PartNumber, e.target.value)
+                        onUEFINoChange(part.PartNumber, e.target.value) // Updated to use prop
                       }
                       className="w-32"
                     />
@@ -579,7 +606,6 @@ export function ServiceCatalogModel({
     fetchDataAssets().then((data) => {
       if (data) setAssetForWorkOrderCreation(data);
     });
-    fetchDataPartCatalog();
     fetchUserAssign("");
   }, [caseDetails]);
 
@@ -615,29 +641,19 @@ export function ServiceCatalogModel({
 
   useEffect(() => {}, [selectedWarrantyServices]);
 
-  //part state
-  const [partCatalog, setPartCatalog] = useState([]);
-  const [loadingPart, setLoadingPart] = useState(false);
-  //fetch data part catalog
-  const fetchDataPartCatalog = async () => {
-    setLoadingPart(true);
-    try {
-      const response = await ApiCustomer.get(`/api/service-log/parts-catalog`);
-      setPartCatalog(response.data.data);
-      setLoadingPart(false);
-      return response.data.data;
-    } catch (e) {
-      toast.error("Err :", e);
-    } finally {
-      setLoadingPart(false);
-    }
-  };
+  const hook = useServerPageTable({
+    url: "/api/service-log/parts-catalog",
+    pageSize: 20,
+    defaultSorting: [{ id: "PartNumber", desc: false }],
+    // filtersToParams: (f) => ({ mode: "paginated", ...partFiltersToParams(f) }),
+    filtersToParams: partFiltersToParams, 
+    sortToParams: partSortToParams,
+  });
 
   const handlePartAdded = async (createdPart) => {
-    // 1) refresh catalog from backend (optional but recommended)
-    await fetchDataPartCatalog();
+    // Rely on hook for updated data instead of manually tracking it
+    hook.refresh();
 
-    // 2) auto-select the newly created part in selectedPartCatalog
     if (createdPart?.PartNumber) {
       setSelectedPartCatalog((prev) => {
         const alreadyExists = prev.some(
@@ -664,13 +680,6 @@ export function ServiceCatalogModel({
   const [keywordSearch, setKeywordSearch] = useState("");
   const [descriptionSearch, setDescriptionSearch] = useState("");
 
-  const hook = useServerPageTable({
-    url: "/api/service-log/parts-catalog",
-    pageSize: 20,
-    defaultSorting: [{ id: "PartNumber", desc: false }],
-    filtersToParams: (f) => ({ mode: "paginated", ...partFiltersToParams(f) }),
-    sortToParams: partSortToParams,
-  });
   //handler part
   const [selectedPartCatalog, setSelectedPartCatalog] = useState([]);
   const handlerPartCatalog = (part, checked) => {
@@ -926,7 +935,6 @@ export function ServiceCatalogModel({
     }
   };
 
-
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -1011,6 +1019,12 @@ export function ServiceCatalogModel({
                 isOutWarranty={isOutWarranty}
                 addNewpart={() => setModalPart(true)}
                 effectiveWarrantyService={effectiveWarrantyService}
+                // Appended missing handlers:
+                onQtyChange={handleQtyChangePartsCatalog}
+                onRemovedPartNumberChange={handleRemovedPartNumberChange}
+                onUEFICodeChange={handleUEFICodeChange}
+                onUEFINoChange={handleUEFINoChange}
+                onRemovePart={handlerPartCatalog}
               />
             </div>
           </div>
@@ -1020,10 +1034,10 @@ export function ServiceCatalogModel({
           hook={hook}
           open2={modalPart}
           setOpen2={setModalPart}
-          partCatalog={partCatalog}
+          partCatalog={hook.data} // Fixed: relying on hook's data
           selectedPartCatalog={selectedPartCatalog}
           setSelectedPartCatalog={setSelectedPartCatalog}
-          onPartAdded={handlePartAdded}
+          onPartAdded={handlePartAdded} 
         />
       </Dialog>
     </>

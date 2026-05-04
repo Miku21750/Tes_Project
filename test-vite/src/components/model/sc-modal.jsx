@@ -5858,13 +5858,13 @@ export function BtnModalsServiceCatalog({
                 </CaseField>
                 <CaseField label="Description" lock>
                   <Input
-                  value={effectiveWarrantyService.Service_description}     
+                  value={effectiveWarrantyService?.Service_description || ""}     
                   readOnly             
                   />
                 </CaseField>
                 <CaseField label="Unit Price" lock>
                   <Input
-                  value={effectiveWarrantyService.CTat_RTime}
+                  value={effectiveWarrantyService?.CTat_RTime}
                   readOnly             
                   />
                 </CaseField>
@@ -11574,8 +11574,8 @@ export function FindCase() {
   return (
     <Dialog className={''}>
       <DialogTrigger asChild>
-        <Button className="bg-green-600 text-white hover:bg-emerald-700 ">
-          🔍 Search Case
+        <Button className="w-full bg-green-600 text-white hover:bg-emerald-700 ">
+           Search Case
         </Button>
       </DialogTrigger>
       

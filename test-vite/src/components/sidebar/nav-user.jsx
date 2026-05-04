@@ -103,18 +103,18 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={goToProfile}  className="cursor-pointer">
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={goToProfile}  className="cursor-pointer"> */}
+              {/*   <BadgeCheck /> */}
+              {/*   Account */}
+              {/* </DropdownMenuItem> */}
+              {/* <DropdownMenuItem> */}
+              {/*   <CreditCard /> */}
+              {/*   Billing */}
+              {/* </DropdownMenuItem> */}
+              {/* <DropdownMenuItem> */}
+              {/*   <Bell /> */}
+              {/*   Notifications */}
+              {/* </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 dark:bg-gray-700 "}>

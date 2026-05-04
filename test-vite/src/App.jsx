@@ -170,7 +170,6 @@ const App = () => {
                  { !isLarge && <Breadcrumbs/> }
                 </div>
                 <div className="flex p-2 items-center gap-2 self-center">
-                  <Search />
                   <GlobalSearchBar />
                 </div>
                 <div className="flex items-center gap-1 pr-2" id='three-button'>

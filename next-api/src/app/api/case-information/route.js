@@ -3,6 +3,7 @@ import prisma from "../../../../prisma/client";
 import { generateID } from "@/utils/generateID";
 import { notifySocket } from "../../../../lib/SocketClient";
 import redis, { deleteByPattern, redisKey } from "../../../../lib/redis";
+import { WarrantyCondition } from "@prisma/client";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -10,6 +11,7 @@ function buildWhere(searchParams) {
   const CaseStatus         = searchParams.get("CaseStatus");
   const AssetID            = searchParams.get("AssetID");
   const excludeStatusesRaw = searchParams.getAll("excludeStatuses[]");
+  const includeStatusesRaw = searchParams.getAll("includeStatuses[]");
   const resourceTarget     = searchParams.get("resource");
   const startDate          = searchParams.get("startDate");
   const endDate            = searchParams.get("endDate");
@@ -42,7 +44,12 @@ function buildWhere(searchParams) {
     AND.push({ CaseStatus });
   } else if (excludeStatusesRaw?.length) {
     AND.push({ CaseStatus: { notIn: excludeStatusesRaw } });
+  } else if (includeStatusesRaw?.length > 0) {
+     AND.push({ CaseStatus: { in: includeStatusesRaw } });
   }
+  // else if (excludeStatusesRaw?.length > 0) {
+  //   AND.push({ CaseStatus: { notIn: excludeStatusesRaw } });
+  // }
 
   if (AssetID) AND.push({ AssetID: parseInt(AssetID) });
 
@@ -61,6 +68,16 @@ function buildWhere(searchParams) {
       ],
     });
   }
+
+  const createdOrOwner = searchParams.get("createdOrOwner");
+    if (createdOrOwner) {
+      AND.push({
+        OR: [
+          { Owner:     parseInt(createdOrOwner) },
+          { CreatedBy: parseInt(createdOrOwner) },
+        ],
+      });
+    }
 
   // ── Extra column filters from faceted/column-header filters ───────────────
   // The client sends these as individual query params when filtersToParams maps them.
@@ -108,6 +125,7 @@ const CASE_LIST_SELECT = {
   CreatedOn:   true,
   AssetID:     true,
   ContactID:   true,
+  CreatedBy:   true,
 
   createdByUser: { select: { IDUser: true, Name: true, ResourceId: true } },
   ownerUser:     { select: { IDUser: true, Name: true } },
@@ -123,7 +141,7 @@ const CASE_LIST_SELECT = {
       AssetID:       true,
       SerialNumber:  true,
       ProductNumber: true,
-      WarrantyOTCCode: { select: { OTCCode: true, Description: true } },
+      WarrantyOTCCode: { select: { OTCCode: true, Description: true, WarrantyCondition: true } },
       product_information: {
         select: {
           ProductName:   true,
@@ -142,7 +160,6 @@ const CASE_LIST_SELECT = {
       site_account: { select: { SiteAccountID: true, Company: true } },
     },
   },
-
 
   ActionLog: {
     select: {
@@ -207,7 +224,11 @@ export async function GET(request) {
   const mode = searchParams.get("mode") ?? "all";
 
   // ── Redis cache ───────────────────────────────────────────────────────────
-  const cacheKey = redisKey(`case:list:${searchParams.toString() || "all"}`);
+  // Normalise parameters by sorting alphabetically before stringifying
+  const sortedParams = new URLSearchParams(
+    [...searchParams.entries()].sort(([a], [b]) => a.localeCompare(b))
+  );
+  const cacheKey = redisKey(`case:list:${sortedParams.toString() || "all"}`);
   const cached   = await redis.get(cacheKey);
   if (cached) return NextResponse.json(JSON.parse(cached), { status: 200 });
 
@@ -222,107 +243,102 @@ export async function GET(request) {
   ]);
 
   let cases, total, skip, take;
+  let truncated = false; // Tracks if the hard limit was hit
+  let responseMessage = "List Data Case";
 
   // ── mode: all ─────────────────────────────────────────────────────────────
   if (mode === "all") {
+    const HARD_LIMIT = 1000;
+
     cases = await prisma.caseinformation.findMany({
       where:   Object.keys(where).length ? where : undefined,
       select:  CASE_LIST_SELECT,
       orderBy,
+      take:    HARD_LIMIT + 1,   // fetch one extra to detect truncation
     });
-    total = cases.length;
+
+    truncated = cases.length > HARD_LIMIT;
+    if (truncated) {
+      cases = cases.slice(0, HARD_LIMIT);
+      responseMessage = `Showing first ${HARD_LIMIT.toLocaleString()} rows. Use filters to narrow results.`;
+    }
+
+    total = truncated ? HARD_LIMIT : cases.length;
   }
 
-/**
- * ADD THIS BLOCK inside your existing GET handler in /api/case-information/route.js
- * Place it right after the date range guard, before the Redis cache check.
- *
- * This adds mode=distinct to the SAME existing route — no new file needed.
- * It returns distinct values for a given field, filtered by a search query.
- * Used by DataTableFacetedFilter's fetchOptions prop for dynamic autocomplete.
- *
- * Request:  GET /api/case-information?mode=distinct&field=SerialNumber&q=HP
- * Response: { success: true, values: ["HP123", "HP456", ...] }
- */
-
-// ── Paste this BEFORE the Redis cache block in your existing GET handler ──────
-
+  // ── mode: distinct ────────────────────────────────────────────────────────
   else if (mode === "distinct") {
-  const field  = searchParams.get("field") ?? "";
-  const q      = (searchParams.get("q") ?? "").trim();
-  const limit  = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "30", 10)));
+    const field  = searchParams.get("field") ?? "";
+    const q      = (searchParams.get("q") ?? "").trim();
+    const limit  = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "30", 10)));
 
-  // Cache distinct queries too — 5 min TTL, they change rarely
-  const distKey = redisKey(`case:distinct:${field}:${q}:${limit}`);
-  const distCached = await redis.get(distKey);
-  if (distCached) return NextResponse.json(JSON.parse(distCached), { status: 200 });
+    // Cache distinct queries too — 5 min TTL, they change rarely
+    const distKey = redisKey(`case:distinct:${field}:${q}:${limit}`);
+    const distCached = await redis.get(distKey);
+    if (distCached) return NextResponse.json(JSON.parse(distCached), { status: 200 });
 
-  // Map of allowed field → Prisma query shape
-  // Only fields that exist directly on caseinformation or via a join
-  const DISTINCT_FIELDS = {
-    SerialNumber:  () => prisma.asset_information.findMany({
-      where: q ? { SerialNumber: { contains: q } } : {},
-      select: { SerialNumber: true },
-      distinct: ["SerialNumber"],
-      orderBy: { SerialNumber: "asc" },
-      take: limit,
-    }).then(r => r.map(x => x.SerialNumber).filter(Boolean)),
+    // Map of allowed field → Prisma query shape
+    const DISTINCT_FIELDS = {
+      SerialNumber:  () => prisma.asset_information.findMany({
+        where: q ? { SerialNumber: { contains: q } } : {},
+        select: { SerialNumber: true },
+        distinct: ["SerialNumber"],
+        orderBy: { SerialNumber: "asc" },
+        take: limit,
+      }).then(r => r.map(x => x.SerialNumber).filter(Boolean)),
 
-    ProductNumber: () => prisma.asset_information.findMany({
-      where: q ? { ProductNumber: { contains: q } } : {},
-      select: { ProductNumber: true },
-      distinct: ["ProductNumber"],
-      orderBy: { ProductNumber: "asc" },
-      take: limit,
-    }).then(r => r.map(x => x.ProductNumber).filter(Boolean)),
+      ProductNumber: () => prisma.asset_information.findMany({
+        where: q ? { ProductNumber: { contains: q } } : {},
+        select: { ProductNumber: true },
+        distinct: ["ProductNumber"],
+        orderBy: { ProductNumber: "asc" },
+        take: limit,
+      }).then(r => r.map(x => x.ProductNumber).filter(Boolean)),
 
-    ProductName: () => prisma.product_information.findMany({
-      where: q ? { ProductName: { contains: q } } : {},
-      select: { ProductName: true },
-      distinct: ["ProductName"],
-      orderBy: { ProductName: "asc" },
-      take: limit,
-    }).then(r => r.map(x => x.ProductName).filter(Boolean)),
+      ProductName: () => prisma.product_information.findMany({
+        where: q ? { ProductName: { contains: q } } : {},
+        select: { ProductName: true },
+        distinct: ["ProductName"],
+        orderBy: { ProductName: "asc" },
+        take: limit,
+      }).then(r => r.map(x => x.ProductName).filter(Boolean)),
 
-    // Owner and CreatedName both query the users table
-    Owner: () => prisma.User.findMany({
-      where: q ? { Name: { contains: q } } : {},
-      select: { Name: true },
-      distinct: ["Name"],
-      orderBy: { Name: "asc" },
-      take: limit,
-    }).then(r => r.map(x => x.Name).filter(Boolean)),
+      Owner: () => prisma.User.findMany({
+        where: q ? { Name: { contains: q } } : {},
+        select: { Name: true },
+        distinct: ["Name"],
+        orderBy: { Name: "asc" },
+        take: limit,
+      }).then(r => r.map(x => x.Name).filter(Boolean)),
 
-    CreatedName: () => prisma.User.findMany({
-      where: q ? { Name: { contains: q } } : {},
-      select: { Name: true },
-      distinct: ["Name"],
-      orderBy: { Name: "asc" },
-      take: limit,
-    }).then(r => r.map(x => x.Name).filter(Boolean)),
-  };
+      CreatedName: () => prisma.User.findMany({
+        where: q ? { Name: { contains: q } } : {},
+        select: { Name: true },
+        distinct: ["Name"],
+        orderBy: { Name: "asc" },
+        take: limit,
+      }).then(r => r.map(x => x.Name).filter(Boolean)),
+    };
 
-  if (!DISTINCT_FIELDS[field]) {
-    return NextResponse.json(
-      { success: false, message: `Unknown field: ${field}` },
-      { status: 400 },
-    );
+    if (!DISTINCT_FIELDS[field]) {
+      return NextResponse.json(
+        { success: false, message: `Unknown field: ${field}` },
+        { status: 400 },
+      );
+    }
+
+    try {
+      const values = await DISTINCT_FIELDS[field]();
+      const result = { success: true, values };
+      await redis.set(distKey, JSON.stringify(result), "EX", 300);
+      return NextResponse.json(result, { status: 200 });
+    } catch (e) {
+      return NextResponse.json(
+        { success: false, message: "Distinct query failed", error: e.message },
+        { status: 500 },
+      );
+    }
   }
-
-  try {
-    const values = await DISTINCT_FIELDS[field]();
-    const result = { success: true, values };
-    await redis.set(distKey, JSON.stringify(result), "EX", 300);
-    return NextResponse.json(result, { status: 200 });
-  } catch (e) {
-    return NextResponse.json(
-      { success: false, message: "Distinct query failed", error: e.message },
-      { status: 500 },
-    );
-  }
-}
-
-// ── END of distinct block — your existing cache + mode checks continue below ──
 
   // ── mode: paginated ───────────────────────────────────────────────────────
   else if (mode === "paginated") {
@@ -334,7 +350,7 @@ export async function GET(request) {
       prisma.caseinformation.findMany({
         where:   Object.keys(where).length ? where : undefined,
         select:  CASE_LIST_SELECT,
-        orderBy,   // ← was hardcoded { CreatedOn: "desc" }, now uses sortBy/sortDir
+        orderBy,   // ← uses sortBy/sortDir
         skip,
         take,
       }),
@@ -358,6 +374,15 @@ export async function GET(request) {
     ]);
   }
 
+  // ── mode: export (Skeleton) ───────────────────────────────────────────────
+  else if (mode === "export") {
+    // Example skeleton. A true implementation would stream a CSV via a ReadableStream.
+    return NextResponse.json(
+      { success: false, message: "Streaming export not yet implemented on this route." },
+      { status: 501 }
+    );
+  }
+
   else {
     return NextResponse.json(
       { success: false, message: `Unknown mode: ${mode}` },
@@ -367,15 +392,23 @@ export async function GET(request) {
 
   const response = {
     success: true,
-    message: "List Data Case",
+    message: responseMessage, // Will contain the limit warning if truncated is true
     data:    cases.map(formatCaseRow),
     total,
+    truncated,                // Added to response payload
     ...(skip !== undefined && { skip, take }),
     mode,
     value: { open: openCount, closed: closedCount, inActive: inActiveCount },
   };
+  
+  // FIX: Determine if filters are applied. 
+  // buildWhere returns `{ AND: [...] }` if filtered, or `{}` if not.
+  const isFiltered = Object.keys(where).length > 0;
+  
+  // Set TTL: 30 seconds for filtered queries, 120 seconds (2 mins) for unfiltered.
+  const cacheTTL = isFiltered ? 30 : 120;
 
-  await redis.set(cacheKey, JSON.stringify(response), "EX", 120);
+  await redis.set(cacheKey, JSON.stringify(response), "EX", cacheTTL);
   return NextResponse.json(response, { status: 200 });
 }
 
