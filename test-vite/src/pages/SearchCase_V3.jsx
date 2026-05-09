@@ -558,7 +558,7 @@ export default function NewCaseForm() {
    * @param {string} q
    */
   const fetchWarrantyStatus = useMemo(
-    () =>
+    () => 
       debounce(async (q) => {
         try {
           const response = await ApiCustomer.get(`/api/otc-code`,{
@@ -575,6 +575,7 @@ export default function NewCaseForm() {
           setWarrantyOptions([]);
         }
       }, 400)
+    , []
   )
 
   /**
@@ -904,7 +905,7 @@ export default function NewCaseForm() {
         toast.warning("EMSIFA provinces fetch failed")
       }
     })();
-    fetchWarrantyStatus();
+    fetchWarrantyStatus("");
   }, []);
 
   useEffect(() => {
@@ -1029,12 +1030,27 @@ export default function NewCaseForm() {
    * Performs optional photo upload and action log creation.
    * @returns {Promise<void>}
    */
+
+  // useEffect(() => {
+  //     if (warrantySearchValue !== "01T" && needWarrantyApproval) {
+  //   setNeedWarrantyApproval(false);
+  // }
+  //   needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus(caseStatus ?? "New");
+  // }, [warrantySearchValue, needWarrantyApproval])
+
   useEffect(() => {
-      if (warrantySearchValue !== "01T" && needWarrantyApproval) {
-    setNeedWarrantyApproval(false);
-  }
-    needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus(caseStatus ?? "New");
-  }, [warrantySearchValue, needWarrantyApproval])
+    if (warrantySearchValue !== "01T" && needWarrantyApproval) {
+      setNeedWarrantyApproval(false);
+    }
+  }, [warrantySearchValue, needWarrantyApproval]);
+
+  useEffect(() => {
+    if (needWarrantyApproval) {
+      setCaseStatus("NEW_POPDoc");
+    } else {
+      setCaseStatus((prevStatus) => prevStatus ?? "New");
+    }
+  }, [needWarrantyApproval]);
 
   const onCreateCase = async () => {
     if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
@@ -1081,7 +1097,6 @@ export default function NewCaseForm() {
     
     setLoading(true);
     try {
-      const user = getUserFromTokenSafe();
 
       const pickLabel = (value) => {
         if (value && typeof value === "object") {
@@ -1328,7 +1343,8 @@ export default function NewCaseForm() {
       setLoading(false);
     }
   };
-
+const photoUrls = useMemo(() => photos.map(f => URL.createObjectURL(f)), [photos]);
+useEffect(() => () => photoUrls.forEach(URL.revokeObjectURL), [photoUrls]);
   // ----------------------------
   // UI
   // ----------------------------
@@ -2198,7 +2214,7 @@ export default function NewCaseForm() {
                   {photos.map((file, idx) => (
                     <div key={idx} className="relative">
                       <img
-                        src={URL.createObjectURL(file)}
+                        src={photoUrls}
                         alt={file.name}
                         className="w-full h-24 object-cover rounded-lg border"
                       />
@@ -2210,7 +2226,6 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
         </div>
-
       {/* RIGHT SUMMARY PANEL */}
 
       {/* Footer */}

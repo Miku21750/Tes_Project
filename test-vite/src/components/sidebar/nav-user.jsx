@@ -111,10 +111,10 @@ export function NavUser({
               {/*   <CreditCard /> */}
               {/*   Billing */}
               {/* </DropdownMenuItem> */}
-              {/* <DropdownMenuItem> */}
-              {/*   <Bell /> */}
-              {/*   Notifications */}
-              {/* </DropdownMenuItem> */}
+              <DropdownMenuItem>
+                <Bell />
+                HomePage
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 dark:bg-gray-700 "}>

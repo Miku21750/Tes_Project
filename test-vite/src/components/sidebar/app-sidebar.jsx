@@ -88,6 +88,11 @@ export function AppSidebar({
               icon: Folder
             },
             {
+              title: "Ticket",
+              url: "/app/master/Ticket_table",
+              icon: Folder
+            },
+            {
               title: "Product",
               url: "/app/master/Product_table",
               icon: Box

@@ -54,13 +54,13 @@ export const Home = () => {
                                 <CardTitle className="text-2xl font-semibold text-emerald-100">
                                     Find Your Case
                                 </CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-2  items-center justify-center gap-4">
-                                <img src="/Find_Case.png" alt="" className='size-40' />
-
                                 <CardDescription className="text-md text-emerald-200">
                                     Quickly find your case and view all relevant information.
                                 </CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-2  items-center justify-center gap-4">
+                                {/* <img src="/Find_Case.png" alt="" className='size-40' /> */}
+
                             </CardContent>
                             <CardFooter>
                                 <FindCase /> 
@@ -74,13 +74,13 @@ export const Home = () => {
                                 <CardTitle className="text-2xl font-semibold text-emerald-100">
                                     Login For Patner
                                 </CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-2  items-center justify-center gap-4">
-                                <img src="/Patner_Login.png" alt="" className='size-35'/>
-
                                 <CardDescription className="text-md text-emerald-200">
                                     log in to join the service center dashboard
                                 </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex  items-center justify-center gap-4">
+                                {/* <img src="/Patner_Login.png" alt="" className='size-35'/> */}
+
                             </CardContent>
                             <CardFooter>
                                 {token ? (
@@ -144,11 +144,11 @@ export const Home = () => {
                                 <CardTitle className="text-2xl font-semibold text-emerald-100">
                                     Create Service Ticket
                                 </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex flex-col items-center justify-center gap-4">
                                 <CardDescription className="text-md text-emerald-200 mb-4">
                                  Generate Ticket For Booking Service in Service Center Or Onsite 
                                 </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-col items-center justify-center gap-4">
                                 <Button className="w-full bg-green-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow" onClick={() => navigate('/generateticket')}>
                                     Generate
                                 </Button>

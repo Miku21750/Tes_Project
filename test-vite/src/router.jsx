@@ -154,6 +154,10 @@ const FailureTable = lazy(() =>
   import("./components/table-data/FailureTable")
     .then(m => ({ default: m.FailureTable}))
 )
+const TicketTable = lazy(() =>
+  import("./components/table-data/TicketTable")
+    .then(m => ({ default: m.TicketTable}))
+)
 
 import { ViewCase } from "./pages/ViewCase";
 import { UploadRma } from "./pages/uploadRMA";
@@ -551,6 +555,14 @@ export const router = createBrowserRouter([
         element: (
           <MasterGateKeeping allow={["admin"]}>
             <FailureTable />
+          </MasterGateKeeping>
+        ),
+      },
+      {
+        path: "master/Ticket_Table",
+        element: (
+          <MasterGateKeeping allow={["admin", "fd"]}>
+            <TicketTable />
           </MasterGateKeeping>
         ),
       },
